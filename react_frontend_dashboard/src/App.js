@@ -1,48 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./theme.css";
+import { AuthProvider } from "./context/AuthContext";
+import AuthGate from "./features/auth/AuthGate";
+import Sidebar from "./components/ui/Sidebar";
+import Topbar from "./components/ui/Topbar";
+import Overview from "./features/overview/Overview";
+import Inventory from "./features/inventory/Inventory";
+import Costs from "./features/costs/Costs";
+import Recommendations from "./features/recommendations/Recommendations";
+import Automation from "./features/automation/Automation";
+import Activity from "./features/activity/Activity";
+import CloudConnections from "./features/settings/CloudConnections";
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
+  /** Main app using sidebar + topbar layout with tabbed content panels. */
+  const [route, setRoute] = useState("overview");
+  const [search, setSearch] = useState("");
 
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  const renderContent = () => {
+    switch (route) {
+      case "overview":
+        return <Overview onGoTo={setRoute} />;
+      case "inventory":
+        return <Inventory search={search} />;
+      case "costs":
+        return <Costs />;
+      case "recommendations":
+        return <Recommendations />;
+      case "automation":
+        return <Automation />;
+      case "activity":
+        return <Activity />;
+      case "settings":
+        return <CloudConnections />;
+      default:
+        return <Overview onGoTo={setRoute} />;
+    }
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+      <AuthGate>
+        <div className="layout">
+          <Sidebar current={route} onNavigate={setRoute} />
+          <div className="main">
+            <Topbar onSearch={setSearch} />
+            <main className="content">{renderContent()}</main>
+          </div>
+        </div>
+      </AuthGate>
+    </AuthProvider>
   );
 }
 

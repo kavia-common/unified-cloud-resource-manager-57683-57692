@@ -1,0 +1,4 @@
+{
+    "command": "npm install && npx tsc --noEmit && npm test -- --ci",
+    "working_directory": "/home/kavia/workspace/code-generation/unified-cloud-resource-manager-57683-57692/react_frontend_dashboard"
+}

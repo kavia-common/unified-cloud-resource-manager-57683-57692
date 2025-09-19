@@ -19,7 +19,19 @@ const AuthContext = createContext({
 // PUBLIC_INTERFACE
 export function useAuth() {
   /** React hook to access the auth context */
-  return useContext(AuthContext);
+  const ctx = useContext(AuthContext);
+  // Defensive fallback: if provider is missing, return a safe guest context
+  if (!ctx) {
+    return {
+      session: null,
+      user: { id: "mock-user", email: "guest@example.com" },
+      loading: false,
+      signInWithEmail: async () => ({ data: null, error: null }),
+      signUpWithEmail: async () => ({ data: null, error: null }),
+      signOut: async () => ({ error: null }),
+    };
+  }
+  return ctx;
 }
 
 // PUBLIC_INTERFACE

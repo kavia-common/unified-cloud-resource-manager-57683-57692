@@ -1,14 +1,13 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import supabase from "../lib/supabaseClient";
+import React, { createContext, useContext, useMemo } from "react";
 
 /**
- * Supabase Auth provider with email/password support.
- * Persists session and exposes auth helpers.
+ * Mock Auth context for unauthenticated demo mode.
+ * Provides a default "Guest" user and no-op auth methods.
  */
 const AuthContext = createContext({
   session: null,
-  user: null,
-  loading: true,
+  user: { id: "mock-user", email: "guest@example.com" },
+  loading: false,
   // PUBLIC_INTERFACE
   signInWithEmail: async (_email, _password) => ({ data: null, error: null }),
   // PUBLIC_INTERFACE
@@ -26,67 +25,18 @@ export function useAuth() {
 // PUBLIC_INTERFACE
 export function AuthProvider({ children }) {
   /**
-   * Provides session-aware auth context using Supabase.
-   * Uses onAuthStateChange to update session.
+   * Provides a static mock auth context so the UI can render without gating.
    */
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Initialize session
-  useEffect(() => {
-    let mounted = true;
-    async function init() {
-      const { data, error } = await supabase.auth.getSession();
-      if (!error && mounted) {
-        setSession(data.session || null);
-      }
-      setLoading(false);
-    }
-    init();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-    });
-    return () => {
-      mounted = false;
-      listener?.subscription?.unsubscribe?.();
-    };
-  }, []);
-
-  async function signInWithEmail(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
-  }
-
-  async function signUpWithEmail(email, password) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}`,
-      },
-    });
-    return { data, error };
-  }
-
-  async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    return { error };
-  }
-
   const value = useMemo(
     () => ({
-      session,
-      user: session?.user ?? null,
-      loading,
-      signInWithEmail,
-      signUpWithEmail,
-      signOut,
+      session: null,
+      user: { id: "mock-user", email: "guest@example.com" },
+      loading: false,
+      signInWithEmail: async (_e, _p) => ({ data: null, error: null }),
+      signUpWithEmail: async (_e, _p) => ({ data: null, error: null }),
+      signOut: async () => ({ error: null }),
     }),
-    [session, loading]
+    []
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

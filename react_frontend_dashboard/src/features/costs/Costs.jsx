@@ -10,9 +10,27 @@ export default function Costs() {
   const [delta, setDelta] = useState(0);
   const [breakdown, setBreakdown] = useState([]);
 
+  // Helper: safe RPC call that follows Supabase JS v2 pattern
+  async function safeRpc(fnName, params) {
+    try {
+      // Supabase v2: rpc returns a resolved promise with { data, error }
+      const { data, error } = await supabase.rpc(fnName, params);
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.warn(`RPC ${fnName} failed:`, error.message);
+        return null;
+      }
+      return data ?? null;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`RPC ${fnName} threw:`, e?.message || e);
+      return null;
+    }
+  }
+
   async function load() {
-    // Aggregations (tables might not exist; handle gracefully)
-    const { data: agg } = await supabase.rpc?.("costs_aggregates").catch(() => ({ data: null })) || {};
+    // Aggregations (function/table might not exist; handle gracefully)
+    const agg = await safeRpc("costs_aggregates");
     if (agg) {
       setDaily(agg.daily || 0);
       setMonthly(agg.monthly || 0);
@@ -24,12 +42,18 @@ export default function Costs() {
       setDelta(6.3);
     }
 
-    const { data, error } = await supabase.from("costs_breakdown").select("*").order("amount", { ascending: false });
+    const { data, error } = await supabase
+      .from("costs_breakdown")
+      .select("*")
+      .order("amount", { ascending: false });
+
     if (!error && Array.isArray(data)) setBreakdown(data);
     else setBreakdown([]);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const columns = [
     { key: "provider", label: "Provider" },
@@ -41,7 +65,12 @@ export default function Costs() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <div className="card-grid">
-        <StatCard label="Daily Spend" value={`$${daily.toFixed(2)}`} deltaLabel={`${delta.toFixed(1)}% vs 7d`} deltaType={delta >= 0 ? "up" : "down"} />
+        <StatCard
+          label="Daily Spend"
+          value={`$${daily.toFixed(2)}`}
+          deltaLabel={`${delta.toFixed(1)}% vs 7d`}
+          deltaType={delta >= 0 ? "up" : "down"}
+        />
         <StatCard label="Projected Month" value={`$${monthly.toFixed(2)}`} deltaLabel="Projection" />
         <StatCard label="High-Cost Accounts" value="3" deltaLabel="Top 10%" />
         <StatCard label="Idle Spend Est." value="$214.90" deltaLabel="Potential save" />

@@ -8,17 +8,34 @@ export default function Overview({ onGoTo }) {
   /** Overview dashboard with quick stats. */
   const [stats, setStats] = useState({ resources: 0, accounts: 0, daily: 0, recs: 0 });
 
+  // Helper aligned with Costs: safe RPC call
+  async function safeRpc(fnName, params) {
+    try {
+      const { data, error } = await supabase.rpc(fnName, params);
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.warn(`RPC ${fnName} failed:`, error.message);
+        return null;
+      }
+      return data ?? null;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`RPC ${fnName} threw:`, e?.message || e);
+      return null;
+    }
+  }
+
   useEffect(() => {
     async function load() {
       const [r1, r2, r3, r4] = await Promise.allSettled([
         supabase.from("resources").select("*", { count: "exact", head: true }),
         supabase.from("cloud_accounts").select("*", { count: "exact", head: true }),
-        supabase.rpc?.("costs_aggregates"),
+        safeRpc("costs_aggregates"),
         supabase.from("recommendations").select("*", { count: "exact", head: true }),
       ]);
       const resources = r1.value?.count ?? 0;
       const accounts = r2.value?.count ?? 0;
-      const daily = r3.value?.data?.daily ?? 0;
+      const daily = r3.value?.daily ?? 0;
       const recs = r4.value?.count ?? 0;
       setStats({ resources, accounts, daily, recs });
     }

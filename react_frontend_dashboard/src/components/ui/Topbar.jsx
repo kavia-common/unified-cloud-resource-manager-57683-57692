@@ -1,11 +1,9 @@
 import React from "react";
-import { useAuth } from "../../context/AuthContext";
 
 // PUBLIC_INTERFACE
 export default function Topbar({ onSearch }) {
-  /** Minimal topbar containing search and user badge with signout. */
-  const { user, signOut } = useAuth();
-  const initials = user?.email ? user.email[0].toUpperCase() : "U";
+  /** Minimal topbar containing search and static user badge (auth disabled). */
+  const initials = "G"; // Guest
 
   return (
     <div className="topbar">
@@ -14,13 +12,8 @@ export default function Topbar({ onSearch }) {
         <input placeholder="Search resources, accounts, rules..." onChange={(e) => onSearch?.(e.target.value)} />
       </div>
       <div className="user-badge">
-        <span style={{ color: "var(--muted)", fontSize: 14 }}>{user?.email || "Guest"}</span>
-        <div className="avatar" title={user?.email || "User"}>{initials}</div>
-        {user && (
-          <button className="btn" onClick={signOut} aria-label="Sign out">
-            Sign out
-          </button>
-        )}
+        <span style={{ color: "var(--muted)", fontSize: 14 }}>Guest</span>
+        <div className="avatar" title="Guest">{initials}</div>
       </div>
     </div>
   );

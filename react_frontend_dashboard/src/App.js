@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import "./theme.css";
-import { AuthProvider } from "./context/AuthContext";
-import AuthGate from "./features/auth/AuthGate";
 import Sidebar from "./components/ui/Sidebar";
 import Topbar from "./components/ui/Topbar";
 import Overview from "./features/overview/Overview";
@@ -40,17 +38,13 @@ function App() {
   };
 
   return (
-    <AuthProvider>
-      <AuthGate>
-        <div className="layout">
-          <Sidebar current={route} onNavigate={setRoute} />
-          <div className="main">
-            <Topbar onSearch={setSearch} />
-            <main className="content">{renderContent()}</main>
-          </div>
-        </div>
-      </AuthGate>
-    </AuthProvider>
+    <div className="layout">
+      <Sidebar current={route} onNavigate={setRoute} />
+      <div className="main">
+        <Topbar onSearch={setSearch} />
+        <main className="content">{renderContent()}</main>
+      </div>
+    </div>
   );
 }
 

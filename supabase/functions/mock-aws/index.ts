@@ -1,17 +1,29 @@
-//
-// Placeholder Edge Function for Mock AWS
-// This file is intentionally minimal and ready for future implementation.
-//
-// Notes:
-// - This function will simulate AWS operations for local development/testing.
-// - Replace with actual logic or HTTP handlers as needed.
-// - Ensure Supabase CLI is configured when deploying Edge Functions.
-//
-// PUBLIC_INTERFACE
-export default function handler() {
-  /** Placeholder export for mock AWS Edge Function. */
-  return new Response(JSON.stringify({ provider: "aws", status: "ok", message: "mock-aws placeholder" }), {
-    headers: { "Content-Type": "application/json" },
-    status: 200,
-  });
-}
+import { serve } from "https://deno.land/std/http/server.ts";
+
+serve(async (req) => {
+  const url = new URL(req.url);
+
+  if (url.pathname === "/inventory") {
+    return new Response(JSON.stringify([
+      { id: "i-12345", type: "EC2", status: "running", cost: 12.5 },
+      { id: "db-001", type: "RDS", status: "stopped", cost: 4.2 }
+    ]), { headers: { "Content-Type": "application/json" }});
+  }
+
+  if (url.pathname === "/costs") {
+    return new Response(JSON.stringify({
+      month: "2025-09",
+      total: 16.7,
+      breakdown: { EC2: 12.5, RDS: 4.2 }
+    }), { headers: { "Content-Type": "application/json" }});
+  }
+
+  if (url.pathname === "/action/stop") {
+    return new Response(JSON.stringify({ message: "Resource stopped", id: "i-12345" }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  return new Response("Not Found", { status: 404 });
+});
+

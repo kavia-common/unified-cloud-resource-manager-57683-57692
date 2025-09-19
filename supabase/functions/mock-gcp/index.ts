@@ -1,17 +1,32 @@
-//
-// Placeholder Edge Function for Mock GCP
-// This file is intentionally minimal and ready for future implementation.
-//
-// Notes:
-// - This function will simulate GCP operations for local development/testing.
-// - Replace with actual logic or HTTP handlers as needed.
-// - Ensure Supabase CLI is configured when deploying Edge Functions.
-//
-// PUBLIC_INTERFACE
-export default function handler() {
-  /** Placeholder export for mock GCP Edge Function. */
-  return new Response(JSON.stringify({ provider: "gcp", status: "ok", message: "mock-gcp placeholder" }), {
-    headers: { "Content-Type": "application/json" },
-    status: 200,
-  });
-}
+import { serve } from "https://deno.land/std/http/server.ts";
+
+serve(async (req) => {
+  const url = new URL(req.url);
+
+  // Mock Inventory
+  if (url.pathname === "/inventory") {
+    return new Response(JSON.stringify([
+      { id: "gce-777", type: "ComputeEngine", status: "running", cost: 8.7 },
+      { id: "bq-222", type: "BigQuery", status: "active", cost: 5.0 }
+    ]), { headers: { "Content-Type": "application/json" }});
+  }
+
+  // Mock Costs
+  if (url.pathname === "/costs") {
+    return new Response(JSON.stringify({
+      month: "2025-09",
+      total: 13.7,
+      breakdown: { ComputeEngine: 8.7, BigQuery: 5.0 }
+    }), { headers: { "Content-Type": "application/json" }});
+  }
+
+  // Mock Actions
+  if (url.pathname === "/action/stop") {
+    return new Response(JSON.stringify({ message: "Compute Engine VM stopped", id: "gce-777" }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  return new Response("Not Found", { status: 404 });
+});
+

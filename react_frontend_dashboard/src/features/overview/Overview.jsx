@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import supabase from "../../lib/supabaseClient";
 import EmptyState from "../../components/ui/EmptyState";
+import { getCloudData } from "../../lib/cloudApi";
 
 // PUBLIC_INTERFACE
 export default function Overview({ onGoTo }) {
@@ -38,6 +39,9 @@ export default function Overview({ onGoTo }) {
       const daily = r3.value?.daily ?? 0;
       const recs = r4.value?.count ?? 0;
       setStats({ resources, accounts, daily, recs });
+
+      // Preflight a mock call (non-blocking, ignore result)
+      getCloudData("aws", "inventory").catch(() => {});
     }
     load();
   }, []);

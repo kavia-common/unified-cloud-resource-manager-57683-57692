@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
+import { getAwsInventory, getAzureInventory, getGcpInventory } from "../../lib/cloudApi";
 
 function useResources() {
   const [rows, setRows] = useState([]);
@@ -113,6 +114,42 @@ export default function Inventory() {
     refresh();
   }
 
+  // Mock Cloud Data section state
+  const [mockLoading, setMockLoading] = useState(false);
+  const [mockError, setMockError] = useState("");
+  const [mockData, setMockData] = useState({ aws: [], azure: [], gcp: [] });
+
+  async function loadMock() {
+    setMockLoading(true);
+    setMockError("");
+    try {
+      const [aws, azure, gcp] = await Promise.all([
+        getAwsInventory(),
+        getAzureInventory(),
+        getGcpInventory(),
+      ]);
+      setMockData({
+        aws: Array.isArray(aws.data) ? aws.data : [],
+        azure: Array.isArray(azure.data) ? azure.data : [],
+        gcp: Array.isArray(gcp.data) ? gcp.data : [],
+      });
+      if (aws.error || azure.error || gcp.error) {
+        // Collect first error message to display
+        const err = aws.error?.message || azure.error?.message || gcp.error?.message || "Unknown error";
+        setMockError(err);
+      }
+    } finally {
+      setMockLoading(false);
+    }
+  }
+
+  const mockColumns = [
+    { key: "id", label: "ID" },
+    { key: "type", label: "Type" },
+    { key: "status", label: "State" },
+    { key: "cost", label: "Daily Cost ($)", render: (v) => (v ? Number(v).toFixed(2) : "—") },
+  ];
+
   return (
     <div className="panel">
       <div className="panel-header">
@@ -124,6 +161,36 @@ export default function Inventory() {
       </div>
       <div className="panel-body">
         <DataTable columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
+
+        <div style={{ height: 16 }} />
+
+        <div className="panel" style={{ border: "1px dashed var(--border)" }}>
+          <div className="panel-header">
+            <div className="panel-title">Cloud Mock Data (Edge Functions)</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn" onClick={loadMock} disabled={mockLoading}>
+                {mockLoading ? "Loading..." : "Load from mock-aws/mock-azure/mock-gcp"}
+              </button>
+            </div>
+          </div>
+          <div className="panel-body">
+            {mockError && <div className="badge error">Error: {mockError}</div>}
+            <div style={{ display: "grid", gap: 16 }}>
+              <div>
+                <div className="panel-title" style={{ marginBottom: 8 }}>AWS</div>
+                <DataTable columns={mockColumns} rows={mockData.aws} emptyMessage="No data from mock-aws." />
+              </div>
+              <div>
+                <div className="panel-title" style={{ marginBottom: 8 }}>Azure</div>
+                <DataTable columns={mockColumns} rows={mockData.azure} emptyMessage="No data from mock-azure." />
+              </div>
+              <div>
+                <div className="panel-title" style={{ marginBottom: 8 }}>GCP</div>
+                <DataTable columns={mockColumns} rows={mockData.gcp} emptyMessage="No data from mock-gcp." />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <OperationModal
         open={openOp}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 import StatCard from "../../components/ui/StatCard";
+import { getAwsCosts, getAzureCosts, getGcpCosts } from "../../lib/cloudApi";
 
 /** Costs analytics panel with simple stats and breakdown table. */
 export default function Costs() {
@@ -62,6 +63,46 @@ export default function Costs() {
     { key: "amount", label: "Monthly ($)", render: (v) => (v ? v.toFixed?.(2) ?? v : 0) },
   ];
 
+  // Mock Costs from Edge Functions
+  const [mockLoading, setMockLoading] = useState(false);
+  const [mockError, setMockError] = useState("");
+  const [mockCosts, setMockCosts] = useState({
+    aws: null,
+    azure: null,
+    gcp: null,
+  });
+
+  async function loadMockCosts() {
+    setMockLoading(true);
+    setMockError("");
+    try {
+      const [aws, azure, gcp] = await Promise.all([getAwsCosts(), getAzureCosts(), getGcpCosts()]);
+      setMockCosts({
+        aws: aws.data || null,
+        azure: azure.data || null,
+        gcp: gcp.data || null,
+      });
+      if (aws.error || azure.error || gcp.error) {
+        const err = aws.error?.message || azure.error?.message || gcp.error?.message || "Unknown error";
+        setMockError(err);
+      }
+    } finally {
+      setMockLoading(false);
+    }
+  }
+
+  function renderMockCostCard(provider, payload) {
+    if (!payload) return <div className="badge">No data</div>;
+    const total = Number(payload.total || 0).toFixed(2);
+    return (
+      <div style={{ display: "grid", gap: 6 }}>
+        <div className="badge">{provider.toUpperCase()} Month: {payload.month || "-"}</div>
+        <div style={{ fontWeight: 700 }}>${total}</div>
+        <div style={{ color: "var(--muted)" }}>Services: {Object.keys(payload.breakdown || {}).length}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <div className="card-grid">
@@ -78,12 +119,30 @@ export default function Costs() {
       <div className="panel">
         <div className="panel-header">
           <div className="panel-title">Cost Breakdown</div>
-          <div>
+          <div style={{ display: "flex", gap: 10 }}>
             <button className="btn">Export CSV</button>
+            <button className="btn" onClick={loadMockCosts} disabled={mockLoading}>
+              {mockLoading ? "Loading mock costs..." : "Load mock cloud costs"}
+            </button>
           </div>
         </div>
         <div className="panel-body">
           <DataTable columns={columns} rows={breakdown} emptyMessage="No cost data yet." />
+          <div style={{ height: 16 }} />
+          <div className="panel" style={{ border: "1px dashed var(--border)" }}>
+            <div className="panel-header">
+              <div className="panel-title">Cloud Mock Costs (Edge Functions)</div>
+              {mockError && <div className="badge error">Error: {mockError}</div>}
+            </div>
+            <div className="panel-body">
+              <div className="card-grid">
+                <div className="card">{renderMockCostCard("aws", mockCosts.aws)}</div>
+                <div className="card">{renderMockCostCard("azure", mockCosts.azure)}</div>
+                <div className="card">{renderMockCostCard("gcp", mockCosts.gcp)}</div>
+                <div className="card"><div className="badge">Use Edge Functions to simulate per-cloud totals</div></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

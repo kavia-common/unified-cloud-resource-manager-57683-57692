@@ -4,7 +4,16 @@ import "./index.css";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+// Ensure a root element exists; if not, create one to avoid silent failure.
+let rootEl = document.getElementById("root");
+if (!rootEl) {
+  console.warn('Root element "#root" not found. Creating one dynamically.');
+  rootEl = document.createElement("div");
+  rootEl.id = "root";
+  document.body.appendChild(rootEl);
+}
+
+const root = ReactDOM.createRoot(rootEl);
 root.render(
   <React.StrictMode>
     <AuthProvider>

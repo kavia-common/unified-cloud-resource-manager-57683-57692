@@ -1,5 +1,11 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 
+/**
+ * Mock AWS Edge Function
+ * - GET /inventory -> returns EC2 + RDS with daily cost and status
+ * - GET /costs -> returns month total and breakdown
+ * - POST /action/start, /action/stop, /action/scale -> echoes action result
+ */
 serve(async (req) => {
   const url = new URL(req.url);
 
@@ -28,7 +34,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     return new Response(
       JSON.stringify({
-        message: "Resource started",
+        message: "AWS resource started",
         id: body.id || "i-12345",
       }),
       { headers: { "Content-Type": "application/json" } }
@@ -39,7 +45,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     return new Response(
       JSON.stringify({
-        message: "Resource stopped",
+        message: "AWS resource stopped",
         id: body.id || "i-12345",
       }),
       { headers: { "Content-Type": "application/json" } }
@@ -50,7 +56,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     return new Response(
       JSON.stringify({
-        message: "Resource scaled",
+        message: "AWS resource scaled",
         id: body.id || "i-12345",
         size: body.size || "medium",
       }),

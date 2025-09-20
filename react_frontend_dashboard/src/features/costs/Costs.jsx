@@ -65,21 +65,28 @@ export default function Costs() {
     },
   ];
 
+  // PUBLIC_INTERFACE
   function exportBreakdownCsv() {
+    /** Export the DB-driven cost breakdown to CSV using lib/csv helpers. */
     const headers = [
       { key: "provider", label: "Provider" },
       { key: "account_name", label: "Account" },
       { key: "service", label: "Service" },
       { key: "amount", label: "Monthly ($)" },
     ];
-    const csv = toCsv(headers, breakdown.map((r) => ({
+    const rows = (breakdown || []).map((r) => ({
       provider: r.provider ?? "",
       account_name: r.account_name ?? "",
       service: r.service ?? "",
-      amount: typeof r.amount === "number" ? r.amount.toFixed(2) : (r.amount ?? ""),
-    })));
+      amount:
+        typeof r.amount === "number"
+          ? r.amount.toFixed(2)
+          : r.amount ?? "",
+    }));
+    const csv = toCsv(headers, rows);
     const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-    downloadCsv(`costs_breakdown_${ts}.csv`, csv);
+    const filename = `costs_breakdown_${ts}.csv`;
+    downloadCsv(filename, csv);
   }
 
   // Mock Costs from Edge Functions

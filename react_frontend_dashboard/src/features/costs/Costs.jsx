@@ -3,6 +3,7 @@ import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 import StatCard from "../../components/ui/StatCard";
 import { getAwsCosts, getAzureCosts, getGcpCosts } from "../../lib/cloudApi";
+import { toCsv, downloadCsv } from "../../lib/csv";
 
 /** Costs analytics panel with simple stats and breakdown table. */
 export default function Costs() {
@@ -63,6 +64,23 @@ export default function Costs() {
       render: (v) => (v ? v.toFixed?.(2) ?? v : 0),
     },
   ];
+
+  function exportBreakdownCsv() {
+    const headers = [
+      { key: "provider", label: "Provider" },
+      { key: "account_name", label: "Account" },
+      { key: "service", label: "Service" },
+      { key: "amount", label: "Monthly ($)" },
+    ];
+    const csv = toCsv(headers, breakdown.map((r) => ({
+      provider: r.provider ?? "",
+      account_name: r.account_name ?? "",
+      service: r.service ?? "",
+      amount: typeof r.amount === "number" ? r.amount.toFixed(2) : (r.amount ?? ""),
+    })));
+    const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    downloadCsv(`costs_breakdown_${ts}.csv`, csv);
+  }
 
   // Mock Costs from Edge Functions
   const [mockLoading, setMockLoading] = useState(false);
@@ -197,7 +215,7 @@ export default function Costs() {
         <div className="panel-header">
           <div className="panel-title">Cost Breakdown</div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button className="btn">Export CSV</button>
+            <button className="btn" onClick={exportBreakdownCsv}>Export CSV</button>
             <button className="btn" onClick={loadMockCosts} disabled={mockLoading}>
               {mockLoading ? "Loading mock costs..." : "Load mock cloud costs"}
             </button>

@@ -353,7 +353,79 @@ export default function Inventory() {
                   <div className="badge">mock-aws</div>
                 </div>
                 <DataTable
-                  columns={baseColumns}
+                  columns={[
+                    ...baseColumns,
+                    {
+                      key: "actions",
+                      label: "Actions",
+                      render: (_v, r) => (
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            className="btn"
+                            disabled={r._updating || r.status === "running"}
+                            onClick={async () => {
+                              setAwsRows((prev) =>
+                                prev.map((x) =>
+                                  x.id === r.id ? { ...x, _updating: true } : x
+                                )
+                              );
+                              const { error } = await postCloudAction(
+                                "aws",
+                                "action/start",
+                                { id: r.id }
+                              );
+                              setAwsRows((prev) =>
+                                prev.map((x) =>
+                                  x.id === r.id
+                                    ? {
+                                        ...x,
+                                        status: error ? x.status : "running",
+                                        _updating: false,
+                                      }
+                                    : x
+                                )
+                              );
+                            }}
+                          >
+                            {r._updating && r.status !== "running"
+                              ? "Starting..."
+                              : "Start"}
+                          </button>
+                          <button
+                            className="btn destructive"
+                            disabled={r._updating || r.status === "stopped"}
+                            onClick={async () => {
+                              setAwsRows((prev) =>
+                                prev.map((x) =>
+                                  x.id === r.id ? { ...x, _updating: true } : x
+                                )
+                              );
+                              const { error } = await postCloudAction(
+                                "aws",
+                                "action/stop",
+                                { id: r.id }
+                              );
+                              setAwsRows((prev) =>
+                                prev.map((x) =>
+                                  x.id === r.id
+                                    ? {
+                                        ...x,
+                                        status: error ? x.status : "stopped",
+                                        _updating: false,
+                                      }
+                                    : x
+                                )
+                              );
+                            }}
+                          >
+                            {r._updating && r.status !== "stopped"
+                              ? "Stopping..."
+                              : "Stop"}
+                          </button>
+                        </div>
+                      ),
+                    },
+                  ]}
                   rows={awsRows}
                   emptyMessage="No data from mock-aws."
                 />

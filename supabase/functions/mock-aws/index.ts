@@ -18,8 +18,16 @@ serve(async (req) => {
     }), { headers: { "Content-Type": "application/json" }});
   }
 
+  if (url.pathname === "/action/start") {
+    const body = await req.json().catch(() => ({}));
+    return new Response(JSON.stringify({ message: "Resource started", id: body.id || "i-12345" }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   if (url.pathname === "/action/stop") {
-    return new Response(JSON.stringify({ message: "Resource stopped", id: "i-12345" }), {
+    const body = await req.json().catch(() => ({}));
+    return new Response(JSON.stringify({ message: "Resource stopped", id: body.id || "i-12345" }), {
       headers: { "Content-Type": "application/json" }
     });
   }

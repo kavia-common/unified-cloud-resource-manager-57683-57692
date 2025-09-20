@@ -21,8 +21,16 @@ serve(async (req) => {
   }
 
   // Mock Actions
+  if (url.pathname === "/action/start") {
+    const body = await req.json().catch(() => ({}));
+    return new Response(JSON.stringify({ message: "Compute Engine VM started", id: body.id || "gce-777" }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   if (url.pathname === "/action/stop") {
-    return new Response(JSON.stringify({ message: "Compute Engine VM stopped", id: "gce-777" }), {
+    const body = await req.json().catch(() => ({}));
+    return new Response(JSON.stringify({ message: "Compute Engine VM stopped", id: body.id || "gce-777" }), {
       headers: { "Content-Type": "application/json" }
     });
   }

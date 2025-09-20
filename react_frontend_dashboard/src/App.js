@@ -9,12 +9,15 @@ import Recommendations from "./features/recommendations/Recommendations";
 import Automation from "./features/automation/Automation";
 import Activity from "./features/activity/Activity";
 import CloudConnections from "./features/settings/CloudConnections";
+import { useAuth } from "./context/AuthContext";
+import SignIn from "./components/ui/SignIn";
 
 // PUBLIC_INTERFACE
 function App() {
   /** Main app using sidebar + topbar layout with tabbed content panels. */
   const [route, setRoute] = useState("overview");
   const [search, setSearch] = useState("");
+  const { user, loading } = useAuth();
 
   const renderContent = () => {
     switch (route) {
@@ -36,6 +39,18 @@ function App() {
         return <Overview onGoTo={setRoute} />;
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+        <div className="badge">Loading…</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <SignIn />;
+  }
 
   return (
     <div className="layout">

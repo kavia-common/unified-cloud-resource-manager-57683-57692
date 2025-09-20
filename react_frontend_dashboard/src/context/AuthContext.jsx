@@ -1,30 +1,21 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import supabase from "../lib/supabaseClient";
 
 /**
- * Mock Auth context for unauthenticated demo mode.
- * Provides a default "Guest" user and no-op auth methods.
+ * Supabase-backed Auth context.
+ * Exposes session, user, loading, and PUBLIC_INTERFACE methods for sign-in/up/out.
  */
-const AuthContext = createContext({
-  session: null,
-  user: { id: "mock-user", email: "guest@example.com" },
-  loading: false,
-  // PUBLIC_INTERFACE
-  signInWithEmail: async (_email, _password) => ({ data: null, error: null }),
-  // PUBLIC_INTERFACE
-  signUpWithEmail: async (_email, _password) => ({ data: null, error: null }),
-  // PUBLIC_INTERFACE
-  signOut: async () => ({ error: null }),
-});
+const AuthContext = createContext(null);
 
 // PUBLIC_INTERFACE
 export function useAuth() {
   /** React hook to access the auth context */
   const ctx = useContext(AuthContext);
-  // Defensive fallback: if provider is missing, return a safe guest context
+  // Defensive fallback: safe guest context if provider missing
   if (!ctx) {
     return {
       session: null,
-      user: { id: "mock-user", email: "guest@example.com" },
+      user: null,
       loading: false,
       signInWithEmail: async () => ({ data: null, error: null }),
       signUpWithEmail: async () => ({ data: null, error: null }),
@@ -37,18 +28,81 @@ export function useAuth() {
 // PUBLIC_INTERFACE
 export function AuthProvider({ children }) {
   /**
-   * Provides a static mock auth context so the UI can render without gating.
+   * Auth provider that listens to Supabase auth changes and provides auth methods.
    */
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Initial session fetch and subscribe to changes
+  useEffect(() => {
+    let mounted = true;
+
+    async function init() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(data?.session || null);
+        setUser(data?.session?.user || null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      setUser(sess?.user || null);
+    });
+
+    init();
+
+    return () => {
+      mounted = false;
+      sub?.subscription?.unsubscribe?.();
+    };
+  }, []);
+
+  // PUBLIC_INTERFACE
+  async function signInWithEmail(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      setSession(data?.session || null);
+      setUser(data?.user || data?.session?.user || null);
+    }
+    return { data, error };
+  }
+
+  // PUBLIC_INTERFACE
+  async function signUpWithEmail(email, password) {
+    const emailRedirectTo = `${window.location.origin}/`;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo },
+    });
+    return { data, error };
+  }
+
+  // PUBLIC_INTERFACE
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setSession(null);
+      setUser(null);
+    }
+    return { error };
+  }
+
   const value = useMemo(
     () => ({
-      session: null,
-      user: { id: "mock-user", email: "guest@example.com" },
-      loading: false,
-      signInWithEmail: async (_e, _p) => ({ data: null, error: null }),
-      signUpWithEmail: async (_e, _p) => ({ data: null, error: null }),
-      signOut: async () => ({ error: null }),
+      session,
+      user,
+      loading,
+      signInWithEmail,
+      signUpWithEmail,
+      signOut,
     }),
-    []
+    [session, user, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

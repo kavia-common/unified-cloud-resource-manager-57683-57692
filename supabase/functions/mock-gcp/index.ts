@@ -35,6 +35,18 @@ serve(async (req) => {
     });
   }
 
+  if (url.pathname === "/action/scale") {
+    const body = await req.json().catch(() => ({}));
+    return new Response(
+      JSON.stringify({
+        message: "Compute Engine VM scaled",
+        id: body.id || "gce-777",
+        size: body.size || "medium",
+      }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   return new Response("Not Found", { status: 404 });
 });
 

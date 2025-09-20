@@ -49,5 +49,17 @@ serve(async (req) => {
     );
   }
 
+  if (url.pathname === "/action/scale") {
+    const body = await req.json().catch(() => ({}));
+    return new Response(
+      JSON.stringify({
+        message: "Azure resource scaled",
+        id: body.id || "vm-az-001",
+        size: body.size || "medium",
+      }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   return new Response("Not Found", { status: 404 });
 });

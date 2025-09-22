@@ -4,12 +4,8 @@ import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 import FilterBar from "../../components/ui/Filters";
 import { TrendLineChart } from "../../components/ui/Charts";
-import {
-  getAwsInventory,
-  getAzureInventory,
-  getGcpInventory,
-  postCloudAction,
-} from "../../lib/cloudApi";
+import providerRegistry from "../../lib/providers";
+import { postCloudAction } from "../../lib/cloudApi";
 
 function useResources() {
   const [rows, setRows] = useState([]);
@@ -203,14 +199,34 @@ export default function Inventory() {
     setMockLoading(true);
     setMockError("");
     try {
-      const [aws, azure, gcp] = await Promise.all([
-        getAwsInventory(),
-        getAzureInventory(),
-        getGcpInventory(),
-      ]);
+      const providers = Array.from(providerRegistry.getAllProviders().values());
+      const results = await Promise.all(
+        providers.map(async (provider) => {
+          try {
+            const data = await provider.getInventory();
+            return { provider: provider.name, data };
+          } catch (error) {
+            console.error(`Error loading ${provider.name} inventory:`, error);
+            return { provider: provider.name, data: [] };
+          }
+        })
+      );
 
-      // AWS: expect array of EC2 + RDS rows from mock-aws
-      setAwsRows(Array.isArray(aws.data) ? aws.data : []);
+      // Update state based on provider results
+      setAwsRows(results.find(r => r.provider === 'AWS')?.data || []);
+      setAzureVMRows(
+        (results.find(r => r.provider === 'Azure')?.data || [])
+          .filter(r => String(r.type || "").toLowerCase().includes("vm"))
+      );
+      setAzureStorageRows(
+        (results.find(r => r.provider === 'Azure')?.data || [])
+          .filter(r => String(r.type || "").toLowerCase().includes("storage"))
+      );
+      setGcpRows(results.find(r => r.provider === 'GCP')?.data || []);
+
+      if (results.some(r => !r.data)) {
+        setMockError('Some providers failed to load data');
+      }
 
       // Azure: assume function returns { vms: [...], storage: [...] } or an array with type info
       let vmRows = [];

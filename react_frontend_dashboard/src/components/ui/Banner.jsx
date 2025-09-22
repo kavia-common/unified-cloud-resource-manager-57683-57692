@@ -5,8 +5,10 @@ import React from "react";
  */
 // PUBLIC_INTERFACE
 export default function Banner({
-  title = "Cross-Cloud Resource Manager",
-  subtitle = "Unified visibility and control across clouds — clean, focused, and fast.",
+  // Title now defaults to a friendly welcome (no app/project name)
+  title = "Welcome back!",
+  // Keep a subtle, optional subtitle aligned with the minimalist Pure White tone
+  subtitle = "",
   align = "left",
   children,
 }) {
@@ -74,16 +76,16 @@ export default function Banner({
               height: 8,
               borderRadius: "50%",
               background: "var(--primary)",
-              opacity: 0.85,
+              opacity: 0.5,
             }}
           />
-          Minimalist — Pure White
+          Pure White — Minimalist
         </div>
         <h1
           style={{
             margin: 0,
-            fontSize: 26,
-            lineHeight: 1.2,
+            fontSize: 24,
+            lineHeight: 1.25,
             fontWeight: 800,
             color: "#374151",
             letterSpacing: 0.2,
@@ -95,10 +97,10 @@ export default function Banner({
           <p
             style={{
               margin: 0,
-              fontSize: 15,
+              fontSize: 14,
               lineHeight: 1.6,
               color: "#6B7280",
-              maxWidth: 920,
+              maxWidth: 820,
             }}
           >
             {subtitle}

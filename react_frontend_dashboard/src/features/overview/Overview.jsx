@@ -22,8 +22,9 @@ export default function Overview() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <Banner
-        title="Cross-Cloud Resource Manager"
-        subtitle="Unified visibility and control across clouds — clean, focused, and fast."
+        // Show only a friendly welcome message; no app/project name
+        title="Welcome back!"
+        subtitle=""
         align="left"
       />
 

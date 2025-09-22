@@ -46,7 +46,7 @@ export default function Sidebar() {
               aria-current={active ? "page" : undefined}
               style={{ textDecoration: "none" }}
             >
-              <Icon aria-hidden="true" size={18} style={{ color: "var(--primary)" }} />
+              <Icon aria-hidden="true" size={18} style={{ color: "#FFFFFF" }} />
               <span>{label}</span>
             </Link>
           );

@@ -31,7 +31,8 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up" })
 
   return (
     <div className="card" style={containerStyles}>
-      <div className="label" style={{ color: "#EDE9FE", fontSize: 12 }}>{label}</div>
+      {/* Increase label font size only; keep stat number unchanged */}
+      <div className="label" style={{ color: "#EDE9FE", fontSize: 14 }}>{label}</div>
       <div className="value" style={{ color: "#FFFFFF", fontSize: 26, fontWeight: 800 }}>{value}</div>
       {deltaLabel && (
         <div className={`delta ${deltaType}`} style={{ ...deltaColor, fontSize: 12 }}>

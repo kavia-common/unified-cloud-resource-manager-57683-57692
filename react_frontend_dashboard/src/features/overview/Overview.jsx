@@ -48,9 +48,9 @@ export default function Overview() {
             data={chartData}
             xKey="name"
             seriesOrder={[
-              { key: "series2", label: "Series 2", color: "var(--series-2)" }, // back
-              { key: "series1", label: "Series 1", color: "var(--series-1)" }, // middle
-              { key: "series3", label: "Series 3", color: "var(--series-3)" }, // front
+              { key: "series2", label: "AWS", color: "var(--series-2)" },   // back
+              { key: "series1", label: "Azure", color: "var(--series-1)" }, // middle
+              { key: "series3", label: "GCP", color: "var(--series-3)" },   // front
             ]}
             height={260}
           />

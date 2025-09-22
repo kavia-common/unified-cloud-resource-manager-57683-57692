@@ -5,14 +5,14 @@ import React from "react";
  */
 // PUBLIC_INTERFACE
 export default function Banner({
-  // Title now defaults to a friendly welcome (no app/project name)
+  // Title defaults to a friendly welcome (moved to top)
   title = "Welcome back!",
-  // Keep a subtle, optional subtitle aligned with the minimalist Pure White tone
-  subtitle = "",
+  // Optional subtitle; if not provided, we show the default product message
+  subtitle = "Manage, monitor, and optimize your cloud with ease",
   align = "left",
   children,
 }) {
-  /** Minimalist curved banner with soft shadow, Pure White style. */
+  /** Minimalist curved banner with soft shadow, curved edges. */
   const alignStyles =
     align === "center"
       ? { alignItems: "center", textAlign: "center" }
@@ -24,7 +24,7 @@ export default function Banner({
       style={{
         position: "relative",
         overflow: "hidden",
-        borderRadius: 16,               // curved edges
+        borderRadius: 16, // curved edges
         background: "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
         border: "1px solid var(--border)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
@@ -54,33 +54,7 @@ export default function Banner({
           ...alignStyles,
         }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 10px",
-            borderRadius: 999,
-            border: "1px solid var(--border)",
-            background: "#fff",
-            color: "var(--muted)",
-            fontSize: 12,
-            boxShadow: "var(--shadow)",
-          }}
-        >
-          <span
-            aria-hidden="true"
-            style={{
-              display: "inline-block",
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "var(--primary)",
-              opacity: 0.5,
-            }}
-          />
-          Pure White — Minimalist
-        </div>
+        {/* Title at the very top */}
         <h1
           style={{
             margin: 0,
@@ -93,6 +67,8 @@ export default function Banner({
         >
           {title}
         </h1>
+
+        {/* Subtitle directly under title */}
         {subtitle && (
           <p
             style={{
@@ -106,6 +82,7 @@ export default function Banner({
             {subtitle}
           </p>
         )}
+
         {children && <div style={{ marginTop: 4 }}>{children}</div>}
       </div>
     </section>

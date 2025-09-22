@@ -22,9 +22,8 @@ export default function Overview() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <Banner
-        // Show only a friendly welcome message; no app/project name
         title="Welcome back!"
-        subtitle=""
+        subtitle="Manage, monitor, and optimize your cloud with ease"
         align="left"
       />
 

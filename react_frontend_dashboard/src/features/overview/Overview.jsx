@@ -129,9 +129,9 @@ export default function Overview() {
             data={chartData}
             xKey="name"
             seriesOrder={[
-              { key: "series2", label: "AWS", color: "#000000" },         // AWS line black
+              { key: "series2", label: "AWS", color: "#000000" },         // AWS bar black
               { key: "series1", label: "Azure", color: "#1a237e" },       // Azure dark blue
-              { key: "series3", label: "GCP", color: "var(--series-3)" }, // GCP
+              { key: "series3", label: "GCP", color: "var(--series-3)" }, // GCP original color token
             ]}
             height={260}
             xTickFormatter={axis.xTickFormatter}

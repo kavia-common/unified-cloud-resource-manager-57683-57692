@@ -171,12 +171,12 @@ export function MultiSeriesOverviewChart({
   });
 
   return (
-    <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview line chart: Series comparison by cloud provider">
+    <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview bar chart: Series comparison by cloud provider">
       <div style={layoutStyle}>
         {/* Graph area (left) */}
         <div style={chartContainerStyle}>
           <ResponsiveContainer width="100%" height={height}>
-            <LineChart
+            <BarChart
               data={data}
               margin={{ top: 16, right: 12, bottom: 36, left: 48 }}
             >
@@ -200,24 +200,19 @@ export function MultiSeriesOverviewChart({
               {/* Tooltip retained for accessibility */}
               <Tooltip contentStyle={{ fontSize: 12 }} />
 
-              {/* Render order matters: back -> front */}
-              {seriesOrder.map((s) => (
-                <Line
+              {/* Grouped bars: one per provider per x value */}
+              {seriesOrder.map((s, idx) => (
+                <Bar
                   key={s.key}
-                  type="monotone"
                   dataKey={s.key}
                   name={s.label}
-                  stroke={s.color}
-                  strokeWidth={3}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  dot={{ r: 3, strokeWidth: 0, fill: s.color }}
-                  activeDot={{ r: 4 }}
-                  opacity={s.label === "AWS" || s.key === "series2" ? 0.9 : 1}
+                  fill={s.color}
+                  radius={[3, 3, 0, 0]}
+                  barSize={Math.max(8, 24 - seriesOrder.length * 2)}
                   isAnimationActive={false}
                 />
               ))}
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
 

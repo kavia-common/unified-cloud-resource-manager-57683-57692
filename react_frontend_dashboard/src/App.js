@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./theme.css";
 import Sidebar from "./components/ui/Sidebar";
 import Topbar from "./components/ui/Topbar";
@@ -17,38 +18,26 @@ import Profile from "./features/profile/Profile";
 // PUBLIC_INTERFACE
 function DashboardShell() {
   /** Main app shell guarded by auth, with sidebar + topbar and tabbed content. */
-  const [route, setRoute] = useState("overview");
   const [search, setSearch] = useState("");
-
-  const renderContent = () => {
-    switch (route) {
-      case "overview":
-        return <Overview onGoTo={setRoute} />;
-      case "inventory":
-        return <Inventory search={search} />;
-      case "costs":
-        return <Costs />;
-      case "recommendations":
-        return <Recommendations />;
-      case "automation":
-        return <Automation />;
-      case "activity":
-        return <Activity />;
-      case "settings":
-        return <CloudConnections />;
-      case "profile":
-        return <Profile />;
-      default:
-        return <Overview onGoTo={setRoute} />;
-    }
-  };
 
   return (
     <div className="layout">
-      <Sidebar current={route} onNavigate={setRoute} />
+      <Sidebar />
       <div className="main">
-        <Topbar onSearch={setSearch} onNavigate={setRoute} />
-        <main className="content">{renderContent()}</main>
+        <Topbar onSearch={setSearch} />
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<Navigate to="/overview" replace />} />
+            <Route path="/overview" element={<Overview />} />
+            <Route path="/inventory" element={<Inventory search={search} />} />
+            <Route path="/costs" element={<Costs />} />
+            <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/automation" element={<Automation />} />
+            <Route path="/activity" element={<Activity />} />
+            <Route path="/settings" element={<CloudConnections />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </main>
       </div>
     </div>
   );
@@ -62,21 +51,15 @@ function App() {
       <Login onSuccess={() => { /* AuthGate will re-render once session exists */ }} />
     </div>
   );
+  
   return (
-    <AuthProvider>
-      <AuthBoundary fallback={LoginFallback}>
-        <DashboardShell />
-      </AuthBoundary>
-    </AuthProvider>
-  );
-}
-
-function AuthBoundary({ fallback, children }) {
-  const { user } = useAuth();
-  return (
-    <AuthGate requireAuth={true} fallback={fallback}>
-      {children}
-    </AuthGate>
+    <Router>
+      <AuthProvider>
+        <AuthGate requireAuth={true} fallback={LoginFallback}>
+          <DashboardShell />
+        </AuthGate>
+      </AuthProvider>
+    </Router>
   );
 }
 

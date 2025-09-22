@@ -101,6 +101,97 @@ export function MultiSeriesLineChart({
   );
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * Multi-series Overview chart styled to match assets/overview_graph_design_notes.md
+ * Expects data like: [{ name: "Item 1", s1: 10, s2: 22, s3: 14 }, ...]
+ */
+// PUBLIC_INTERFACE
+export function MultiSeriesOverviewChart({
+  data,
+  xKey = "name",
+  seriesOrder = [
+    { key: "series2", label: "Series 2", color: "var(--series-2)" }, // back
+    { key: "series1", label: "Series 1", color: "var(--series-1)" }, // middle
+    { key: "series3", label: "Series 3", color: "var(--series-3)" }, // front
+  ],
+  height = 260,
+}) {
+  /** Styled multi-series line chart to replicate the screenshot look & feel. */
+  const wrapperStyle = {
+    background: "var(--bg-canvas)",
+    border: "2px solid var(--accent-outline)",
+    borderRadius: 8,
+    padding: 16,
+  };
+
+  const legendWrapperStyle = {
+    top: 8,
+    left: 16,
+    lineHeight: "1",
+  };
+
+  return (
+    <div className="chart-card" style={wrapperStyle} role="figure" aria-label="Overview line chart: Series comparison">
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart
+          data={data}
+          margin={{ top: 28, right: 12, bottom: 28, left: 40 }}
+        >
+          <CartesianGrid stroke="var(--gridline)" vertical={false} strokeWidth={1} />
+          <XAxis
+            dataKey={xKey}
+            tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            domain={[0, 50]}
+            ticks={[0, 10, 20, 30, 40, 50]}
+            tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Legend
+            verticalAlign="top"
+            align="left"
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={legendWrapperStyle}
+            formatter={(value, _entry, index) => {
+              // Apply legend label typography and color
+              return (
+                <span style={{ color: "var(--legend-text)", fontFamily: '"Helvetica Neue", Arial, sans-serif', fontWeight: 500, fontSize: 12 }}>
+                  {value}
+                </span>
+              );
+            }}
+          />
+          <Tooltip contentStyle={{ fontSize: 12 }} />
+
+          {/* Render order matters: back -> front */}
+          {seriesOrder.map((s) => (
+            <Line
+              key={s.key}
+              type="monotone"
+              dataKey={s.key}
+              name={s.label}
+              stroke={s.color}
+              strokeWidth={3}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              dot={{ r: 3, strokeWidth: 0, fill: `var(--${s.key})` }}
+              activeDot={{ r: 4 }}
+              opacity={s.key === "series2" ? 0.9 : 1}
+              isAnimationActive={false}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 // PUBLIC_INTERFACE
 export function StackedBarChart({ data, keys, colors, xKey = "name", height = 260, legend = true }) {
   /** Stacked bar chart for cost by provider/service. keys: ['aws','azure'] */

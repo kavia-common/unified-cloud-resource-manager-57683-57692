@@ -10,3 +10,26 @@ body { margin: 0; }
 .sidebar .brand .title {
   color: #FFFFFF;
 }
+
+/* Chart legend helpers (as per design notes) */
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 4px;
+  color: var(--legend-text);
+  font: 500 12px/1 "Helvetica Neue", Arial, sans-serif;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.series-1 { background: var(--series-1); }
+.legend-dot.series-2 { background: var(--series-2); }
+.legend-dot.series-3 { background: var(--series-3); }

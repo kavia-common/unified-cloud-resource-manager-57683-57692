@@ -1,32 +1,27 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
-import { MultiSeriesLineChart } from "../../components/ui/Charts";
+import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
-  /** Overview dashboard with a curved-edge banner header, key stats, and a synthetic spend trend. */
-  const [stats, setStats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
-  const [trend, setTrend] = useState([]);
+  /** Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design. */
+  const [stats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    // Build 30 days of placeholder per-provider spend (AWS, Azure, GCP)
-    const n = 30;
-    const seedAws = stats.daily * 0.45;
-    const seedAzure = stats.daily * 0.35;
-    const seedGcp = stats.daily * 0.20;
-
-    const series = new Array(n).fill(0).map((_, i) => {
-      const date = new Date(Date.now() - (n - i - 1) * 86400000)
-        .toISOString()
-        .slice(5, 10);
-      const aws = Number((seedAws * (0.9 + Math.random() * 0.2)).toFixed(2));
-      const azure = Number((seedAzure * (0.9 + Math.random() * 0.2)).toFixed(2));
-      const gcp = Number((seedGcp * (0.9 + Math.random() * 0.2)).toFixed(2));
-      return { date, aws, azure, gcp };
-    });
-    setTrend(series);
-  }, [stats.daily]);
+    // Build 5 categories "Item 1".."Item 5" with values within 0..50 per design notes.
+    const names = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"];
+    const rand = (min, max) => Math.round(min + Math.random() * (max - min));
+    const data = names.map((name, i) => ({
+      name,
+      // Ensure reasonable variation and remain within 0..50
+      series1: rand(10, 40), // medium gray, middle
+      series2: rand(5, 35),  // light gray, back
+      series3: rand(15, 50), // magenta, front/highlight
+    }));
+    setChartData(data);
+  }, []);
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -45,20 +40,19 @@ export default function Overview() {
 
       <div className="panel">
         <div className="panel-header">
-          <div className="panel-title">Daily Spend Trend</div>
-          <div className="badge">Last 30 days</div>
+          <div className="panel-title">Series Comparison</div>
+          <div className="badge">Overview</div>
         </div>
         <div className="panel-body">
-          <MultiSeriesLineChart
-            data={trend}
-            xKey="date"
-            series={[
-              { key: "aws", label: "AWS", color: "#F59E0B" },   // amber
-              { key: "azure", label: "Azure", color: "#3B82F6" }, // blue
-              { key: "gcp", label: "GCP", color: "#10B981" },   // emerald
+          <MultiSeriesOverviewChart
+            data={chartData}
+            xKey="name"
+            seriesOrder={[
+              { key: "series2", label: "Series 2", color: "var(--series-2)" }, // back
+              { key: "series1", label: "Series 1", color: "var(--series-1)" }, // middle
+              { key: "series3", label: "Series 3", color: "var(--series-3)" }, // front
             ]}
             height={260}
-            showLegend
           />
         </div>
       </div>

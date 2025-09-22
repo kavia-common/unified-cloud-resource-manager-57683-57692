@@ -33,13 +33,14 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Sidebar */
 .sidebar {
-  border-right: 1px solid var(--border);
-  background: var(--bg);
+  border-right: 1px solid #000; /* blend with black background */
+  background: #111111; /* requested black/off-black */
   padding: 20px 16px;
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  color: #FFFFFF; /* default text color inside sidebar to white for contrast */
 }
 .brand {
   display: flex;
@@ -47,19 +48,22 @@ button { font-family: inherit; cursor: pointer; }
   gap: 10px;
   padding: 6px 8px;
   margin-bottom: 18px;
+  color: #FFFFFF;
 }
 .brand .dot {
   width: 12px; height: 12px; border-radius: 50%;
-  background: var(--primary);
+  background: #FFFFFF; /* white brand dot for consistency */
 }
 .brand .title {
   font-weight: 700; letter-spacing: 0.2px;
+  color: #FFFFFF; /* keep title white on black */
 }
 .sidebar .section-title {
   margin: 18px 8px 8px;
   font-size: 12px;
-  color: var(--muted);
+  color: #FFFFFF; /* keep section header white for consistency and readability */
   text-transform: uppercase;
+  opacity: 0.8; /* slight dimming to create hierarchy while remaining white */
 }
 .nav {
   display: grid;
@@ -72,18 +76,20 @@ button { font-family: inherit; cursor: pointer; }
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid transparent;
-  color: var(--primary);
-  background: transparent;
+  color: #FFFFFF; /* white icons/text */
+  background: transparent; /* no background by default to keep black canvas */
   text-align: left;
 }
 .nav-btn:hover {
-  background: var(--surface);
-  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.08); /* subtle white hover tint */
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF; /* remain white on hover */
 }
 .nav-btn.active {
-  background: linear-gradient(to bottom right, #fff, var(--surface));
-  border-color: var(--border);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.14); /* slightly stronger active tint */
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+  color: #FFFFFF; /* remain white on active */
 }
 
 /* Topbar */

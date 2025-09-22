@@ -2,3 +2,11 @@
 html, body, #root { height: 100%; }
 body { margin: 0; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Ensure high contrast in sidebar regardless of global overrides */
+.sidebar a,
+.sidebar .nav-btn,
+.sidebar .nav-btn span,
+.sidebar .brand .title {
+  color: #FFFFFF;
+}

@@ -77,11 +77,8 @@ export default function Overview() {
 
       <div className="panel">
         <div className="panel-header">
-          <div className="panel-title">Overview</div>
+          <div className="panel-title">Cost Overview</div>
           <div style={selectStyles}>
-            <label htmlFor="overview-mode" style={{ fontSize: 12, color: "var(--muted)" }}>
-              Interval
-            </label>
             <select
               id="overview-mode"
               className="select"
@@ -101,9 +98,9 @@ export default function Overview() {
             data={chartData}
             xKey="name"
             seriesOrder={[
-              { key: "series2", label: "AWS", color: "var(--series-2)" },   // back
-              { key: "series1", label: "Azure", color: "var(--series-1)" }, // middle
-              { key: "series3", label: "GCP", color: "var(--series-3)" },   // front
+              { key: "series2", label: "AWS", color: "#000000" },         // AWS line black
+              { key: "series1", label: "Azure", color: "#1a237e" },       // Azure dark blue
+              { key: "series3", label: "GCP", color: "var(--series-3)" }, // keep GCP as is
             ]}
             height={260}
           />

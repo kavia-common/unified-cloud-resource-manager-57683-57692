@@ -25,13 +25,13 @@ export default function Banner({
         position: "relative",
         overflow: "hidden",
         borderRadius: 16, // curved edges
-        // Soft violet gradient that complements Pure White theme
-        background: "linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 100%)", // violet-50 to violet-100
-        border: "1px solid var(--border)",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+        // Set solid violet background per requirement
+        background: "#7C3AED", // violet (approx Tailwind violet-600)
+        border: "1px solid rgba(0,0,0,0.06)",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
       }}
     >
-      {/* subtle decorative shape */}
+      {/* subtle decorative shape (keep but ensure it doesn't reduce contrast) */}
       <div
         aria-hidden="true"
         style={{
@@ -42,8 +42,7 @@ export default function Banner({
           height: 220,
           borderRadius: "50%",
           background:
-            // faint violet blur for minimalist accent
-            "radial-gradient(closest-side, rgba(124,58,237,0.10), rgba(124,58,237,0.00))",
+            "radial-gradient(closest-side, rgba(255,255,255,0.18), rgba(255,255,255,0.00))",
           filter: "blur(0.2px)",
         }}
       />
@@ -54,6 +53,7 @@ export default function Banner({
           gap: 10,
           flexDirection: "column",
           ...alignStyles,
+          color: "#FFFFFF", // default text color inside banner -> white
         }}
       >
         {/* Title at the very top */}
@@ -63,8 +63,7 @@ export default function Banner({
             fontSize: 24,
             lineHeight: 1.25,
             fontWeight: 800,
-            // Deep violet for strong contrast on soft violet background
-            color: "#4C1D95", // violet-900
+            color: "#FFFFFF", // white text on violet background
             letterSpacing: 0.2,
           }}
         >
@@ -78,8 +77,7 @@ export default function Banner({
               margin: 0,
               fontSize: 14,
               lineHeight: 1.6,
-              // Muted violet for secondary text
-              color: "#6D28D9", // violet-700
+              color: "rgba(255,255,255,0.92)", // slightly softened white for hierarchy
               maxWidth: 820,
             }}
           >
@@ -87,7 +85,11 @@ export default function Banner({
           </p>
         )}
 
-        {children && <div style={{ marginTop: 4 }}>{children}</div>}
+        {children && (
+          <div style={{ marginTop: 4, color: "#FFFFFF" }}>
+            {children}
+          </div>
+        )}
       </div>
     </section>
   );

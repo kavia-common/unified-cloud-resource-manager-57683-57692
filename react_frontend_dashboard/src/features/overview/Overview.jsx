@@ -7,47 +7,75 @@ import Banner from "../../components/ui/Banner";
 export default function Overview() {
   /** 
    * Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design.
-   * Enhancement: Replaces the static "Monthly" label with a drop-down (Daily/Monthly/Yearly) that updates the chart with mock data.
+   * Enhancement: Dynamic axes/labels for Daily/Monthly/Yearly with mock data.
    */
   const [stats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
   const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
   const [chartData, setChartData] = useState([]);
 
-  // Helpers: generate mock data by mode
-  const namesDaily = useMemo(() => Array.from({ length: 7 }, (_ , i) => `Day ${i + 1}`), []);
-  const namesMonthly = useMemo(() => ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"], []);
-  const namesYearly = useMemo(() => ["Y1", "Y2", "Y3", "Y4", "Y5"], []);
+  // X-axis categories per mode
+  const hours = useMemo(() => Array.from({ length: 24 }, (_, h) => h), []);
+  const daysInMonth = useMemo(() => Array.from({ length: 31 }, (_, d) => d + 1), []);
+  const months = useMemo(() => ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], []);
 
   function rand(min, max) {
     return Math.round(min + Math.random() * (max - min));
   }
 
-  function buildSeriesFor(names, ranges) {
-    // ranges: { s1:[min,max], s2:[min,max], s3:[min,max] }
-    return names.map((name) => ({
-      name,
+  // Build data rows for current x-domain (will map into { name, series1, series2, series3 })
+  function buildSeriesFor(xValues, ranges, nameFormatter = (x) => String(x)) {
+    return xValues.map((x) => ({
+      name: nameFormatter(x),
       series1: rand(ranges.s1[0], ranges.s1[1]),
       series2: rand(ranges.s2[0], ranges.s2[1]),
       series3: rand(ranges.s3[0], ranges.s3[1]),
     }));
   }
 
+  // Compute axis configuration for the chart based on mode
+  function computeAxisConfig(selectedMode) {
+    if (selectedMode === "Daily") {
+      return {
+        xTickFormatter: (v) => `${v}:00`,
+        xLabel: "Hour of Day",
+        yLabel: "Spend ($)",
+        yDomain: [0, 25],
+        yTicks: [0, 5, 10, 15, 20, 25],
+      };
+    }
+    if (selectedMode === "Monthly") {
+      return {
+        xTickFormatter: (v) => `${v}`,
+        xLabel: "Day of Month",
+        yLabel: "Spend ($)",
+        yDomain: [0, 60],
+        yTicks: [0, 10, 20, 30, 40, 50, 60],
+      };
+    }
+    // Yearly
+    return {
+      xTickFormatter: (v) => v,
+      xLabel: "Month",
+      yLabel: "Spend ($)",
+      yDomain: [0, 120],
+      yTicks: [0, 20, 40, 60, 80, 100, 120],
+    };
+  }
+
+  // Initialize with Monthly mock data
   useEffect(() => {
-    // Initialize with Monthly
-    setChartData(buildSeriesFor(namesMonthly, { s1: [10, 40], s2: [5, 35], s3: [15, 50] }));
+    setChartData(buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update data when mode changes
   useEffect(() => {
-    // Update data when mode changes (mock datasets per mode)
     if (mode === "Daily") {
-      // smaller values for daily fluctuations; keep within 0..20
-      setChartData(buildSeriesFor(namesDaily, { s1: [4, 16], s2: [2, 14], s3: [6, 20] }));
+      setChartData(buildSeriesFor(hours, { s1: [2, 16], s2: [1, 14], s3: [3, 20] }, (h) => `${h}`));
     } else if (mode === "Monthly") {
-      setChartData(buildSeriesFor(namesMonthly, { s1: [10, 40], s2: [5, 35], s3: [15, 50] }));
+      setChartData(buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`));
     } else if (mode === "Yearly") {
-      // larger aggregated values; keep within 0..100 for visual distinction
-      setChartData(buildSeriesFor(namesYearly, { s1: [30, 80], s2: [20, 70], s3: [40, 100] }));
+      setChartData(buildSeriesFor(months, { s1: [25, 90], s2: [20, 80], s3: [30, 100] }, (m) => m));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -59,6 +87,9 @@ export default function Overview() {
     gridAutoFlow: "column",
     gap: 8,
   };
+
+  // Axis config for current mode
+  const axis = computeAxisConfig(mode);
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -100,9 +131,14 @@ export default function Overview() {
             seriesOrder={[
               { key: "series2", label: "AWS", color: "#000000" },         // AWS line black
               { key: "series1", label: "Azure", color: "#1a237e" },       // Azure dark blue
-              { key: "series3", label: "GCP", color: "var(--series-3)" }, // keep GCP as is
+              { key: "series3", label: "GCP", color: "var(--series-3)" }, // GCP
             ]}
             height={260}
+            xTickFormatter={axis.xTickFormatter}
+            xAxisLabel={axis.xLabel}
+            yAxisLabel={axis.yLabel}
+            yDomain={axis.yDomain}
+            yTicks={axis.yTicks}
           />
         </div>
       </div>

@@ -116,6 +116,12 @@ export function MultiSeriesOverviewChart({
     { key: "series3", label: "GCP", color: "var(--series-3)" },   // front
   ],
   height = 260,
+  // New dynamic axis props
+  xTickFormatter,
+  xAxisLabel = "",
+  yAxisLabel = "Spend ($)",
+  yDomain = [0, 50],
+  yTicks = [0, 10, 20, 30, 40, 50],
 }) {
   /** Styled multi-series line chart with right-aligned legend [graph | legend] layout. */
   const cardStyle = {
@@ -172,21 +178,24 @@ export function MultiSeriesOverviewChart({
           <ResponsiveContainer width="100%" height={height}>
             <LineChart
               data={data}
-              margin={{ top: 16, right: 12, bottom: 28, left: 40 }}
+              margin={{ top: 16, right: 12, bottom: 36, left: 48 }}
             >
               <CartesianGrid stroke="var(--gridline)" vertical={false} strokeWidth={1} />
               <XAxis
                 dataKey={xKey}
                 tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+                tickFormatter={xTickFormatter}
                 tickLine={false}
                 axisLine={false}
+                label={xAxisLabel ? { value: xAxisLabel, position: "insideBottom", offset: -4, fill: "var(--axis-text)", fontSize: 12 } : undefined}
               />
               <YAxis
-                domain={[0, 50]}
-                ticks={[0, 10, 20, 30, 40, 50]}
+                domain={yDomain}
+                ticks={yTicks}
                 tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
                 tickLine={false}
                 axisLine={false}
+                label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: "insideLeft", offset: 12, fill: "var(--axis-text)", fontSize: 12 } : undefined}
               />
               {/* Tooltip retained for accessibility */}
               <Tooltip contentStyle={{ fontSize: 12 }} />

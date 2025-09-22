@@ -33,7 +33,7 @@ export function TrendLineChart({ data, dataKey = "value", xKey = "date", color =
             <defs>
               <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
-                <stop offset="95%\" stopColor={color} stopOpacity={0.05}/>
+                <stop offset="95%" stopColor={color} stopOpacity={0.05}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -51,6 +51,51 @@ export function TrendLineChart({ data, dataKey = "value", xKey = "date", color =
             <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
           </LineChart>
         )}
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Multi-series line chart with legend. Expects data like:
+ * [{ date: '09-01', aws: 12, azure: 10, gcp: 8 }, ...]
+ */
+// PUBLIC_INTERFACE
+export function MultiSeriesLineChart({
+  data,
+  xKey = "date",
+  series = [
+    { key: "aws", label: "AWS", color: "#F59E0B" },   // amber
+    { key: "azure", label: "Azure", color: "#3B82F6" }, // blue
+    { key: "gcp", label: "GCP", color: "#10B981" },   // emerald
+  ],
+  height = 260,
+  showLegend = true,
+}) {
+  /** Minimal multi-series line chart for provider trends with legend. */
+  return (
+    <div className="card" style={{ padding: 8 }}>
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip />
+          {showLegend && <Legend />}
+          {series.map((s) => (
+            <Line
+              key={s.key}
+              type="monotone"
+              dataKey={s.key}
+              name={s.label}
+              stroke={s.color}
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+          ))}
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );

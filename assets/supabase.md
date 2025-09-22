@@ -7,6 +7,11 @@ Set via orchestrator (do not commit `.env`):
 - REACT_APP_SUPABASE_URL
 - REACT_APP_SUPABASE_KEY
 
+Frontend client:
+- File: react_frontend_dashboard/src/lib/supabaseClient.js
+- Export: supabase() // returns a memoized Supabase client
+- Usage: import { supabase } from "../lib/supabaseClient"; supabase().auth.getSession()
+
 ## Edge Function: link-account
 Path: supabase/functions/link-account/index.ts
 

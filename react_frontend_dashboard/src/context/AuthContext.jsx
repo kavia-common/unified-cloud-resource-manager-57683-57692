@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
+/**
+ * Authentication context backed by Supabase.
+ * Exposes useAuth() and AuthProvider to the rest of the app.
+ */
 const AuthCtx = createContext(null);
 
 // PUBLIC_INTERFACE

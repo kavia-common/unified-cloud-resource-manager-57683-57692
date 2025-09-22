@@ -3,28 +3,26 @@ import React from "react";
 // PUBLIC_INTERFACE
 export default function StatCard({ label, value, deltaLabel, deltaType = "up" }) {
   /** 
-   * Square stat card with delta indicator.
-   * - Square: uses aspectRatio + minHeight fallback.
-   * - Larger visual size.
-   * - More curved edges (prominent rounded corners).
-   * - Preserves violet background with white text.
+   * Rectangular stat card with delta indicator.
+   * Changes:
+   * - Remove square aspect ratio; use a modest fixed minHeight to appear wider than tall.
+   * - Maintain violet background, white text, and curved edges.
+   * - Keep responsive behavior via grid container from theme.css.
    */
   const containerStyles = {
-    // Ensure square shape
-    aspectRatio: "1 / 1",
-    minHeight: 140, // fallback for browsers without aspect-ratio support
-    // Visual prominence
-    padding: 20,
-    borderRadius: 18, // more curved edges
+    // Rectangle: wider than tall comes from grid width vs. height here
+    minHeight: 100, // rectangular profile
+    padding: "16px 20px",
+    borderRadius: 16,
     background: "#7C3AED", // violet
     color: "#FFFFFF",
     border: "1px solid transparent",
-    boxShadow: "0 10px 22px rgba(124, 58, 237, 0.25)", // subtle violet glow
+    boxShadow: "0 8px 18px rgba(124, 58, 237, 0.22)", // subtle violet glow
     display: "grid",
     alignContent: "center",
     alignItems: "center",
     justifyItems: "start",
-    gap: 8,
+    gap: 6,
   };
 
   // Delta color contrast on dark background
@@ -33,10 +31,10 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up" })
 
   return (
     <div className="card" style={containerStyles}>
-      <div className="label" style={{ color: "#EDE9FE", fontSize: 13 }}>{label}</div>
-      <div className="value" style={{ color: "#FFFFFF", fontSize: 28, fontWeight: 800 }}>{value}</div>
+      <div className="label" style={{ color: "#EDE9FE", fontSize: 12 }}>{label}</div>
+      <div className="value" style={{ color: "#FFFFFF", fontSize: 26, fontWeight: 800 }}>{value}</div>
       {deltaLabel && (
-        <div className={`delta ${deltaType}`} style={{ ...deltaColor, fontSize: 13 }}>
+        <div className={`delta ${deltaType}`} style={{ ...deltaColor, fontSize: 12 }}>
           {deltaLabel}
         </div>
       )}

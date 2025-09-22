@@ -3,10 +3,10 @@ import { useAuth } from "../../context/AuthContext";
 
 /**
  * PUBLIC_INTERFACE
- * Minimal login + signup panel using Supabase Auth: email/password and Google OAuth.
+ * Minimal login + signup panel using Supabase Auth: email/password.
  */
 export default function Login({ onSuccess }) {
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signUpWithEmail } = useAuth();
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,18 +27,6 @@ export default function Login({ onSuccess }) {
         if (error) setMsg(error.message);
         else setMsg("Check your inbox to confirm your email.");
       }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleGoogle() {
-    setBusy(true);
-    setMsg("");
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) setMsg(error.message);
-      // On OAuth, Supabase will redirect. No onSuccess here.
     } finally {
       setBusy(false);
     }
@@ -82,9 +70,6 @@ export default function Login({ onSuccess }) {
         </form>
 
         <div style={{ display: "grid", gap: 10, marginTop: 6 }}>
-          <button className="btn" onClick={handleGoogle} disabled={busy}>
-            Continue with Google
-          </button>
           <button
             className="btn ghost"
             onClick={() => {

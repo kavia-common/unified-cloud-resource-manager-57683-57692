@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 
@@ -8,62 +7,34 @@ export default function Automation() {
   const [rules, setRules] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
-  const [form, setForm] = useState({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
+  const [form, setForm] = useState({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5", status: "enabled" });
 
-  async function load() {
-    const { data, error } = await supabase.from("automation_rules").select("*").order("created_at", { ascending: false });
-    if (!error && Array.isArray(data)) setRules(data);
-    else setRules([]);
-  }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    setRules([
+      { id: 1, name: "Stop dev VMs at 10pm", match: "env=dev type=vm", action: "stop", cron: "0 22 * * 1-5", status: "enabled" },
+    ]);
+  }, []);
 
-  async function saveRule(e) {
+  function saveRule(e) {
     e?.preventDefault?.();
     if (editingRule) {
-      await supabase.from("automation_rules")
-        .update({
-          name: form.name,
-          match: form.match,
-          action: form.action,
-          cron: form.cron,
-        })
-        .eq("id", editingRule.id);
+      setRules(prev => prev.map(r => r.id === editingRule.id ? { ...editingRule, ...form } : r));
     } else {
-      await supabase.from("automation_rules").insert({
-        name: form.name,
-        match: form.match,
-        action: form.action,
-        cron: form.cron,
-        status: "enabled",
-      });
+      setRules(prev => [{ id: Date.now(), ...form }, ...prev]);
     }
     setOpen(false);
     setEditingRule(null);
-    setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
-    load();
+    setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5", status: "enabled" });
   }
 
-  async function deleteRule(rule) {
-    if (window.confirm(`Are you sure you want to delete rule "${rule.name}"?`)) {
-      await supabase.from("automation_rules").delete().eq("id", rule.id);
-      load();
+  function deleteRule(rule) {
+    if (window.confirm(`Delete rule "${rule.name}"?`)) {
+      setRules(prev => prev.filter(r => r.id !== rule.id));
     }
   }
 
-  function openEditModal(rule) {
-    setEditingRule(rule);
-    setForm({
-      name: rule.name,
-      match: rule.match,
-      action: rule.action,
-      cron: rule.cron,
-    });
-    setOpen(true);
-  }
-
-  async function toggleRule(rule) {
-    await supabase.from("automation_rules").update({ status: rule.status === "enabled" ? "disabled" : "enabled" }).eq("id", rule.id);
-    load();
+  function toggleRule(rule) {
+    setRules(prev => prev.map(r => r.id === rule.id ? { ...r, status: r.status === "enabled" ? "disabled" : "enabled" } : r));
   }
 
   const columns = [
@@ -80,10 +51,10 @@ export default function Automation() {
           <button className="btn" onClick={() => toggleRule(r)}>
             {r.status === "enabled" ? "Disable" : "Enable"}
           </button>
-          <button className="btn" onClick={() => openEditModal(r)}>
+          <button className="btn" onClick={() => { setEditingRule(r); setForm(r); setOpen(true); }}>
             Edit
           </button>
-          <button className="btn error" onClick={() => deleteRule(r)}>
+          <button className="btn destructive" onClick={() => deleteRule(r)}>
             Delete
           </button>
         </div>
@@ -96,7 +67,6 @@ export default function Automation() {
       <div className="panel-header">
         <div className="panel-title">Automation Rules</div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn" onClick={load}>Refresh</button>
           <button className="btn primary" onClick={() => setOpen(true)}>New Rule</button>
         </div>
       </div>
@@ -110,14 +80,14 @@ export default function Automation() {
         onClose={() => {
           setOpen(false);
           setEditingRule(null);
-          setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
+          setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5", status: "enabled" });
         }}
         footer={
           <>
             <button className="btn ghost" onClick={() => {
               setOpen(false);
               setEditingRule(null);
-              setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
+              setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5", status: "enabled" });
             }}>Cancel</button>
             <button className="btn primary" onClick={saveRule}>
               {editingRule ? "Save" : "Create"}

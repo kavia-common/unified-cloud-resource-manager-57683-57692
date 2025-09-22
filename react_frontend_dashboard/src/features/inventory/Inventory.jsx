@@ -1,330 +1,70 @@
-import React, { useEffect, useMemo, useState } from "react";
-import supabase from "../../lib/supabaseClient";
+import React, { useMemo, useState } from "react";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 import FilterBar from "../../components/ui/Filters";
-import { TrendLineChart } from "../../components/ui/Charts";
-import providerRegistry from "../../lib/providers";
-import { postCloudAction } from "../../lib/cloudApi";
 
-function useResources() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const refresh = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("resources")
-      .select("*")
-      .order("updated_at", { ascending: false });
-    if (!error && Array.isArray(data)) setRows(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    refresh();
-  }, []);
-  return { rows, loading, refresh };
-}
-
-function OperationModal({ open, onClose, resource, onSubmit }) {
+// PUBLIC_INTERFACE
+export default function Inventory() {
+  /** Inventory with filters, actions and operation modal (start/stop/scale). */
+  const [rows, setRows] = useState([
+    { id: "i-123", name: "web-1", provider: "aws", type: "ec2", region: "us-east-1", state: "running", cost_daily: 4.12 },
+    { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", state: "stopped", cost_daily: 5.44 },
+    { id: "db-01", name: "orders-db", provider: "aws", type: "rds", region: "us-west-2", state: "running", cost_daily: 7.8 },
+  ]);
+  const [filters, setFilters] = useState({});
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
   const [operation, setOperation] = useState("start");
   const [size, setSize] = useState("medium");
-  const [submitting, setSubmitting] = useState(false);
-
-  async function run() {
-    setSubmitting(true);
-    try {
-      await onSubmit(operation, operation === "scale" ? { size } : {});
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <Modal
-      title={`Operate: ${resource?.name || ""}`}
-      open={open}
-      onClose={onClose}
-      footer={
-        <>
-          <button className="btn ghost" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="btn primary" onClick={run} disabled={submitting}>
-            {submitting ? "Running..." : "Run"}
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: "grid", gap: 10 }}>
-        <label>
-          <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
-            Operation
-          </div>
-          <select
-            className="select"
-            value={operation}
-            onChange={(e) => setOperation(e.target.value)}
-          >
-            <option value="start">Start</option>
-            <option value="stop">Stop</option>
-            <option value="scale">Scale</option>
-          </select>
-        </label>
-        {operation === "scale" && (
-          <label>
-            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
-              Target Size
-            </div>
-            <select
-              className="select"
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-            >
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
-          </label>
-        )}
-        <div className="badge">
-          This will enqueue operation via Supabase (Edge Function / table) if
-          configured.
-        </div>
-      </div>
-    </Modal>
-  );
-}
-
-/** Inventory resources with inline actions and operations modal. */
-export default function Inventory() {
-  const { rows, loading, refresh } = useResources();
-  const [selected, setSelected] = useState(null);
-  const [openOp, setOpenOp] = useState(false);
-  const [search, setSearch] = useState("");
-
-  const [filters, setFilters] = useState({
-    provider: "",
-    account: "",
-    region: "",
-    service: "",
-    tag: "",
-    from: "",
-    to: "",
-  });
+  const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    let out = rows;
-    if (filters.provider) out = out.filter((r) => (r.provider || "") === filters.provider);
-    if (filters.account) out = out.filter((r) => (r.account_name || r.account || "") === filters.account);
-    if (filters.region) out = out.filter((r) => (r.region || "") === filters.region);
-    if (filters.service) out = out.filter((r) => (r.type || r.service || "") === filters.service);
-    if (filters.tag) out = out.filter((r) => {
-      const tags = Array.isArray(r.tags) ? r.tags : [];
-      return tags.includes(filters.tag);
+    return rows.filter((r) => {
+      if (filters.provider && r.provider !== filters.provider) return false;
+      if (q && ![r.name, r.id, r.type, r.region].some(v => String(v || "").toLowerCase().includes(q))) return false;
+      return true;
     });
-    if (filters.from) out = out.filter((r) => !r.updated_at || r.updated_at >= filters.from);
-    if (filters.to) out = out.filter((r) => !r.updated_at || r.updated_at <= filters.to);
-    if (q) {
-      out = out.filter((r) =>
-        [r.name, r.type, r.provider, r.region].some((v) =>
-          String(v || "").toLowerCase().includes(q)
-        )
-      );
-    }
-    return out;
-  }, [rows, search, filters]);
+  }, [rows, filters, search]);
 
   const columns = [
+    { key: "id", label: "ID" },
     { key: "name", label: "Name" },
     { key: "provider", label: "Provider" },
     { key: "type", label: "Type" },
     { key: "region", label: "Region" },
-    {
-      key: "state",
-      label: "State",
-      render: (v) => (
-        <span className={`badge ${v === "running" ? "success" : ""}`}>
-          {v || "unknown"}
-        </span>
-      ),
-    },
-    {
-      key: "cost_daily",
-      label: "Daily Cost ($)",
-      render: (v) => (v ? v.toFixed?.(2) ?? v : "—"),
-    },
+    { key: "state", label: "State", render: (v) => <span className={`badge ${v === "running" ? "success" : ""}`}>{v}</span> },
+    { key: "cost_daily", label: "Daily Cost ($)", render: (v) => (v ? Number(v).toFixed(2) : "—") },
     {
       key: "actions",
       label: "Actions",
       render: (_v, r) => (
         <div style={{ display: "flex", gap: 8 }}>
-          <button
-            className="btn"
-            onClick={() => {
-              setSelected(r);
-              setOpenOp(true);
-            }}
-          >
-            Operate
-          </button>
+          <button className="btn" onClick={() => { setSelected(r); setOpen(true); setOperation("start"); }}>Operate</button>
         </div>
       ),
     },
   ];
 
-  async function runOperation(op, params) {
-    await supabase.from("operations").insert({
-      resource_id: selected.id,
-      operation: op,
-      params: params || {},
-      status: "queued",
-    });
-    setOpenOp(false);
-    setSelected(null);
-    refresh();
+  function runOperation() {
+    // Mock update of state
+    if (!selected) return;
+    setRows(prev => prev.map(r => {
+      if (r.id !== selected.id) return r;
+      if (operation === "start") return { ...r, state: "running" };
+      if (operation === "stop") return { ...r, state: "stopped" };
+      if (operation === "scale") return { ...r, size };
+      return r;
+    }));
+    setOpen(false); setSelected(null);
   }
-
-  // Mock Cloud Data section state
-  const [mockLoading, setMockLoading] = useState(false);
-  const [mockError, setMockError] = useState("");
-  const [awsRows, setAwsRows] = useState([]); // EC2 + RDS
-  const [azureVMRows, setAzureVMRows] = useState([]);
-  const [azureStorageRows, setAzureStorageRows] = useState([]);
-  const [gcpRows, setGcpRows] = useState([]); // Compute Engine
-
-  async function loadMock() {
-    setMockLoading(true);
-    setMockError("");
-    try {
-      const providers = Array.from(providerRegistry.getAllProviders().values());
-      const results = await Promise.all(
-        providers.map(async (provider) => {
-          try {
-            const data = await provider.getInventory();
-            return { provider: provider.name, data };
-          } catch (error) {
-            console.error(`Error loading ${provider.name} inventory:`, error);
-            return { provider: provider.name, data: [] };
-          }
-        })
-      );
-
-      // Update state based on provider results
-      setAwsRows(results.find(r => r.provider === 'AWS')?.data || []);
-      setAzureVMRows(
-        (results.find(r => r.provider === 'Azure')?.data || [])
-          .filter(r => String(r.type || "").toLowerCase().includes("vm"))
-      );
-      setAzureStorageRows(
-        (results.find(r => r.provider === 'Azure')?.data || [])
-          .filter(r => String(r.type || "").toLowerCase().includes("storage"))
-      );
-      setGcpRows(results.find(r => r.provider === 'GCP')?.data || []);
-
-      if (results.some(r => !r.data)) {
-        setMockError('Some providers failed to load data');
-      }
-
-      // The provider data has already been processed in the results mapping above
-      // Just check if any providers failed to return data
-      const errors = results
-        .filter(r => r.error)
-        .map(r => `${r.provider}: ${r.error}`)
-        .join(', ');
-      
-      if (errors) {
-        setMockError(`Errors: ${errors}`);
-      }
-    } finally {
-      setMockLoading(false);
-    }
-  }
-
-  // GCP start/stop actions wired to mock-gcp endpoint. Update UI state after response.
-  async function handleGcpAction(row, action) {
-    // optimistic UI: set to "updating"
-    setGcpRows((prev) =>
-        prev.map((r) => (r.id === row.id ? { ...r, _updating: true } : r))
-    );
-    const endpoint = action === "start" ? "action/start" : "action/stop";
-    const { error } = await postCloudAction("gcp", endpoint, { id: row.id });
-    setGcpRows((prev) =>
-      prev.map((r) => {
-        if (r.id !== row.id) return r;
-        const nextStatus =
-          action === "start" ? "running" : "stopped";
-        return {
-          ...r,
-          status: error ? r.status : nextStatus,
-          _updating: false,
-        };
-      })
-    );
-  }
-
-  const baseColumns = [
-    { key: "id", label: "ID" },
-    { key: "type", label: "Type" },
-    {
-      key: "status",
-      label: "State",
-      render: (v) => (
-        <span className={`badge ${v === "running" ? "success" : ""}`}>
-          {v || "unknown"}
-        </span>
-      ),
-    },
-    {
-      key: "cost",
-      label: "Daily Cost ($)",
-      render: (v) => (v ? Number(v).toFixed(2) : "—"),
-    },
-  ];
-
-  const gcpColumns = [
-    ...baseColumns,
-    {
-      key: "actions",
-      label: "Actions",
-      render: (_v, r) => (
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            className="btn"
-            disabled={r._updating || r.status === "running"}
-            onClick={() => handleGcpAction(r, "start")}
-            title="Start instance"
-          >
-            {r._updating && r.status !== "running" ? "Starting..." : "Start"}
-          </button>
-          <button
-            className="btn destructive"
-            disabled={r._updating || r.status === "stopped"}
-            onClick={() => handleGcpAction(r, "stop")}
-            title="Stop instance"
-          >
-            {r._updating && r.status !== "stopped" ? "Stopping..." : "Stop"}
-          </button>
-        </div>
-      ),
-    },
-  ];
 
   return (
     <div className="panel">
       <div className="panel-header">
         <div className="panel-title">Inventory</div>
         <div style={{ display: "flex", gap: 10 }}>
-          <input
-            className="input"
-            placeholder="Search resources..."
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button className="btn" onClick={refresh} disabled={loading}>
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
+          <input className="input" placeholder="Search resources..." onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
       <div className="panel-body">
@@ -334,305 +74,44 @@ export default function Inventory() {
           providerOptions={[
             { value: "aws", label: "AWS" },
             { value: "azure", label: "Azure" },
-            { value: "gcp", label: "GCP" },
           ]}
-          accountOptions={[]}
-          regionOptions={[
-            { value: "us-east-1", label: "us-east-1" },
-            { value: "us-west-2", label: "us-west-2" },
-          ]}
-          serviceOptions={[]}
-          tagOptions={[]}
         />
-
         <div style={{ height: 10 }} />
-
-        <DataTable
-          columns={columns}
-          rows={filtered}
-          emptyMessage="No resources discovered yet."
-        />
-
-        <div style={{ height: 16 }} />
-
-        <div className="panel" style={{ border: "1px dashed var(--border)" }}>
-          <div className="panel-header">
-            <div className="panel-title">Fleet Spend Sparkline</div>
-            <div className="badge">Preview</div>
-          </div>
-          <div className="panel-body">
-            <TrendLineChart
-              data={(() => {
-                // synthesize small trend from visible filtered rows
-                const n = 14;
-                const avgDaily =
-                  filtered.reduce((s, r) => s + Number(r.cost_daily || 0), 0);
-                return new Array(n).fill(0).map((_, i) => ({
-                  date: new Date(Date.now() - (n - i - 1) * 86400000)
-                    .toISOString()
-                    .slice(5, 10),
-                  value: Number(
-                    (avgDaily * (0.9 + Math.random() * 0.2)).toFixed(2)
-                  ),
-                }));
-              })()}
-              dataKey="value"
-              xKey="date"
-              gradient
-              color="#10B981"
-              height={160}
-            />
-          </div>
-        </div>
-
-        <div style={{ height: 16 }} />
-
-        <div className="panel" style={{ border: "1px dashed var(--border)" }}>
-          <div className="panel-header">
-            <div className="panel-title">Cloud Mock Data (Edge Functions)</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button className="btn" onClick={loadMock} disabled={mockLoading}>
-                {mockLoading ? "Loading..." : "Load from mock-aws/mock-azure/mock-gcp"}
-              </button>
-            </div>
-          </div>
-          <div className="panel-body">
-            {mockError && <div className="badge error">Error: {mockError}</div>}
-
-            <div
-              style={{
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-              }}
-            >
-              {/* AWS Card */}
-              <div className="card" style={{ gridColumn: "span 12" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <div className="panel-title">AWS — EC2 + RDS</div>
-                  <div className="badge">mock-aws</div>
-                </div>
-                <DataTable
-                  columns={[
-                    ...baseColumns,
-                    {
-                      key: "actions",
-                      label: "Actions",
-                      render: (_v, r) => (
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <button
-                            className="btn"
-                            disabled={r._updating || r.status === "running"}
-                            onClick={async () => {
-                              setAwsRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id ? { ...x, _updating: true } : x
-                                )
-                              );
-                              const { error } = await postCloudAction(
-                                "aws",
-                                "action/start",
-                                { id: r.id }
-                              );
-                              setAwsRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id
-                                    ? {
-                                        ...x,
-                                        status: error ? x.status : "running",
-                                        _updating: false,
-                                      }
-                                    : x
-                                )
-                              );
-                            }}
-                          >
-                            {r._updating && r.status !== "running"
-                              ? "Starting..."
-                              : "Start"}
-                          </button>
-                          <button
-                            className="btn destructive"
-                            disabled={r._updating || r.status === "stopped"}
-                            onClick={async () => {
-                              setAwsRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id ? { ...x, _updating: true } : x
-                                )
-                              );
-                              const { error } = await postCloudAction(
-                                "aws",
-                                "action/stop",
-                                { id: r.id }
-                              );
-                              setAwsRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id
-                                    ? {
-                                        ...x,
-                                        status: error ? x.status : "stopped",
-                                        _updating: false,
-                                      }
-                                    : x
-                                )
-                              );
-                            }}
-                          >
-                            {r._updating && r.status !== "stopped"
-                              ? "Stopping..."
-                              : "Stop"}
-                          </button>
-                        </div>
-                      ),
-                    },
-                  ]}
-                  rows={awsRows}
-                  emptyMessage="No data from mock-aws."
-                />
-              </div>
-
-              {/* Azure Split: VMs and Storage */}
-              <div className="card" style={{ gridColumn: "span 6" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <div className="panel-title">Azure — VMs</div>
-                  <div className="badge">mock-azure</div>
-                </div>
-                <DataTable
-                  columns={[
-                    ...baseColumns,
-                    {
-                      key: "actions",
-                      label: "Actions",
-                      render: (_v, r) => (
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <button
-                            className="btn"
-                            disabled={r._updating || r.status === "running"}
-                            onClick={async () => {
-                              setAzureVMRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id ? { ...x, _updating: true } : x
-                                )
-                              );
-                              const { error } = await postCloudAction(
-                                "azure",
-                                "action/start",
-                                { id: r.id }
-                              );
-                              setAzureVMRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id
-                                    ? {
-                                        ...x,
-                                        status: error ? x.status : "running",
-                                        _updating: false,
-                                      }
-                                    : x
-                                )
-                              );
-                            }}
-                          >
-                            {r._updating && r.status !== "running"
-                              ? "Starting..."
-                              : "Start"}
-                          </button>
-                          <button
-                            className="btn destructive"
-                            disabled={r._updating || r.status === "stopped"}
-                            onClick={async () => {
-                              setAzureVMRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id ? { ...x, _updating: true } : x
-                                )
-                              );
-                              const { error } = await postCloudAction(
-                                "azure",
-                                "action/stop",
-                                { id: r.id }
-                              );
-                              setAzureVMRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === r.id
-                                    ? {
-                                        ...x,
-                                        status: error ? x.status : "stopped",
-                                        _updating: false,
-                                      }
-                                    : x
-                                )
-                              );
-                            }}
-                          >
-                            {r._updating && r.status !== "stopped"
-                              ? "Stopping..."
-                              : "Stop"}
-                          </button>
-                        </div>
-                      ),
-                    },
-                  ]}
-                  rows={azureVMRows}
-                  emptyMessage="No VM data from mock-azure."
-                />
-              </div>
-              <div className="card" style={{ gridColumn: "span 6" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <div className="panel-title">Azure — Storage (with cost)</div>
-                  <div className="badge">mock-azure</div>
-                </div>
-                <DataTable
-                  columns={baseColumns}
-                  rows={azureStorageRows}
-                  emptyMessage="No Storage data from mock-azure."
-                />
-              </div>
-
-              {/* GCP Compute with actions */}
-              <div className="card" style={{ gridColumn: "span 12" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <div className="panel-title">GCP — Compute Engine</div>
-                  <div className="badge">mock-gcp</div>
-                </div>
-                <DataTable
-                  columns={gcpColumns}
-                  rows={gcpRows}
-                  emptyMessage="No Compute Engine data from mock-gcp."
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <DataTable columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
       </div>
-      <OperationModal
-        open={openOp}
-        onClose={() => setOpenOp(false)}
-        resource={selected}
-        onSubmit={runOperation}
-      />
+
+      <Modal
+        title={selected ? `Operate: ${selected.name}` : "Operate"}
+        open={open}
+        onClose={() => setOpen(false)}
+        footer={
+          <>
+            <button className="btn ghost" onClick={() => setOpen(false)}>Cancel</button>
+            <button className="btn primary" onClick={runOperation}>Run</button>
+          </>
+        }
+      >
+        <div style={{ display: "grid", gap: 10 }}>
+          <label>
+            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Operation</div>
+            <select className="select" value={operation} onChange={(e) => setOperation(e.target.value)}>
+              <option value="start">Start</option>
+              <option value="stop">Stop</option>
+              <option value="scale">Scale</option>
+            </select>
+          </label>
+          {operation === "scale" && (
+            <label>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Target Size</div>
+              <select className="select" value={size} onChange={(e) => setSize(e.target.value)}>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </label>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

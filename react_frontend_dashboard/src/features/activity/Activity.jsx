@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 
 /** Activity stream of operations, recommendations, and automation rule runs. */
 export default function Activity() {
   const [rows, setRows] = useState([]);
 
-  async function load() {
-    const { data, error } = await supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(200);
-    if (!error && Array.isArray(data)) setRows(data);
-    else setRows([]);
+  function load() {
+    setRows([
+      { created_at: new Date().toISOString(), actor: "you", type: "operation", summary: "Start instance i-123", status: "success" },
+      { created_at: new Date(Date.now() - 3600e3).toISOString(), actor: "system", type: "automation", summary: "Stopped 2 dev VMs", status: "success" },
+    ]);
   }
 
   useEffect(() => { load(); }, []);

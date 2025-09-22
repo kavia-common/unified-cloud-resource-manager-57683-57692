@@ -1,8 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 // PUBLIC_INTERFACE
-export default function Topbar({ onSearch, onNavigate }) {
+export default function Topbar({ onSearch }) {
   /** Minimal topbar containing search and user badge. Shows auth user if available. */
   const { user } = useAuth();
   const userLabel = user?.email || (user?.id ? `${String(user.id).slice(0, 6)}…` : "Guest");
@@ -14,6 +15,7 @@ export default function Topbar({ onSearch, onNavigate }) {
         .slice(0, 2)
         .join("") || "U"
     : "G";
+  const navigate = useNavigate();
 
   return (
     <div className="topbar">
@@ -22,7 +24,7 @@ export default function Topbar({ onSearch, onNavigate }) {
         <input placeholder="Search resources, accounts, rules..." onChange={(e) => onSearch?.(e.target.value)} />
       </div>
       <div className="user-badge">
-        <button className="btn ghost" onClick={() => onNavigate?.("profile")}>Profile</button>
+        <button className="btn ghost" onClick={() => navigate("/profile")}>Profile</button>
         <span style={{ color: "var(--muted)", fontSize: 14 }}>{userLabel}</span>
         <div className="avatar" title={userLabel}>{initials}</div>
       </div>

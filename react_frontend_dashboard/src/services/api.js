@@ -1,0 +1,168 @@
+//
+// Centralized API service: handles all calls to Supabase Edge Functions (REST)
+// and direct Supabase queries when appropriate.
+// Follows best practices: single responsibility, error handling, minimal coupling.
+//
+
+import { supabase } from '../lib/supabaseClient';
+
+const EDGE_BASE = '/functions/v1'; // Supabase Edge Functions base path for REST
+
+// Helpers
+async function callEdgeFunction(name, method = 'POST', body = null, signal) {
+  const url = `${EDGE_BASE}/${name}`;
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  const options = {
+    method,
+    headers,
+    signal,
+    credentials: 'include',
+  };
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, options);
+  const text = await res.text();
+  let json = null;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch (e) {
+    // fall back to raw text if not json
+    json = { raw: text };
+  }
+  if (!res.ok) {
+    const err = new Error(json?.error || res.statusText || 'Request failed');
+    err.status = res.status;
+    err.payload = json;
+    throw err;
+  }
+  return json;
+}
+
+// PUBLIC_INTERFACE
+export async function loginWithEmail(email, password) {
+  /** Log in a user via email/password using Supabase Auth. Returns { user, session }. */
+  const { data, error } = await supabase().auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+// PUBLIC_INTERFACE
+export async function signUpWithEmail(email, password, siteUrl) {
+  /**
+   * Sign up a user via Supabase Auth with email/password.
+   * emailRedirectTo must be set from SITE_URL env configured externally.
+   */
+  const { data, error } = await supabase().auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: siteUrl,
+    },
+  });
+  if (error) throw error;
+  return data;
+}
+
+// PUBLIC_INTERFACE
+export async function logout() {
+  /** Logs out the current user session. */
+  const { error } = await supabase().auth.signOut();
+  if (error) throw error;
+  return true;
+}
+
+// PUBLIC_INTERFACE
+export async function getCurrentUser() {
+  /** Returns the current authenticated user (or null). */
+  const {
+    data: { user },
+  } = await supabase().auth.getUser();
+  return user || null;
+}
+
+// PUBLIC_INTERFACE
+export async function linkAwsAccount(payload, signal) {
+  /**
+   * Triggers AWS account linking flow via Edge Function 'link-account'.
+   * payload: { provider: 'aws', accountId, roleArn, externalId }
+   */
+  return callEdgeFunction('link-account', 'POST', payload, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function linkAzureAccount(payload, signal) {
+  /**
+   * Triggers Azure account linking flow via Edge Function 'link-account'.
+   * payload: { provider: 'azure', subscriptionId, tenantId, clientId, clientSecret }
+   */
+  return callEdgeFunction('link-account', 'POST', payload, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function discoverResources({ providers = ['aws', 'azure'] }, signal) {
+  /**
+   * Discovers multi-cloud resources via mock functions or actual providers.
+   * Returns: { resources: [ ... ] }
+   */
+  return callEdgeFunction('mock-aws', 'POST', { action: 'discover', providers }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function fetchInventory({ filter = {}, page = 1, pageSize = 20 }, signal) {
+  /** Returns inventory list using cached DB or on-demand discovery. */
+  return callEdgeFunction('mock-aws', 'POST', { action: 'inventory', filter, page, pageSize }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function fetchCosts({ range = '30d', groupBy = 'service' }, signal) {
+  /** Returns cost data aggregation for charts/tables. */
+  return callEdgeFunction('mock-azure', 'POST', { action: 'costs', range, groupBy }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function controlResource({ provider, resourceId, operation, params = {} }, signal) {
+  /**
+   * Performs lifecycle operations: start | stop | scale on a resource.
+   * Returns the operation result and enqueues audit trail.
+   */
+  return callEdgeFunction('queue-processor', 'POST', { provider, resourceId, operation, params }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function fetchRecommendations({ scope = 'all' }, signal) {
+  /** Returns AI/ML recommendations from Edge Function. */
+  return callEdgeFunction('recommendations', 'POST', { scope }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function upsertAutomationRule(rule, signal) {
+  /**
+   * Upserts an automation rule into DB via Edge Function.
+   * rule: { id?, name, conditions, actions, enabled }
+   */
+  return callEdgeFunction('automation-enforcer', 'POST', { action: 'upsert', rule }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function listAutomationRules(signal) {
+  /** Lists automation rules for the user. */
+  return callEdgeFunction('automation-enforcer', 'POST', { action: 'list' }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function fetchActivity({ page = 1, pageSize = 25 }, signal) {
+  /** Returns activity history (audits, operations). */
+  return callEdgeFunction('queue-processor', 'POST', { action: 'activity', page, pageSize }, signal);
+}
+
+// PUBLIC_INTERFACE
+export async function getLinkedAccounts(signal) {
+  /** Gets the linked cloud accounts for current user from DB (via edge). */
+  return callEdgeFunction('link-account', 'POST', { action: 'list' }, signal);
+}

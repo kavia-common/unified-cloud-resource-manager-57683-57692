@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./theme.css";
+import "./index.css";
 import Sidebar from "./components/ui/Sidebar";
 import Topbar from "./components/ui/Topbar";
 import Overview from "./features/overview/Overview";

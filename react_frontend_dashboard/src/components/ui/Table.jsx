@@ -14,14 +14,14 @@ export function DataTable({ columns, rows, emptyMessage = "No data" }) {
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 && (
+          {(!rows || rows.length === 0) && (
             <tr>
               <td colSpan={columns.length} style={{ textAlign: "center", color: "var(--muted)" }}>
                 {emptyMessage}
               </td>
             </tr>
           )}
-          {rows.map((r, idx) => (
+          {(rows || []).map((r, idx) => (
             <tr key={idx}>
               {columns.map((c) => (
                 <td key={c.key}>{c.render ? c.render(r[c.key], r) : r[c.key]}</td>

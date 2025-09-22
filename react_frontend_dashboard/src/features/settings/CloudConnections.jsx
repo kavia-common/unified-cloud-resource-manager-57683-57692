@@ -1,25 +1,12 @@
-import React, { useEffect, useState } from "react";
-import supabase from "../../lib/supabaseClient";
+import React, { useState } from "react";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 
-/** Cloud account connection manager. Supports AWS and Azure entries. */
+/** Cloud account connection manager. Supports AWS and Azure entries (local mock). */
 export default function CloudConnections() {
   const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState({ provider: "AWS", name: "", accountId: "" });
-  const [error, setError] = useState("");
-
-  async function load() {
-    setLoading(true);
-    // Best-effort read (table might not exist yet in environment)
-    const { data, error: err } = await supabase.from("cloud_accounts").select("*").order("created_at", { ascending: false });
-    if (!err && Array.isArray(data)) setAccounts(data);
-    setLoading(false);
-  }
-
-  useEffect(() => { load(); }, []);
 
   const columns = [
     { key: "provider", label: "Provider" },
@@ -29,23 +16,20 @@ export default function CloudConnections() {
     { key: "created_at", label: "Added" },
   ];
 
-  async function addAccount(e) {
-    e.preventDefault();
-    setError("");
-    const payload = {
-      provider: form.provider,
-      name: form.name,
-      account_id: form.accountId,
-      status: "connected",
-    };
-    const { error: err } = await supabase.from("cloud_accounts").insert(payload);
-    if (err) {
-      setError(err.message);
-    } else {
-      setOpenModal(false);
-      setForm({ provider: "AWS", name: "", accountId: "" });
-      load();
-    }
+  function addAccount(e) {
+    e?.preventDefault?.();
+    setAccounts(prev => [
+      {
+        provider: form.provider,
+        name: form.name,
+        account_id: form.accountId,
+        status: "connected",
+        created_at: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+    setOpenModal(false);
+    setForm({ provider: "AWS", name: "", accountId: "" });
   }
 
   return (
@@ -53,7 +37,6 @@ export default function CloudConnections() {
       <div className="panel-header">
         <div className="panel-title">Cloud Connections</div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn" onClick={load} disabled={loading}>{loading ? "Refreshing..." : "Refresh"}</button>
           <button className="btn primary" onClick={() => setOpenModal(true)}>Connect Account</button>
         </div>
       </div>
@@ -92,7 +75,6 @@ export default function CloudConnections() {
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Account ID / Subscription ID</div>
             <input className="input" value={form.accountId} onChange={(e) => setForm((f) => ({ ...f, accountId: e.target.value }))} placeholder="123456789012 / xxxx-xxxx-xxxx" />
           </label>
-          {error && <div className="badge error">Error: {error}</div>}
         </form>
       </Modal>
     </div>

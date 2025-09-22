@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import supabase, { getEmailRedirectTo } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 const AuthCtx = createContext(null);
 
@@ -12,7 +12,6 @@ export function useAuth() {
     loading: false,
     signInWithEmail: async () => ({ data: null, error: { message: "Auth not initialized" } }),
     signUpWithEmail: async () => ({ data: null, error: { message: "Auth not initialized" } }),
-    signInWithGoogle: async () => ({ data: null, error: { message: "Auth not initialized" } }),
     signOut: async () => ({ error: { message: "Auth not initialized" } }),
   };
 }
@@ -31,7 +30,7 @@ export function AuthProvider({ children }) {
     let mounted = true;
     async function init() {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data } = await supabase().auth.getSession();
         if (!mounted) return;
         setSession(data?.session || null);
       } finally {
@@ -41,7 +40,7 @@ export function AuthProvider({ children }) {
     init();
 
     // Subscribe to auth changes
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: subscription } = supabase().auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession || null);
     });
 
@@ -50,36 +49,28 @@ export function AuthProvider({ children }) {
         subscription?.subscription?.unsubscribe?.();
         subscription?.unsubscribe?.();
       } catch {
-        // ignore stub mismatch
+        // ignore
       }
       mounted = false;
     };
   }, []);
 
   async function signInWithEmail({ email, password }) {
-    return supabase.auth.signInWithPassword({ email, password });
+    return supabase().auth.signInWithPassword({ email, password });
   }
 
   async function signUpWithEmail({ email, password }) {
-    return supabase.auth.signUp({
+    return supabase().auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: getEmailRedirectTo(),
+        emailRedirectTo: window.location.origin,
       },
     });
   }
 
-  async function signInWithGoogle() {
-    const redirectTo = getEmailRedirectTo();
-    return supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
-  }
-
   async function signOut() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase().auth.signOut();
     return { error };
   }
 
@@ -90,7 +81,6 @@ export function AuthProvider({ children }) {
       loading,
       signInWithEmail,
       signUpWithEmail,
-      signInWithGoogle,
       signOut,
     }),
     [session, loading]

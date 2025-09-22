@@ -14,7 +14,7 @@
     "postinstall": "echo \"postinstall complete\"",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --watchAll=false",
+    "test": "react-scripts test --watchAll=false --transformIgnorePatterns \"node_modules/(?!@codemirror)/\"",
     "eject": "react-scripts eject",
     "lint": "echo \"lint placeholder (eslint configured)\""
   },
@@ -34,6 +34,10 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "@testing-library/react": "^14.2.1",
+    "@testing-library/jest-dom": "^6.4.2",
+    "cross-env": "^7.0.3",
+    "msw": "^2.2.3",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }

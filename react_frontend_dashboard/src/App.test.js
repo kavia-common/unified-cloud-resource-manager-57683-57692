@@ -1,7 +1,7 @@
-import { render } from "@testing-library/react";
-import App from "./App";
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import App from './App';
 
-test("renders app container", () => {
-  const { container } = render(<App />);
-  expect(container).toBeTruthy();
+test('renders without crashing', () => {
+  render(<App />);
 });

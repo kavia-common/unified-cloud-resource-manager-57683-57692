@@ -1,0 +1,6 @@
+{
+  "name": "functions",
+  "scripts": {
+    "test": "deno test --allow-env --allow-net **/**.test.ts"
+  }
+}

@@ -40,7 +40,7 @@ export default function Overview() {
 
       <div className="panel">
         <div className="panel-header">
-          <div className="panel-title">Series Comparison</div>
+          <div className="panel-title">Monthly</div>
           <div className="badge">Overview</div>
         </div>
         <div className="panel-body">

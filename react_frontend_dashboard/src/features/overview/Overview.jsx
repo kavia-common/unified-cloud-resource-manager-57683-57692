@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import { TrendLineChart } from "../../components/ui/Charts";
+import Banner from "../../components/ui/Banner";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
-  /** Overview dashboard showing a friendly welcome, key stats, and a synthetic spend trend. */
+  /** Overview dashboard with a curved-edge banner header, key stats, and a synthetic spend trend. */
   const [stats, setStats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
   const [trend, setTrend] = useState([]);
 
@@ -20,40 +21,11 @@ export default function Overview() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      {/* Minimalist greeting — Pure White style */}
-      <section
-        aria-label="Welcome"
-        style={{
-          background: "var(--bg)",
-          padding: "4px 2px 6px",
-          borderRadius: 0,
-        }}
-      >
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 28,
-            lineHeight: 1.2,
-            fontWeight: 800,
-            color: "#374151",
-            letterSpacing: 0.2,
-          }}
-        >
-          Cross-Cloud Resource Manager
-        </h1>
-        <p
-          style={{
-            margin: "6px 0 0 0",
-            fontSize: 15,
-            lineHeight: 1.6,
-            color: "#9CA3AF",
-            maxWidth: 880,
-          }}
-        >
-          Unified visibility and control for AWS and Azure—link accounts, explore inventory, track real-time spend,
-          act on AI-driven recommendations, and automate operations with rules. Built for a clean, focused workflow.
-        </p>
-      </section>
+      <Banner
+        title="Cross-Cloud Resource Manager"
+        subtitle="Unified visibility and control across clouds — clean, focused, and fast."
+        align="left"
+      />
 
       <div className="card-grid">
         <StatCard label="Linked Accounts" value={stats.accounts} />

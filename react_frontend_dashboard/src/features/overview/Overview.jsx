@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
+import PieChart from "../../components/ui/PieChart";
+import { CLOUD_COLORS } from "../../components/ui/Charts";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
@@ -91,6 +93,25 @@ export default function Overview() {
   // Axis config for current mode
   const axis = computeAxisConfig(mode);
 
+  // Mock spend totals for pie chart by interval
+  const pieTotals = useMemo(() => {
+    switch (mode) {
+      case "Daily":
+        return { AWS: 420, Azure: 350, GCP: 230 };
+      case "Yearly":
+        return { AWS: 42000, Azure: 36000, GCP: 26000 };
+      case "Monthly":
+      default:
+        return { AWS: 8200, Azure: 6900, GCP: 5200 };
+    }
+  }, [mode]);
+
+  const pieData = useMemo(() => ([
+    { label: "AWS", value: pieTotals.AWS, color: CLOUD_COLORS.AWS },
+    { label: "Azure", value: pieTotals.Azure, color: CLOUD_COLORS.Azure },
+    { label: "GCP", value: pieTotals.GCP, color: CLOUD_COLORS.GCP },
+  ]), [pieTotals]);
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <Banner
@@ -140,6 +161,17 @@ export default function Overview() {
             yDomain={axis.yDomain}
             yTicks={axis.yTicks}
           />
+        </div>
+      </div>
+
+      {/* Spend share pie chart */}
+      <div className="panel" style={{ marginTop: 8 }}>
+        <div className="panel-header">
+          <div className="panel-title">Spend Share by Provider</div>
+          <div className="text-xs" style={{ color: "var(--muted)" }}>Interval: {mode}</div>
+        </div>
+        <div className="panel-body">
+          <PieChart data={pieData} size={240} strokeWidth={2} />
         </div>
       </div>
     </div>

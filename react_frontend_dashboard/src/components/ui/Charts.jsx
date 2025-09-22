@@ -18,6 +18,17 @@ import {
 } from "recharts";
 
 /**
+ * PUBLIC_INTERFACE
+ * Shared chart color palette for cloud providers to ensure visual consistency
+ * across chart types (bar, pie, etc).
+ */
+export const CLOUD_COLORS = {
+  AWS: "#000000",      // black
+  Azure: "#1a237e",    // dark blue
+  GCP: "var(--series-3)", // original token/color used for GCP in bar chart
+};
+
+/**
  * Small toolkit of charts using Recharts for the minimalist Pure White theme.
  * These components are intentionally simple to keep bundle size and complexity small.
  */

@@ -1,27 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
-  /** Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design. */
+  /** 
+   * Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design.
+   * Enhancement: Replaces the static "Monthly" label with a drop-down (Daily/Monthly/Yearly) that updates the chart with mock data.
+   */
   const [stats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
+  const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
   const [chartData, setChartData] = useState([]);
 
-  useEffect(() => {
-    // Build 5 categories "Item 1".."Item 5" with values within 0..50 per design notes.
-    const names = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"];
-    const rand = (min, max) => Math.round(min + Math.random() * (max - min));
-    const data = names.map((name, i) => ({
+  // Helpers: generate mock data by mode
+  const namesDaily = useMemo(() => Array.from({ length: 7 }, (_ , i) => `Day ${i + 1}`), []);
+  const namesMonthly = useMemo(() => ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"], []);
+  const namesYearly = useMemo(() => ["Y1", "Y2", "Y3", "Y4", "Y5"], []);
+
+  function rand(min, max) {
+    return Math.round(min + Math.random() * (max - min));
+  }
+
+  function buildSeriesFor(names, ranges) {
+    // ranges: { s1:[min,max], s2:[min,max], s3:[min,max] }
+    return names.map((name) => ({
       name,
-      // Ensure reasonable variation and remain within 0..50
-      series1: rand(10, 40), // medium gray, middle
-      series2: rand(5, 35),  // light gray, back
-      series3: rand(15, 50), // magenta, front/highlight
+      series1: rand(ranges.s1[0], ranges.s1[1]),
+      series2: rand(ranges.s2[0], ranges.s2[1]),
+      series3: rand(ranges.s3[0], ranges.s3[1]),
     }));
-    setChartData(data);
+  }
+
+  useEffect(() => {
+    // Initialize with Monthly
+    setChartData(buildSeriesFor(namesMonthly, { s1: [10, 40], s2: [5, 35], s3: [15, 50] }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Update data when mode changes (mock datasets per mode)
+    if (mode === "Daily") {
+      // smaller values for daily fluctuations; keep within 0..20
+      setChartData(buildSeriesFor(namesDaily, { s1: [4, 16], s2: [2, 14], s3: [6, 20] }));
+    } else if (mode === "Monthly") {
+      setChartData(buildSeriesFor(namesMonthly, { s1: [10, 40], s2: [5, 35], s3: [15, 50] }));
+    } else if (mode === "Yearly") {
+      // larger aggregated values; keep within 0..100 for visual distinction
+      setChartData(buildSeriesFor(namesYearly, { s1: [30, 80], s2: [20, 70], s3: [40, 100] }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  // Minimalist select styling aligned with Pure White theme
+  const selectStyles = {
+    display: "inline-grid",
+    alignItems: "center",
+    gridAutoFlow: "column",
+    gap: 8,
+  };
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -40,8 +77,24 @@ export default function Overview() {
 
       <div className="panel">
         <div className="panel-header">
-          <div className="panel-title">Monthly</div>
-          <div className="badge">Overview</div>
+          <div className="panel-title">Overview</div>
+          <div style={selectStyles}>
+            <label htmlFor="overview-mode" style={{ fontSize: 12, color: "var(--muted)" }}>
+              Interval
+            </label>
+            <select
+              id="overview-mode"
+              className="select"
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              aria-label="Select time interval for overview chart"
+              style={{ minWidth: 140 }}
+            >
+              <option value="Daily">Daily</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
         </div>
         <div className="panel-body">
           <MultiSeriesOverviewChart

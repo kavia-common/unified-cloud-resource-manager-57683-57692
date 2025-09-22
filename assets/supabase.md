@@ -76,6 +76,9 @@ Use the Supabase CLI:
 - supabase functions deploy mock-aws
 - supabase functions deploy mock-azure
 - supabase functions deploy mock-gcp
+- supabase functions deploy recommendations
+- supabase functions deploy automation-enforcer
+- supabase functions deploy queue-processor
 
 Make sure the function has access to:
 - SUPABASE_URL
@@ -83,9 +86,26 @@ Make sure the function has access to:
 
 Supabase config automatically injects these into the Edge environment when deployed.
 
+### Scheduler (Cron) Setup
+Use Supabase Scheduled Triggers to automate back-end jobs (project Dashboard → Edge Functions → Schedules):
+- recommendations: POST /run every 6 hours to generate new recommendations and anomalies.
+- automation-enforcer: POST /run on a schedule that matches how often you want rules evaluated (e.g., every 10 minutes).
+- queue-processor: POST /run every 2–5 minutes to process queued operations and recommendation_actions.
+
+All scheduled calls must include a service bearer key in headers or be configured via Supabase’s secure scheduler which injects credentials automatically.
+
 ## Frontend Usage
 lib/linkAccountApi.js exports:
 
 - linkCloudAccount({ provider, name, credentials })
 
 Profile.jsx uses this to send credentials securely. No sensitive data is inserted directly from the client into tables.
+
+Recommendations.jsx and Automation.jsx are already wired to:
+- Read from `recommendations` and enqueue into `recommendation_actions`.
+- Create/toggle rules in `automation_rules`.
+
+With the new Edge Functions and cron:
+- `recommendations` will be periodically populated.
+- `automation_rules` will be enforced and resulting `operations` queued.
+- `queue-processor` will update `operations`/`recommendation_actions` and append to `activity_log` for the Activity panel.

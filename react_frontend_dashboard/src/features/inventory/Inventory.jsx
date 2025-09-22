@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import supabase from "../../lib/supabaseClient";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
+import FilterBar from "../../components/ui/Filters";
+import { TrendLineChart } from "../../components/ui/Charts";
 import {
   getAwsInventory,
   getAzureInventory,
@@ -106,15 +108,38 @@ export default function Inventory() {
   const [openOp, setOpenOp] = useState(false);
   const [search, setSearch] = useState("");
 
+  const [filters, setFilters] = useState({
+    provider: "",
+    account: "",
+    region: "",
+    service: "",
+    tag: "",
+    from: "",
+    to: "",
+  });
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      [r.name, r.type, r.provider, r.region].some((v) =>
-        String(v || "").toLowerCase().includes(q)
-      )
-    );
-  }, [rows, search]);
+    let out = rows;
+    if (filters.provider) out = out.filter((r) => (r.provider || "") === filters.provider);
+    if (filters.account) out = out.filter((r) => (r.account_name || r.account || "") === filters.account);
+    if (filters.region) out = out.filter((r) => (r.region || "") === filters.region);
+    if (filters.service) out = out.filter((r) => (r.type || r.service || "") === filters.service);
+    if (filters.tag) out = out.filter((r) => {
+      const tags = Array.isArray(r.tags) ? r.tags : [];
+      return tags.includes(filters.tag);
+    });
+    if (filters.from) out = out.filter((r) => !r.updated_at || r.updated_at >= filters.from);
+    if (filters.to) out = out.filter((r) => !r.updated_at || r.updated_at <= filters.to);
+    if (q) {
+      out = out.filter((r) =>
+        [r.name, r.type, r.provider, r.region].some((v) =>
+          String(v || "").toLowerCase().includes(q)
+        )
+      );
+    }
+    return out;
+  }, [rows, search, filters]);
 
   const columns = [
     { key: "name", label: "Name" },
@@ -313,11 +338,62 @@ export default function Inventory() {
         </div>
       </div>
       <div className="panel-body">
+        <FilterBar
+          values={filters}
+          onChange={setFilters}
+          providerOptions={[
+            { value: "aws", label: "AWS" },
+            { value: "azure", label: "Azure" },
+            { value: "gcp", label: "GCP" },
+          ]}
+          accountOptions={[]}
+          regionOptions={[
+            { value: "us-east-1", label: "us-east-1" },
+            { value: "us-west-2", label: "us-west-2" },
+          ]}
+          serviceOptions={[]}
+          tagOptions={[]}
+        />
+
+        <div style={{ height: 10 }} />
+
         <DataTable
           columns={columns}
           rows={filtered}
           emptyMessage="No resources discovered yet."
         />
+
+        <div style={{ height: 16 }} />
+
+        <div className="panel" style={{ border: "1px dashed var(--border)" }}>
+          <div className="panel-header">
+            <div className="panel-title">Fleet Spend Sparkline</div>
+            <div className="badge">Preview</div>
+          </div>
+          <div className="panel-body">
+            <TrendLineChart
+              data={(() => {
+                // synthesize small trend from visible filtered rows
+                const n = 14;
+                const avgDaily =
+                  filtered.reduce((s, r) => s + Number(r.cost_daily || 0), 0);
+                return new Array(n).fill(0).map((_, i) => ({
+                  date: new Date(Date.now() - (n - i - 1) * 86400000)
+                    .toISOString()
+                    .slice(5, 10),
+                  value: Number(
+                    (avgDaily * (0.9 + Math.random() * 0.2)).toFixed(2)
+                  ),
+                }));
+              })()}
+              dataKey="value"
+              xKey="date"
+              gradient
+              color="#10B981"
+              height={160}
+            />
+          </div>
+        </div>
 
         <div style={{ height: 16 }} />
 

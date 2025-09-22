@@ -7,6 +7,7 @@ import { Modal } from "../../components/ui/Modal";
 export default function Automation() {
   const [rules, setRules] = useState([]);
   const [open, setOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState(null);
   const [form, setForm] = useState({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
 
   async function load() {
@@ -16,18 +17,48 @@ export default function Automation() {
   }
   useEffect(() => { load(); }, []);
 
-  async function addRule(e) {
+  async function saveRule(e) {
     e?.preventDefault?.();
-    await supabase.from("automation_rules").insert({
-      name: form.name,
-      match: form.match,
-      action: form.action,
-      cron: form.cron,
-      status: "enabled",
-    });
+    if (editingRule) {
+      await supabase.from("automation_rules")
+        .update({
+          name: form.name,
+          match: form.match,
+          action: form.action,
+          cron: form.cron,
+        })
+        .eq("id", editingRule.id);
+    } else {
+      await supabase.from("automation_rules").insert({
+        name: form.name,
+        match: form.match,
+        action: form.action,
+        cron: form.cron,
+        status: "enabled",
+      });
+    }
     setOpen(false);
+    setEditingRule(null);
     setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
     load();
+  }
+
+  async function deleteRule(rule) {
+    if (window.confirm(`Are you sure you want to delete rule "${rule.name}"?`)) {
+      await supabase.from("automation_rules").delete().eq("id", rule.id);
+      load();
+    }
+  }
+
+  function openEditModal(rule) {
+    setEditingRule(rule);
+    setForm({
+      name: rule.name,
+      match: rule.match,
+      action: rule.action,
+      cron: rule.cron,
+    });
+    setOpen(true);
   }
 
   async function toggleRule(rule) {
@@ -45,7 +76,17 @@ export default function Automation() {
       key: "actions",
       label: "Actions",
       render: (_v, r) => (
-        <button className="btn" onClick={() => toggleRule(r)}>{r.status === "enabled" ? "Disable" : "Enable"}</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn" onClick={() => toggleRule(r)}>
+            {r.status === "enabled" ? "Disable" : "Enable"}
+          </button>
+          <button className="btn" onClick={() => openEditModal(r)}>
+            Edit
+          </button>
+          <button className="btn error" onClick={() => deleteRule(r)}>
+            Delete
+          </button>
+        </div>
       ),
     },
   ];
@@ -64,17 +105,27 @@ export default function Automation() {
       </div>
 
       <Modal
-        title="Create Automation Rule"
+        title={editingRule ? "Edit Automation Rule" : "Create Automation Rule"}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false);
+          setEditingRule(null);
+          setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
+        }}
         footer={
           <>
-            <button className="btn ghost" onClick={() => setOpen(false)}>Cancel</button>
-            <button className="btn primary" onClick={addRule}>Create</button>
+            <button className="btn ghost" onClick={() => {
+              setOpen(false);
+              setEditingRule(null);
+              setForm({ name: "", match: "", action: "stop", cron: "0 22 * * 1-5" });
+            }}>Cancel</button>
+            <button className="btn primary" onClick={saveRule}>
+              {editingRule ? "Save" : "Create"}
+            </button>
           </>
         }
       >
-        <form onSubmit={addRule} style={{ display: "grid", gap: 10 }}>
+        <form onSubmit={saveRule} style={{ display: "grid", gap: 10 }}>
           <label>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Name</div>
             <input className="input" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Stop dev servers at 10pm" />

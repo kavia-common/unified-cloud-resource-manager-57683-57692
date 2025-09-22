@@ -25,7 +25,8 @@ export default function Banner({
         position: "relative",
         overflow: "hidden",
         borderRadius: 16, // curved edges
-        background: "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
+        // Soft violet gradient that complements Pure White theme
+        background: "linear-gradient(180deg, #F5F3FF 0%, #EDE9FE 100%)", // violet-50 to violet-100
         border: "1px solid var(--border)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
       }}
@@ -41,7 +42,8 @@ export default function Banner({
           height: 220,
           borderRadius: "50%",
           background:
-            "radial-gradient(closest-side, rgba(55,65,81,0.06), rgba(55,65,81,0.0))",
+            // faint violet blur for minimalist accent
+            "radial-gradient(closest-side, rgba(124,58,237,0.10), rgba(124,58,237,0.00))",
           filter: "blur(0.2px)",
         }}
       />
@@ -61,7 +63,8 @@ export default function Banner({
             fontSize: 24,
             lineHeight: 1.25,
             fontWeight: 800,
-            color: "#374151",
+            // Deep violet for strong contrast on soft violet background
+            color: "#4C1D95", // violet-900
             letterSpacing: 0.2,
           }}
         >
@@ -75,7 +78,8 @@ export default function Banner({
               margin: 0,
               fontSize: 14,
               lineHeight: 1.6,
-              color: "#6B7280",
+              // Muted violet for secondary text
+              color: "#6D28D9", // violet-700
               maxWidth: 820,
             }}
           >

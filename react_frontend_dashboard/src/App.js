@@ -10,7 +10,7 @@ import Recommendations from "./features/recommendations/Recommendations";
 import Automation from "./features/automation/Automation";
 import Activity from "./features/activity/Activity";
 import CloudConnections from "./features/settings/CloudConnections";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import AuthGate from "./features/auth/AuthGate";
 import Login from "./features/auth/Login";
 import Profile from "./features/profile/Profile";
@@ -53,7 +53,7 @@ function App() {
   );
   
   return (
-    <Router>
+    <Router basename={process.env.PUBLIC_URL || '/'}>
       <AuthProvider>
         <AuthGate requireAuth={true} fallback={LoginFallback}>
           <DashboardShell />

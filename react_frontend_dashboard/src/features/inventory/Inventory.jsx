@@ -228,41 +228,15 @@ export default function Inventory() {
         setMockError('Some providers failed to load data');
       }
 
-      // Azure: assume function returns { vms: [...], storage: [...] } or an array with type info
-      let vmRows = [];
-      let storageRows = [];
-      if (azure && azure.data) {
-        if (Array.isArray(azure.data)) {
-          // Split by type if array
-          vmRows = azure.data.filter((r) =>
-            String(r.type || "").toLowerCase().includes("vm")
-          );
-          storageRows = azure.data.filter((r) =>
-            String(r.type || "").toLowerCase().includes("storage")
-          );
-        } else if (typeof azure.data === "object") {
-          vmRows = Array.isArray(azure.data.vms) ? azure.data.vms : [];
-          storageRows = Array.isArray(azure.data.storage) ? azure.data.storage : [];
-        }
-      }
-      setAzureVMRows(vmRows);
-      setAzureStorageRows(storageRows);
-
-      // GCP: expect Compute Engine instances. Filter by type if array has other services
-      const gcpList = Array.isArray(gcp.data) ? gcp.data : [];
-      setGcpRows(
-        gcpList.filter((r) =>
-          String(r.type || "").toLowerCase().includes("compute")
-        )
-      );
-
-      if (aws.error || azure.error || gcp.error) {
-        const err =
-          aws.error?.message ||
-          azure.error?.message ||
-          gcp.error?.message ||
-          "Unknown error";
-        setMockError(err);
+      // The provider data has already been processed in the results mapping above
+      // Just check if any providers failed to return data
+      const errors = results
+        .filter(r => r.error)
+        .map(r => `${r.provider}: ${r.error}`)
+        .join(', ');
+      
+      if (errors) {
+        setMockError(`Errors: ${errors}`);
       }
     } finally {
       setMockLoading(false);

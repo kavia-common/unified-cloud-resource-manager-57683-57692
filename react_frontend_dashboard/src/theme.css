@@ -276,7 +276,8 @@ button { font-family: inherit; cursor: pointer; }
 /* Create a clean grid by using collapsed borders and consistent cell borders */
 .table {
   width: 100%;
-  border-collapse: collapse; /* contiguous grid lines */
+  border-collapse: collapse; /* contiguous grid lines - prevents double borders */
+  border-spacing: 0; /* ensure no gaps */
   background: transparent;
 }
 
@@ -289,9 +290,17 @@ button { font-family: inherit; cursor: pointer; }
   text-align: left;
   font-weight: 600;
   letter-spacing: 0.2px;
-  border: 1px solid rgba(17, 24, 39, 0.12);
+  /* Use bottom border only to merge with body top border into a single line */
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
+  border-right: 1px solid rgba(17, 24, 39, 0.12);
+  border-left: 1px solid rgba(17, 24, 39, 0.12);
+  border-bottom: none; /* remove to avoid double border with first body row */
   padding: 12px 14px;
   font-size: 13px;
+}
+/* Reinstate a bottom border for the entire header row container so sides remain continuous */
+.table thead tr {
+  border-bottom: 1px solid rgba(17, 24, 39, 0.12);
 }
 
 /* Inventory header override: ONLY header cells should be white-on-black */
@@ -299,6 +308,8 @@ button { font-family: inherit; cursor: pointer; }
 .table thead th.table__head--inventory {
   background: #000000 !important;
   color: #FFFFFF !important;
+  /* preserve single-line merge behavior with body */
+  border-bottom: none !important; /* avoid double border against first body row */
 }
 
 /* Body cells: transparent fill, show only text and gridlines */
@@ -310,16 +321,39 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid rgba(17, 24, 39, 0.12); /* subtle gridlines */
 }
 
+/* Ensure the top line of the first body row acts as the single divider below the header */
+.table tbody tr:first-child td {
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
+}
+
+/* When header is black (inventory), still use the same single divider color for a clean seam */
+.table--inventory tbody tr:first-child td {
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
+}
+
 /* AWS/Azure provider highlight: use solid black border for cells */
 .aws-border {
   border: 2px solid #000000 !important; /* black border as requested */
-  border-radius: 6px; /* slight rounding to make the highlight look intentional */
+  /* avoid rounding that can visually clash with grid lines when collapsed */
+  border-radius: 0 !important;
 }
 
 /* Inventory row exact-match highlight: apply to all value cells (td) only */
 .inventory-row-black-border {
-  border: 3px solid #000 !important; /* prominent black border */
-  border-radius: 6px; /* keep consistent rounded look */
+  /* Use top/bottom only per cell, and we will outline the row container using :first-child/:last-child to avoid double borders between cells */
+  border-top: 3px solid #000 !important;
+  border-bottom: 3px solid #000 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+/* Left-most and right-most cells close the rectangle edges */
+.table tbody tr .inventory-row-black-border:first-child { border-left: 3px solid #000 !important; }
+.table tbody tr .inventory-row-black-border:last-child { border-right: 3px solid #000 !important; }
+
+/* If the highlighted row is the first body row, ensure its top edge merges with header without a double line */
+.table tbody tr:first-child .inventory-row-black-border {
+  /* Use a single thick line; header bottom is none, so this becomes the single divider */
+  border-top-width: 3px !important;
 }
 
 /* Remove alternate row and hover fills for a fully transparent body */

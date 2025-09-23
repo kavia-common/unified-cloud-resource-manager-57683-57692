@@ -6,6 +6,7 @@ export function DataTable({ columns, rows, emptyMessage = "No data", variant = "
    * rowClassName: optional function (row) => string; applied to each td (value cells) in that row.
    */
   const variantClass = variant === "transparent" ? "table--transparent" : "";
+  // Keep 'table' base class first so theme.css rules apply predictably; inventory modifier follows.
   const tableClass = `table table--inventory ${variantClass} ${tableClassName}`.trim();
   return (
     <div className="table-wrapper" role="region" aria-label="Data table">

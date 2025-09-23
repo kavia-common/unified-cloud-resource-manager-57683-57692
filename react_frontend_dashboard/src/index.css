@@ -16,10 +16,7 @@ td.aws-border {
   border: 2px solid #111; /* black border for AWS/Azure provider cells */
 }
 
-/* Optional: keep headers clean and minimal */
-th {
-  border: none;
-}
+
 
 /* Chart legend helpers (as per design notes) */
 .chart-legend {

@@ -406,7 +406,18 @@ export default function AddCloudAccountModal({
                     {acc.name || "(no name)"}
                   </span>
                 </div>
-                <div className="badge" aria-label={`Provider ${acc.provider || "unknown"}`}>{acc.provider}</div>
+                {/* Provider badge: black background with white text for high contrast */}
+                <div
+                  className="badge"
+                  aria-label={`Provider ${acc.provider || "unknown"}`}
+                  style={{
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    borderColor: "#000000"
+                  }}
+                >
+                  {acc.provider}
+                </div>
               </div>
 
               {/* Meta row */}

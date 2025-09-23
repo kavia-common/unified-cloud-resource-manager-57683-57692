@@ -1,7 +1,7 @@
 import React, { useEffect, memo } from "react";
 
 // PUBLIC_INTERFACE
-export const Modal = memo(function Modal({ title, open, onClose, children, footer, disableBackdropClose = false }) {
+export const Modal = memo(function Modal({ title, open, onClose, children, footer, disableBackdropClose = false, headerActions }) {
   /**
    * Accessible modal dialog with backdrop.
    *
@@ -12,6 +12,7 @@ export const Modal = memo(function Modal({ title, open, onClose, children, foote
    * - children: ReactNode, body content
    * - footer: ReactNode, optional footer actions; defaults to Close button
    * - disableBackdropClose: boolean, if true, clicking the backdrop will not close the modal (default false)
+   * - headerActions: ReactNode, optional actions to display next to the close button in the header
    *
    * Returns: a modal dialog element with header, body, and footer regions.
    */
@@ -31,15 +32,18 @@ export const Modal = memo(function Modal({ title, open, onClose, children, foote
       <div className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
           <span>{title}</span>
-          <button
-            type="button"
-            aria-label="Close modal"
-            className="btn ghost"
-            onClick={onClose}
-            style={{ borderColor: "var(--border)" }}
-          >
-            ✕
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {headerActions}
+            <button
+              type="button"
+              aria-label="Close modal"
+              className="btn ghost"
+              onClick={onClose}
+              style={{ borderColor: "var(--border)" }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
         <div className="modal-body">{children}</div>
         <div className="modal-footer">

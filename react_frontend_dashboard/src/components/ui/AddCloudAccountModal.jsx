@@ -224,6 +224,17 @@ export default function AddCloudAccountModal({
       onClose={handleClose}
       footer={activeTab === "add" ? footer : <button className="btn" onClick={handleClose}>Close</button>}
       disableBackdropClose={true}
+      headerActions={
+        <button
+          type="button"
+          className="btn primary-accent"
+          aria-label="Manage linked cloud accounts"
+          onClick={() => setActiveTab("existing")}
+          title="Manage"
+        >
+          Manage
+        </button>
+      }
     >
       <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
 
@@ -403,16 +414,7 @@ export default function AddCloudAccountModal({
                 {acc.provider}
               </div>
 
-              {/* Action area placeholder (kept separate so label doesn't interfere with touch target) */}
-              <div className="action-bar" style={{ marginTop: 2 }}>
-                <button
-                  type="button"
-                  className="btn primary"
-                  aria-label={`Manage ${acc.provider} account ${acc.name || ""}`}
-                >
-                  Manage
-                </button>
-              </div>
+              {/* Action area removed per design: unified Manage button is in the modal header */}
             </div>
           ))}
         </div>

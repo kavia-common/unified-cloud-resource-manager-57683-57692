@@ -11,6 +11,16 @@ body { margin: 0; }
   color: #FFFFFF;
 }
 
+/* Provider cell border - only for value cells (td), never headers (th) */
+td.aws-border {
+  border: 2px solid #111; /* black border for AWS/Azure provider cells */
+}
+
+/* Optional: keep headers clean and minimal */
+th {
+  border: none;
+}
+
 /* Chart legend helpers (as per design notes) */
 .chart-legend {
   display: flex;

@@ -445,6 +445,37 @@ button { font-family: inherit; cursor: pointer; }
 .btn.ghost { background: transparent; border-color: transparent; }
 .btn:focus { outline: 3px solid var(--ring); }
 
+/* Inventory Actions column — scoped highlight for operate/action buttons only */
+.table.table--inventory td.table__cell--actions .btn,
+.table.table--inventory td.table__cell--actions .btn.action {
+  /* Vibrant, but still minimalist and aligned with dark theme tokens */
+  background: linear-gradient(165deg, var(--violet-card) 0%, var(--violet-card-end) 100%);
+  color: #FFFFFF;
+  border-color: rgba(124,58,237,0.55);
+  box-shadow: 0 10px 22px rgba(124,58,237,0.20), 0 4px 8px rgba(0,0,0,0.08);
+  transform: translateZ(0);
+}
+.table.table--inventory td.table__cell--actions .btn:hover,
+.table.table--inventory td.table__cell--actions .btn.action:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 14px 26px rgba(124,58,237,0.26), 0 6px 12px rgba(0,0,0,0.10);
+  border-color: rgba(124,58,237,0.70);
+}
+.table.table--inventory td.table__cell--actions .btn:focus-visible,
+.table.table--inventory td.table__cell--actions .btn.action:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--ring),
+    0 10px 22px rgba(124,58,237,0.22),
+    0 4px 8px rgba(0,0,0,0.08);
+}
+.table.table--inventory td.table__cell--actions .btn:active,
+.table.table--inventory td.table__cell--actions .btn.action:active {
+  transform: translateY(0) scale(1.0);
+  background: linear-gradient(165deg, #6D28D9 0%, #5B21B6 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
 /* Action bar and accent variant */
 .action-bar {
   display: flex;

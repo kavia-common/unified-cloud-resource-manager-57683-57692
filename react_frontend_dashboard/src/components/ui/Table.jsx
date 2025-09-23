@@ -34,8 +34,12 @@ export function DataTable({ columns, rows, emptyMessage = "No data", variant = "
                   const cellCls = [
                     typeof c.cellClassName === "function" ? c.cellClassName(r[c.key], r) : (c.cellClassName || ""),
                   ].filter(Boolean).join(" ");
+                  // Mark the Actions column cell so styles can be scoped in theme.css
+                  const scopedCellCls = c.key === "actions"
+                    ? `${cellCls} table__cell--actions`
+                    : cellCls;
                   return (
-                    <td key={c.key} className={cellCls}>
+                    <td key={c.key} className={scopedCellCls}>
                       {c.render ? c.render(r[c.key], r) : r[c.key]}
                     </td>
                   );

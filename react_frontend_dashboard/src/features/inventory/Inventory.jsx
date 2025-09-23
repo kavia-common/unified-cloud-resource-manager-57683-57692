@@ -58,7 +58,7 @@ export default function Inventory() {
       render: (_v, r) => (
         <div style={{ display: "flex", gap: 8 }}>
           <button
-            className="btn"
+            className="btn action"
             onClick={() => {
               setSelected(r);
               setOpen(true);

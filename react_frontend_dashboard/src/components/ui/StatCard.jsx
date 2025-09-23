@@ -34,7 +34,7 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up", o
   if (variant === "violet") classes.push("card-violet");
 
   // Inline color hints to ensure accessibility on colored backgrounds
-  const labelStyle = { fontSize: 14, color: "var(--card-oncolor)" };
+  const labelStyle = { fontSize: 14, fontWeight: 700, color: "var(--card-oncolor)" };
   const valueStyle = { fontSize: 26, fontWeight: 800, color: "var(--card-oncolor-strong)", ...(valueStyleOverride || {}) };
   const deltaCommon = { fontSize: 12 };
 

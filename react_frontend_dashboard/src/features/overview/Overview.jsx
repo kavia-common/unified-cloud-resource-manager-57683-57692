@@ -277,8 +277,8 @@ export default function Overview() {
               {/* Add Cloud Account */}
               <button
                 type="button"
-                className="actionBtn"
-                aria-label="Add Cloud Account – start setup"
+                className="actionBtn pop-hover"
+                aria-label="Add Cloud Account"
                 style={actionBtnStyle}
                 onClick={() => setShowAccounts(true)}
               >
@@ -290,13 +290,16 @@ export default function Overview() {
                   </svg>
                 </div>
                 <span className="label" style={actionLabelStyle}>Add Cloud Account</span>
-                <span className="chip" style={{ ...chipBase, background: "#34D399", color: "#0E1A12" }}>Start</span>
+                {/* chevron-right (consistent with other buttons) */}
+                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
+                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
 
               {/* Discover Resources */}
               <button
                 type="button"
-                className="actionBtn"
+                className="actionBtn pop-hover"
                 aria-label="Discover Resources"
                 style={actionBtnStyle}
                 onClick={() => setShowResources(true)}
@@ -318,7 +321,7 @@ export default function Overview() {
               {/* Run Optimization */}
               <button
                 type="button"
-                className="actionBtn"
+                className="actionBtn pop-hover"
                 aria-label="Run Optimization"
                 style={actionBtnStyle}
                 onClick={() => setShowRecs(true)}

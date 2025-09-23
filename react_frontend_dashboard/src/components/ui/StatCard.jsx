@@ -1,12 +1,13 @@
 import React from "react";
 
 // PUBLIC_INTERFACE
-export default function StatCard({ label, value, deltaLabel, deltaType = "up", onClick }) {
+export default function StatCard({ label, value, deltaLabel, deltaType = "up", onClick, variant = "violet" }) {
   /**
    * Rectangular stat card with delta indicator.
    * - Acts as a button when onClick is provided (keyboard accessible).
    * - Follows global Pure White theme styles via .card.
    * - Hover pop handled in theme.css for consistency.
+   * - variant: allows themed backgrounds; default to 'violet' per design request.
    */
   const containerBase = {
     minHeight: 100,
@@ -18,9 +19,7 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up", o
     gap: 6,
   };
 
-  const interactiveStyles = onClick
-    ? { cursor: "pointer", outline: "none" }
-    : {};
+  const interactiveStyles = onClick ? { cursor: "pointer", outline: "none" } : {};
 
   const handleKeyDown = (e) => {
     if (!onClick) return;
@@ -31,10 +30,17 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up", o
   };
 
   const Component = onClick ? "button" : "div";
+  const classes = ["card"];
+  if (variant === "violet") classes.push("card-violet");
+
+  // Inline color hints to ensure accessibility on colored backgrounds
+  const labelStyle = { fontSize: 14, color: "var(--card-oncolor)" };
+  const valueStyle = { fontSize: 26, fontWeight: 800, color: "var(--card-oncolor-strong)" };
+  const deltaCommon = { fontSize: 12 };
 
   return (
     <Component
-      className="card"
+      className={classes.join(" ")}
       style={{ ...containerBase, ...interactiveStyles }}
       onClick={onClick}
       onKeyDown={handleKeyDown}
@@ -43,10 +49,10 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up", o
         onClick ? `${label}: ${typeof value === "string" ? value : String(value)}` : undefined
       }
     >
-      <div className="label" style={{ fontSize: 14 }}>{label}</div>
-      <div className="value" style={{ fontSize: 26, fontWeight: 800 }}>{value}</div>
+      <div className="label" style={labelStyle}>{label}</div>
+      <div className="value" style={valueStyle}>{value}</div>
       {deltaLabel && (
-        <div className={`delta ${deltaType}`} style={{ fontSize: 12 }}>
+        <div className={`delta ${deltaType}`} style={deltaCommon}>
           {deltaLabel}
         </div>
       )}

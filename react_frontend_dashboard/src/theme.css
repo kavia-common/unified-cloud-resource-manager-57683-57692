@@ -156,9 +156,30 @@ button { font-family: inherit; cursor: pointer; }
   box-shadow: var(--shadow);
   padding: 14px; /* slightly reduced to keep stat cards compact */
   transform: translateZ(0); /* enable GPU acceleration for smoother hover */
-  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, background 0.24s ease, color 0.24s ease;
   will-change: transform, box-shadow;
 }
+/* Violet variant color tokens */
+:root {
+  --violet-card: #7C3AED; /* medium violet */
+  --violet-card-end: #6D28D9; /* deeper violet for subtle gradient */
+  --card-oncolor: rgba(255,255,255,0.92);
+  --card-oncolor-strong: #FFFFFF;
+  --delta-oncolor-up: #C8FACC;   /* light mint for visibility on violet */
+  --delta-oncolor-down: #FFD1D6; /* light red/pink for visibility on violet */
+}
+/* Violet card variant */
+.card.card-violet {
+  background: linear-gradient(165deg, var(--violet-card) 0%, var(--violet-card-end) 100%);
+  border-color: rgba(255,255,255,0.14);
+  color: var(--card-oncolor);
+}
+.card.card-violet .label { color: var(--card-oncolor); }
+.card.card-violet .value { color: var(--card-oncolor-strong); }
+.card.card-violet .delta.up { color: var(--delta-oncolor-up); }
+.card.card-violet .delta.down { color: var(--delta-oncolor-down); }
+
+/* Preserve the pop-on-hover across variants */
 .card:hover {
   transform: scale(1.05);
   /* soft shadow using #374151 at ~9% alpha => 0x17 (~15) -> rgba(55,65,81,0.09) */
@@ -167,6 +188,14 @@ button { font-family: inherit; cursor: pointer; }
     0 3px 6px rgba(0, 0, 0, 0.04);
   border-color: #E6E9EE; /* subtle lift in border color for depth */
 }
+.card.card-violet:hover {
+  /* slightly brighter on hover for violet variant while keeping existing pop */
+  box-shadow:
+    0 12px 28px rgba(124, 58, 237, 0.28),
+    0 4px 10px rgba(0, 0, 0, 0.06);
+  border-color: rgba(255,255,255,0.22);
+}
+/* Focus ring remains consistent and accessible */
 .card:focus-within,
 .card:focus {
   outline: none;

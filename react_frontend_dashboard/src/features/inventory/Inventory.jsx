@@ -33,13 +33,8 @@ export default function Inventory() {
     });
   }, [rows, filters, search]);
 
-  // Helper: badge class based on Status
-  const statusBadge = (status) => {
-    const s = String(status || "").toLowerCase();
-    if (s === "running") return "success";
-    if (s === "stopped") return "";
-    return "";
-  };
+  // Status is rendered as plain text; no styling or badges per requirement
+  const statusBadge = () => "";
 
   const columns = [
     { key: "id", label: "ID" },
@@ -50,7 +45,7 @@ export default function Inventory() {
     {
       key: "status",
       label: "Status",
-      render: (v) => <span className={`badge ${statusBadge(v)}`}>{v}</span>,
+      render: (v) => <span>{v}</span>,
     },
     { key: "cost_daily", label: "Daily Cost ($)", render: (v) => (v ? Number(v).toFixed(2) : "—") },
     {

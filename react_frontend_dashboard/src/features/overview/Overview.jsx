@@ -23,10 +23,10 @@ export default function Overview() {
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
 
-  // One-click action modal states
-  const [showAddAccount, setShowAddAccount] = useState(false);
-  const [showDiscover, setShowDiscover] = useState(false);
-  const [showOptimize, setShowOptimize] = useState(false);
+  // One-click action modal states (removed: Add Account, Discover, Optimize)
+  // const [showAddAccount, setShowAddAccount] = useState(false);
+  // const [showDiscover, setShowDiscover] = useState(false);
+  // const [showOptimize, setShowOptimize] = useState(false);
 
   // X-axis categories per mode
   const hours = useMemo(() => Array.from({ length: 24 }, (_, h) => h), []);
@@ -133,36 +133,10 @@ export default function Overview() {
         align="left"
       />
 
-      {/* One-click action bar */}
-      <div className="action-bar" role="group" aria-label="Quick actions">
-        <button
-          className="btn action primary-accent"
-          onClick={() => setShowAddAccount(true)}
-          aria-haspopup="dialog"
-          aria-controls="modal-add-account"
-        >
-          Add Cloud Account
-        </button>
-        <button
-          className="btn action"
-          onClick={() => setShowDiscover(true)}
-          aria-haspopup="dialog"
-          aria-controls="modal-discover-resources"
-        >
-          Discover Resources
-        </button>
-        <button
-          className="btn action"
-          onClick={() => setShowOptimize(true)}
-          aria-haspopup="dialog"
-          aria-controls="modal-run-optimization"
-        >
-          Run Optimization
-        </button>
-      </div>
+      {/* Action bar removed to streamline layout per request */}
 
       {/* Prominent Cost Anomaly Alert */}
-      <div style={{ marginTop: 4 }}>
+      <div style={{ marginTop: 8 }}>
         <CostAnomalyAlert
           provider="Azure"
           message="Cost spike detected on Azure: +27% week-on-week"
@@ -310,60 +284,7 @@ export default function Overview() {
         </ul>
       </Modal>
 
-      {/* New modals for action buttons */}
-      <div id="modal-add-account">
-        <Modal
-          title="Add Cloud Account"
-          open={showAddAccount}
-          onClose={() => setShowAddAccount(false)}
-          footer={
-            <>
-              <button className="btn" onClick={() => setShowAddAccount(false)}>Close</button>
-              <button className="btn primary" onClick={() => setShowAddAccount(false)}>Go to Connections</button>
-            </>
-          }
-        >
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Add Cloud Account functionality coming soon! You will be able to securely connect AWS and Azure here.
-          </p>
-        </Modal>
-      </div>
-
-      <div id="modal-discover-resources">
-        <Modal
-          title="Discover Resources"
-          open={showDiscover}
-          onClose={() => setShowDiscover(false)}
-          footer={
-            <>
-              <button className="btn" onClick={() => setShowDiscover(false)}>Close</button>
-              <button className="btn primary" onClick={() => setShowDiscover(false)}>Open Inventory</button>
-            </>
-          }
-        >
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Discover Resources functionality coming soon! This will scan connected accounts and populate your inventory.
-          </p>
-        </Modal>
-      </div>
-
-      <div id="modal-run-optimization">
-        <Modal
-          title="Run Optimization"
-          open={showOptimize}
-          onClose={() => setShowOptimize(false)}
-          footer={
-            <>
-              <button className="btn" onClick={() => setShowOptimize(false)}>Close</button>
-              <button className="btn primary" onClick={() => setShowOptimize(false)}>View Recommendations</button>
-            </>
-          }
-        >
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Run Optimization functionality coming soon! We will analyze your resources and suggest savings.
-          </p>
-        </Modal>
-      </div>
+      {/* Action modals removed */}
     </div>
   );
 }

@@ -207,21 +207,12 @@ export default function AddCloudAccountModal({
         Close
       </button>
       <button
-        type="button"
-        className="btn primary-accent"
-        aria-label="Manage linked cloud accounts"
-        onClick={() => setActiveTab("existing")}
-        title="Manage"
-      >
-        Manage
-      </button>
-      <button
         className="btn primary"
         onClick={handleSubmit}
         disabled={submitting}
-        aria-label="Submit credentials securely"
+        aria-label="Create cloud account"
       >
-        {submitting ? "Submitting…" : "Submit Securely"}
+        {submitting ? "Creating…" : "Create"}
       </button>
     </>
   ), [handleClose, handleSubmit, submitting]);
@@ -230,15 +221,6 @@ export default function AddCloudAccountModal({
     <>
       <button className="btn" onClick={handleClose} aria-label="Close modal">
         Close
-      </button>
-      <button
-        type="button"
-        className="btn primary-accent"
-        aria-label="Manage accounts (no-op)"
-        onClick={() => { /* placeholder: could route to account management */ }}
-        title="Manage"
-      >
-        Manage
       </button>
     </>
   ), [handleClose]);

@@ -14,7 +14,8 @@ export default function Overview() {
    * Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design.
    * Enhancement: Dynamic axes/labels for Daily/Monthly/Yearly with mock data.
    */
-  const [stats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
+  // Dashboard stats state - initialize with mock baseline
+  const [stats, setStats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
   const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
   const [chartData, setChartData] = useState([]);
 
@@ -455,7 +456,7 @@ export default function Overview() {
           const now = new Date().toISOString();
           const account_id =
             payload.provider === "AWS"
-              ? payload.credentials.accessKeyId?.slice(0, 4) + "****"
+              ? (payload.credentials.accessKeyId || "").slice(0, 4) + "****"
               : payload.credentials.subscriptionId || "(hidden)";
           setExistingAccounts((prev) => [
             {
@@ -466,6 +467,23 @@ export default function Overview() {
             },
             ...prev,
           ]);
+
+          // Update stats reactively to reflect the new linked account.
+          // Linked Accounts increments by 1.
+          // Discovered Resources: simulate discovering 20-60 new resources for the added account.
+          // Daily Spend: simulate +$20 to +$80 additional daily spend.
+          // Recommendations: simulate +1 to +3 new recommendations.
+          const randInRange = (min, max) => Math.floor(min + Math.random() * (max - min + 1));
+          const addedResources = randInRange(20, 60);
+          const addedDailySpend = randInRange(20, 80);
+          const addedRecs = randInRange(1, 3);
+
+          setStats((prev) => ({
+            accounts: (prev.accounts || 0) + 1,
+            resources: (prev.resources || 0) + addedResources,
+            daily: Number(prev.daily || 0) + addedDailySpend,
+            recs: (prev.recs || 0) + addedRecs,
+          }));
         }}
       />
     </div>

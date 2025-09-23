@@ -201,7 +201,13 @@ export default function Overview() {
       <div className="card-grid">
         <StatCard label="Linked Accounts" value={stats.accounts} onClick={() => setShowAccounts(true)} />
         <StatCard label="Discovered Resources" value={stats.resources} onClick={() => setShowResources(true)} />
-        <StatCard label="Daily Spend" value={`$${Number(stats.daily).toFixed(2)}`} onClick={() => setShowDailySpend(true)} />
+        <StatCard
+          label="Daily Spend"
+          value={`$${Number(stats.daily).toFixed(2)}`}
+          onClick={() => setShowDailySpend(true)}
+          // force the numeric value to display in pure black for emphasis
+          valueStyleOverride={{ color: "#000000" }}
+        />
         <StatCard label="Open Recommendations" value={stats.recs} onClick={() => setShowRecs(true)} />
       </div>
 
@@ -418,9 +424,9 @@ export default function Overview() {
         }
       >
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div className="badge">AWS: $242.12</div>
-          <div className="badge">Azure: $138.44</div>
-          <div className="badge">GCP: $31.76</div>
+          <div className="badge" style={{ color: "#000000" }}>AWS: $242.12</div>
+          <div className="badge" style={{ color: "#000000" }}>Azure: $138.44</div>
+          <div className="badge" style={{ color: "#000000" }}>GCP: $31.76</div>
           <div className="badge success">Anomaly checks: OK</div>
         </div>
       </Modal>

@@ -1,7 +1,7 @@
 import React from "react";
 
 // PUBLIC_INTERFACE
-export default function StatCard({ label, value, deltaLabel, deltaType = "up", onClick, variant = "violet" }) {
+export default function StatCard({ label, value, deltaLabel, deltaType = "up", onClick, variant = "violet", valueStyleOverride }) {
   /**
    * Rectangular stat card with delta indicator.
    * - Acts as a button when onClick is provided (keyboard accessible).
@@ -35,7 +35,7 @@ export default function StatCard({ label, value, deltaLabel, deltaType = "up", o
 
   // Inline color hints to ensure accessibility on colored backgrounds
   const labelStyle = { fontSize: 14, color: "var(--card-oncolor)" };
-  const valueStyle = { fontSize: 26, fontWeight: 800, color: "var(--card-oncolor-strong)" };
+  const valueStyle = { fontSize: 26, fontWeight: 800, color: "var(--card-oncolor-strong)", ...(valueStyleOverride || {}) };
   const deltaCommon = { fontSize: 12 };
 
   return (

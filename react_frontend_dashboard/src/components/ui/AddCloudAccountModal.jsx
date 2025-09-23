@@ -284,7 +284,6 @@ export default function AddCloudAccountModal({
             placeholder="e.g., Production Account"
             autoComplete="off"
             error={getError("name")}
-            helpText="A short label to identify this account in the dashboard."
             ref={nameInputRef}
           />
 

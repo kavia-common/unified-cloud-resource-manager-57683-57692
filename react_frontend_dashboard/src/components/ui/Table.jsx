@@ -2,7 +2,7 @@ import React from "react";
 
 // PUBLIC_INTERFACE
 export function DataTable({ columns, rows, emptyMessage = "No data", variant = "default", headerClassName = "", tableClassName = "" }) {
-  /** Simple responsive table. columns: [{key,label,render?}] rows: array of objects */
+  /** Simple responsive table. columns: [{key,label,render?, cellClassName?}] rows: array of objects */
   const variantClass = variant === "transparent" ? "table--transparent" : "";
   const tableClass = `table table--inventory ${variantClass} ${tableClassName}`.trim();
   return (
@@ -25,9 +25,14 @@ export function DataTable({ columns, rows, emptyMessage = "No data", variant = "
           )}
           {(rows || []).map((r, idx) => (
             <tr key={idx}>
-              {columns.map((c) => (
-                <td key={c.key}>{c.render ? c.render(r[c.key], r) : r[c.key]}</td>
-              ))}
+              {columns.map((c) => {
+                const cellCls = typeof c.cellClassName === "function" ? c.cellClassName(r[c.key], r) : (c.cellClassName || "");
+                return (
+                  <td key={c.key} className={cellCls}>
+                    {c.render ? c.render(r[c.key], r) : r[c.key]}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

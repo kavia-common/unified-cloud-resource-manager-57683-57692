@@ -39,7 +39,13 @@ export default function Inventory() {
   const columns = [
     { key: "id", label: "ID" },
     { key: "name", label: "Name" },
-    { key: "provider", label: "Provider" },
+    {
+      key: "provider",
+      label: "Provider",
+      // Apply the yellow border to the cell when provider is AWS
+      cellClassName: (_v, r) => (String(r.provider || "").toLowerCase() === "aws" ? "aws-border" : ""),
+      render: (v) => String(v || "").toUpperCase(),
+    },
     { key: "type", label: "Type" },
     { key: "region", label: "Region" },
     {

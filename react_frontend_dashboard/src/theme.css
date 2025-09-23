@@ -310,6 +310,13 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid rgba(17, 24, 39, 0.12); /* subtle gridlines */
 }
 
+/* AWS provider highlight: visually distinct yellow border for cells */
+.aws-border {
+  /* Using Tailwind's amber-400 equivalent: #FACC15 */
+  border: 2px solid #FACC15 !important; /* stronger border to stand out */
+  border-radius: 6px; /* slight rounding to make the highlight look intentional */
+}
+
 /* Remove alternate row and hover fills for a fully transparent body */
 .table tbody tr:nth-child(2n) td { background: transparent; }
 .table tbody tr:hover td { background: transparent; }

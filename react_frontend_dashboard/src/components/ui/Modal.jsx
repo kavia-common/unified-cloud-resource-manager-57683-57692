@@ -13,9 +13,24 @@ export function Modal({ title, open, onClose, children, footer }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">{title}</div>
+        <div className="modal-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span>{title}</span>
+          <button
+            type="button"
+            aria-label="Close modal"
+            className="btn ghost"
+            onClick={onClose}
+            style={{ borderColor: "var(--border)" }}
+          >
+            ✕
+          </button>
+        </div>
         <div className="modal-body">{children}</div>
-        <div className="modal-footer">{footer}</div>
+        <div className="modal-footer">
+          {footer ?? (
+            <button className="btn" onClick={onClose}>Close</button>
+          )}
+        </div>
       </div>
     </div>
   );

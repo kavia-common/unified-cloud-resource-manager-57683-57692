@@ -5,6 +5,7 @@ import Banner from "../../components/ui/Banner";
 import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
 import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
+import { Modal } from "../../components/ui/Modal";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
@@ -15,6 +16,12 @@ export default function Overview() {
   const [stats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
   const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
   const [chartData, setChartData] = useState([]);
+
+  // Local modal states for the four stat cards
+  const [showAccounts, setShowAccounts] = useState(false);
+  const [showResources, setShowResources] = useState(false);
+  const [showDailySpend, setShowDailySpend] = useState(false);
+  const [showRecs, setShowRecs] = useState(false);
 
   // X-axis categories per mode
   const hours = useMemo(() => Array.from({ length: 24 }, (_, h) => h), []);
@@ -130,10 +137,10 @@ export default function Overview() {
       </div>
 
       <div className="card-grid">
-        <StatCard label="Linked Accounts" value={stats.accounts} />
-        <StatCard label="Discovered Resources" value={stats.resources} />
-        <StatCard label="Daily Spend" value={`$${Number(stats.daily).toFixed(2)}`} />
-        <StatCard label="Open Recommendations" value={stats.recs} />
+        <StatCard label="Linked Accounts" value={stats.accounts} onClick={() => setShowAccounts(true)} />
+        <StatCard label="Discovered Resources" value={stats.resources} onClick={() => setShowResources(true)} />
+        <StatCard label="Daily Spend" value={`$${Number(stats.daily).toFixed(2)}`} onClick={() => setShowDailySpend(true)} />
+        <StatCard label="Open Recommendations" value={stats.recs} onClick={() => setShowRecs(true)} />
       </div>
 
       <div className="panel">
@@ -183,6 +190,92 @@ export default function Overview() {
           <PieChart data={pieData} size={240} strokeWidth={2} />
         </div>
       </div>
+
+      {/* Modals for each stat card with placeholder content */}
+      <Modal
+        title="Linked Accounts"
+        open={showAccounts}
+        onClose={() => setShowAccounts(false)}
+        footer={
+          <>
+            <button className="btn" onClick={() => setShowAccounts(false)}>Close</button>
+            <button className="btn primary" onClick={() => setShowAccounts(false)}>Manage Accounts</button>
+          </>
+        }
+      >
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Placeholder: View and link AWS/Azure accounts. Show connected accounts, add/remove actions.
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <li>AWS: 1 account connected</li>
+          <li>Azure: 1 subscription connected</li>
+        </ul>
+      </Modal>
+
+      <Modal
+        title="Discovered Resources"
+        open={showResources}
+        onClose={() => setShowResources(false)}
+        footer={
+          <>
+            <button className="btn" onClick={() => setShowResources(false)}>Close</button>
+            <button className="btn primary" onClick={() => setShowResources(false)}>Open Inventory</button>
+          </>
+        }
+      >
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Placeholder: Summary of resource types discovered across clouds. Click to open full inventory.
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <li>Compute: 58</li>
+          <li>Storage: 42</li>
+          <li>Databases: 16</li>
+          <li>Networking: 12</li>
+        </ul>
+      </Modal>
+
+      <Modal
+        title="Daily Spend"
+        open={showDailySpend}
+        onClose={() => setShowDailySpend(false)}
+        footer={
+          <>
+            <button className="btn" onClick={() => setShowDailySpend(false)}>Close</button>
+            <button className="btn primary" onClick={() => setShowDailySpend(false)}>View Costs</button>
+          </>
+        }
+      >
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Placeholder: Expanded spend insights for today with small trend sparkline and breakdown.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="badge">AWS: $242.12</div>
+          <div className="badge">Azure: $138.44</div>
+          <div className="badge">GCP: $31.76</div>
+          <div className="badge success">Anomaly checks: OK</div>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Open Recommendations"
+        open={showRecs}
+        onClose={() => setShowRecs(false)}
+        footer={
+          <>
+            <button className="btn" onClick={() => setShowRecs(false)}>Close</button>
+            <button className="btn primary" onClick={() => setShowRecs(false)}>View Recommendations</button>
+          </>
+        }
+      >
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Placeholder: List of optimization recommendations with potential monthly savings.
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <li>Rightsize 12 VMs — est. save $420/mo</li>
+          <li>Shut down 4 idle instances — est. save $180/mo</li>
+          <li>Move 3 DBs to reserved — est. save $210/mo</li>
+        </ul>
+      </Modal>
     </div>
   );
 }

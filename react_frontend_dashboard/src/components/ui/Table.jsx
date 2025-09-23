@@ -1,16 +1,17 @@
 import React from "react";
 
 // PUBLIC_INTERFACE
-export function DataTable({ columns, rows, emptyMessage = "No data", variant = "default" }) {
+export function DataTable({ columns, rows, emptyMessage = "No data", variant = "default", headerClassName = "", tableClassName = "" }) {
   /** Simple responsive table. columns: [{key,label,render?}] rows: array of objects */
-  const tableClass = `table table--inventory ${variant === "transparent" ? "table--transparent" : ""}`;
+  const variantClass = variant === "transparent" ? "table--transparent" : "";
+  const tableClass = `table table--inventory ${variantClass} ${tableClassName}`.trim();
   return (
     <div className="table-wrapper" role="region" aria-label="Data table">
       <table className={tableClass}>
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.key}>{c.label}</th>
+              <th key={c.key} className={headerClassName}>{c.label}</th>
             ))}
           </tr>
         </thead>

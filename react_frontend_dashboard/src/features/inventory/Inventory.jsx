@@ -152,7 +152,14 @@ export default function Inventory() {
           <div />
         </div>
 
-        <DataTable variant="transparent" columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
+        <DataTable
+          variant="transparent"
+          columns={columns}
+          rows={filtered}
+          emptyMessage="No resources discovered yet."
+          headerClassName="table__head--inventory"
+          tableClassName="table--inventory"
+        />
       </div>
 
       <Modal

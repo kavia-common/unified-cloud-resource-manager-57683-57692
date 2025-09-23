@@ -284,7 +284,7 @@ button { font-family: inherit; cursor: pointer; }
 .table thead th {
   position: sticky;
   top: 0;
-  background: #F3F4F6; /* header can retain subtle background */
+  background: #F3F4F6; /* default header background */
   color: #111827;
   text-align: left;
   font-weight: 600;
@@ -292,6 +292,13 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid rgba(17, 24, 39, 0.12);
   padding: 12px 14px;
   font-size: 13px;
+}
+
+/* Inventory header override: ONLY header cells should be white-on-black */
+.table--inventory thead th,
+.table thead th.table__head--inventory {
+  background: #000000 !important;
+  color: #FFFFFF !important;
 }
 
 /* Body cells: transparent fill, show only text and gridlines */

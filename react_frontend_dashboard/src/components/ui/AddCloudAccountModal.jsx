@@ -425,20 +425,7 @@ export default function AddCloudAccountModal({
                 {acc.account_id || "N/A"} · Added {new Date(acc.created_at || Date.now()).toLocaleString()}
               </div>
 
-              {/* Minimalist info-only layout for existing accounts; no per-account action buttons */}
-              <div
-                className="text-xs"
-                style={{
-                  color: "var(--muted)",
-                  marginTop: 4,
-                  letterSpacing: 0.2,
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                }}
-                aria-label="Provider label"
-              >
-                {acc.provider}
-              </div>
+              {/* Removed redundant provider label below details; badge above serves as provider indicator */}
             </div>
           ))}
         </div>

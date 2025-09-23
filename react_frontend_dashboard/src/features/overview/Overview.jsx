@@ -106,6 +106,54 @@ export default function Overview() {
   // Axis config for current mode
   const axis = computeAxisConfig(mode);
 
+  // Styles for action buttons (reference CSS variables in theme.css)
+  const actionBtnStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 46,
+    padding: "10px 14px",
+    background: "var(--bg-elevated)",
+    border: "1px solid var(--border-subtle)",
+    borderRadius: 12,
+    boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+    color: "var(--text-primary)",
+    cursor: "pointer",
+    transition: "background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .05s ease",
+  };
+  const iconTileBase = {
+    width: 36,
+    height: 36,
+    minWidth: 36,
+    display: "grid",
+    placeItems: "center",
+    background: "var(--tile-bg)",
+    border: "1px solid var(--border-subtle)",
+    borderRadius: 10,
+    marginRight: 12,
+  };
+  const actionLabelStyle = {
+    fontFamily: "\"Helvetica Neue\", Arial, sans-serif",
+    fontSize: 14,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: "var(--text-primary)",
+    marginRight: 12,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    flex: 1,
+  };
+  const chipBase = {
+    padding: "4px 10px",
+    fontSize: 12,
+    fontWeight: 600,
+    lineHeight: 1,
+    borderRadius: 999,
+    background: "var(--chip-neutral)",
+    color: "var(--text-secondary)",
+  };
+
   // Mock spend totals for pie chart by interval
   const pieTotals = useMemo(() => {
     switch (mode) {
@@ -187,7 +235,7 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Spend share chart */}
+      {/* Spend share chart with right-aligned vertical actions per design notes */}
       <div className="panel" style={{ marginTop: 8 }}>
         <div className="panel-header">
           <div className="panel-title">Spend Share</div>
@@ -197,15 +245,107 @@ export default function Overview() {
           <div
             style={{
               display: "grid",
+              gridTemplateColumns: "minmax(280px, 1fr) minmax(280px, 360px)",
               gap: 16,
-              gridTemplateColumns: "minmax(260px, 420px)",
-              justifyContent: "center",
+              alignItems: "start",
             }}
           >
-            <div style={{ background: "var(--surface, #FFFFFF)", border: "1px solid var(--border, #E5E7EB)", borderRadius: 12, padding: 8 }}>
-              <PieChart data={pieData} size={260} strokeWidth={2} />
+            {/* Left column: Pie chart container */}
+            <div
+              style={{
+                background: "var(--surface, #FFFFFF)",
+                border: "1px solid var(--border, #E5E7EB)",
+                borderRadius: 12,
+                padding: 12,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <PieChart data={pieData} size={280} strokeWidth={2} />
+            </div>
+
+            {/* Right column: Actions stack */}
+            <div
+              className="actionsStack"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                width: "100%",
+              }}
+            >
+              {/* Add Cloud Account */}
+              <button
+                type="button"
+                className="actionBtn"
+                aria-label="Add Cloud Account – start setup"
+                style={actionBtnStyle}
+                onClick={() => setShowAccounts(true)}
+              >
+                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#22C55E" }}>
+                  {/* cloud-plus icon */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
+                    <path d="M7 17h8a4 4 0 0 0 0-8 5 5 0 0 0-9.58 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 11v6M9 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span className="label" style={actionLabelStyle}>Add Cloud Account</span>
+                <span className="chip" style={{ ...chipBase, background: "#34D399", color: "#0E1A12" }}>Start</span>
+              </button>
+
+              {/* Discover Resources */}
+              <button
+                type="button"
+                className="actionBtn"
+                aria-label="Discover Resources"
+                style={actionBtnStyle}
+                onClick={() => setShowResources(true)}
+              >
+                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#A78BFA" }}>
+                  {/* magnifier icon */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.8"/>
+                    <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <span className="label" style={actionLabelStyle}>Discover Resources</span>
+                {/* chevron-right */}
+                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
+                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+
+              {/* Run Optimization */}
+              <button
+                type="button"
+                className="actionBtn"
+                aria-label="Run Optimization"
+                style={actionBtnStyle}
+                onClick={() => setShowRecs(true)}
+              >
+                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#60A5FA" }}>
+                  {/* rocket icon */}
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
+                    <path d="M5 19s2-1 4-1 4 1 4 1 0-3 2-5 5-2 5-2 0-3-2-5-5-2-5-2-0 3-2 5-5 2-5 2 1 2-1 4-4 3-4 3 1-3 3-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 10l-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span className="label" style={actionLabelStyle}>Run Optimization</span>
+                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
+                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
           </div>
+
+          {/* Responsive stacking for mobile: buttons below chart */}
+          <style>{`
+            @media (max-width: 860px) {
+              .panel-body > div {
+                grid-template-columns: 1fr;
+              }
+            }
+          `}</style>
         </div>
       </div>
 

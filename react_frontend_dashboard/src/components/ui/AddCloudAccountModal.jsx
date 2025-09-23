@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback, memo } from "react";
 import { Modal } from "./Modal";
 import { Tabs } from "./Tabs";
 
@@ -141,39 +141,42 @@ export default function AddCloudAccountModal({
     }
   }
 
-  // Helper to render field with label + error
-  function Field({ label, id, type = "text", value, onChange, placeholder = "", autoComplete, helpText }) {
-    const error = touched[id] && errors[id] ? errors[id] : "";
-    return (
-      <div>
-        <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
-          {label}
-        </label>
-        <input
-          id={id}
-          className="input"
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={() => markTouched(id)}
-          placeholder={placeholder}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${id}-error` : undefined}
-          autoComplete={autoComplete}
-        />
-        {helpText && !error && (
-          <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
-        )}
-        {error && (
-          <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
-            {error}
-          </div>
-        )}
-      </div>
-    );
-  }
+  // Helper to render field with label + error (memoized to prevent unnecessary re-renders)
+  const Field = useCallback(
+    memo(function FieldInner({ label, id, type = "text", value, onChange, placeholder = "", autoComplete, helpText }) {
+      const error = touched[id] && errors[id] ? errors[id] : "";
+      return (
+        <div>
+          <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
+            {label}
+          </label>
+          <input
+            id={id}
+            className="input"
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => markTouched(id)}
+            placeholder={placeholder}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${id}-error` : undefined}
+            autoComplete={autoComplete}
+          />
+          {helpText && !error && (
+            <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
+          )}
+          {error && (
+            <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
+              {error}
+            </div>
+          )}
+        </div>
+      );
+    }),
+    [touched, errors]
+  );
 
-  const footer = (
+  const footer = useMemo(() => (
     <>
       <button className="btn" onClick={handleClose} aria-label="Cancel add cloud account">
         Cancel
@@ -187,7 +190,7 @@ export default function AddCloudAccountModal({
         {submitting ? "Submitting…" : "Submit Securely"}
       </button>
     </>
-  );
+  ), [handleClose, handleSubmit, submitting]);
 
   return (
     <Modal
@@ -242,7 +245,7 @@ export default function AddCloudAccountModal({
 
           {/* Provider-specific credential fields */}
           {provider === "AWS" ? (
-            <>
+            <div key="aws-fields">
               <Field
                 id="awsAccessKeyId"
                 label="Access Key ID"
@@ -257,12 +260,12 @@ export default function AddCloudAccountModal({
                 type="password"
                 value={form.awsSecretAccessKey}
                 onChange={(v) => updateField("awsSecretAccessKey", v)}
-                placeholder="••••••••••••••••••••••"
+                placeholder="•••••••••••••••••••••"
                 autoComplete="new-password"
               />
-            </>
+            </div>
           ) : (
-            <>
+            <div key="azure-fields">
               <Field
                 id="azureClientId"
                 label="Client ID (Application ID)"
@@ -277,7 +280,7 @@ export default function AddCloudAccountModal({
                 type="password"
                 value={form.azureClientSecret}
                 onChange={(v) => updateField("azureClientSecret", v)}
-                placeholder="••••••••••••••••••••••"
+                placeholder="•••••••••••••••••••••"
                 autoComplete="new-password"
               />
               <Field
@@ -296,7 +299,7 @@ export default function AddCloudAccountModal({
                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                 autoComplete="off"
               />
-            </>
+            </div>
           )}
 
           {/* Note about security (frontend only for now) */}

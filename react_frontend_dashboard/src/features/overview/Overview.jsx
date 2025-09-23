@@ -3,7 +3,6 @@ import StatCard from "../../components/ui/StatCard";
 import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 import PieChart from "../../components/ui/PieChart";
-import RadarResourceChart from "../../components/ui/RadarResourceChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
 import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
 import { Modal } from "../../components/ui/Modal";
@@ -188,10 +187,10 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Spend share and resources charts */}
+      {/* Spend share chart */}
       <div className="panel" style={{ marginTop: 8 }}>
         <div className="panel-header">
-          <div className="panel-title">Spend Share & Resources</div>
+          <div className="panel-title">Spend Share</div>
           <div className="text-xs" style={{ color: "var(--muted)" }}>Interval: {mode}</div>
         </div>
         <div className="panel-body">
@@ -199,23 +198,12 @@ export default function Overview() {
             style={{
               display: "grid",
               gap: 16,
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              alignItems: "stretch",
+              gridTemplateColumns: "minmax(260px, 420px)",
+              justifyContent: "center",
             }}
           >
             <div style={{ background: "var(--surface, #FFFFFF)", border: "1px solid var(--border, #E5E7EB)", borderRadius: 12, padding: 8 }}>
-              <PieChart data={pieData} size={240} strokeWidth={2} />
-            </div>
-            <div>
-              <RadarResourceChart
-                data={[
-                  { category: "Computers", value: 58 },
-                  { category: "Storage", value: 42 },
-                  { category: "Databases", value: 16 },
-                  { category: "Networking", value: 12 },
-                ]}
-                height={280}
-              />
+              <PieChart data={pieData} size={260} strokeWidth={2} />
             </div>
           </div>
         </div>

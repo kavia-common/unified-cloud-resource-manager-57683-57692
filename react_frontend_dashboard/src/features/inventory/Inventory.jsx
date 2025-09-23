@@ -133,7 +133,7 @@ export default function Inventory() {
           <div />
         </div>
 
-        <DataTable columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
+        <DataTable variant="transparent" columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
       </div>
 
       <Modal

@@ -269,52 +269,46 @@ button { font-family: inherit; cursor: pointer; }
   overflow: auto;
   border-radius: 12px;
   border: 1px solid rgba(17, 24, 39, 0.12);
-  background: var(--bg); /* light surface */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  background: transparent; /* no fill behind the table */
+  box-shadow: none; /* avoid implying a surface background */
 }
 
 /* Create a clean grid by using collapsed borders and consistent cell borders */
 .table {
   width: 100%;
-  border-collapse: collapse; /* collapse for contiguous grid lines */
+  border-collapse: collapse; /* contiguous grid lines */
   background: transparent;
 }
 
-/* Header styling: light background and header text */
+/* Header styling: keep a light header background for clarity */
 .table thead th {
   position: sticky;
   top: 0;
-  background: #F3F4F6; /* light header background; alternative: #E5E7EB */
-  color: #111827; /* header text (dark for contrast on light bg) */
+  background: #F3F4F6; /* header can retain subtle background */
+  color: #111827;
   text-align: left;
   font-weight: 600;
   letter-spacing: 0.2px;
-  border: 1px solid rgba(17, 24, 39, 0.12); /* subtle grid border */
+  border: 1px solid rgba(17, 24, 39, 0.12);
   padding: 12px 14px;
   font-size: 13px;
 }
 
-/* Body cells: pure white text on minimalist surface, grid borders between rows and columns */
+/* Body cells: transparent fill, show only text and gridlines */
 .table tbody td {
   padding: 12px 14px;
   font-size: 14px;
-  color: #FFFFFF; /* enforce pure white for all values */
-  background: #0F141A; /* keep dark canvas for strong contrast with white text */
-  border: 1px solid rgba(255, 255, 255, 0.08); /* subtle semi-transparent grid lines */
+  color: var(--text);
+  background: transparent; /* remove fills */
+  border: 1px solid rgba(17, 24, 39, 0.12); /* subtle gridlines */
 }
 
-/* Alternate row shading remains subtle */
-.table tbody tr:nth-child(2n) td {
-  background: #0D1219;
-}
-
-/* Hover state for readability without breaking grid */
-.table tbody tr:hover td {
-  background: #162231;
-}
+/* Remove alternate row and hover fills for a fully transparent body */
+.table tbody tr:nth-child(2n) td { background: transparent; }
+.table tbody tr:hover td { background: transparent; }
 
 /* Utility: muted and badge styles remain */
-.table .cell-muted { color: #9ca3af; }
+.table .cell-muted { color: #6b7280; }
 
 .table .cell-badge {
   display: inline-flex;
@@ -325,7 +319,7 @@ button { font-family: inherit; cursor: pointer; }
   line-height: 1;
   border: 1px solid rgba(20,184,166,0.35);
   background: linear-gradient(180deg, rgba(20,184,166,0.22), rgba(20,184,166,0.08));
-  color: #d6fffa;
+  color: #065f46;
 }
 
 /* Rounded corners only for outer header cells when sticky header is used */
@@ -337,17 +331,19 @@ button { font-family: inherit; cursor: pointer; }
   background: #fff;
 }
 
-/* Remove previous scoped teal background on specific columns for a cleaner grid */
+/* Remove any previously scoped background overrides on specific columns */
 .panel-body table.table tbody td:nth-child(3),
 .panel-body table.table thead th:nth-child(3),
 .panel-body table.table tbody td:nth-child(6),
 .panel-body table.table thead th:nth-child(6) {
-  background: inherit;
+  background: transparent;
 }
-.panel-body table.table tbody td:nth-child(3),
-.panel-body table.table tbody td:nth-child(6) {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+
+/* Dedicated transparent variant to ensure no background fills anywhere in the table body */
+.table--transparent tbody td,
+.table--transparent tbody tr:nth-child(2n) td,
+.table--transparent tbody tr:hover td {
+  background: transparent !important;
 }
 
 /* Popover styling */

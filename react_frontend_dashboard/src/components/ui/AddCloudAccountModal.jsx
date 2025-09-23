@@ -414,13 +414,12 @@ export default function AddCloudAccountModal({
                 {acc.account_id || "N/A"} · Added {new Date(acc.created_at || Date.now()).toLocaleString()}
               </div>
 
-              {/* Provider label placed clearly above the action area */}
+              {/* Minimalist info-only layout for existing accounts; no per-account action buttons */}
               <div
                 className="text-xs"
                 style={{
                   color: "var(--muted)",
                   marginTop: 4,
-                  marginBottom: 2,
                   letterSpacing: 0.2,
                   textTransform: "uppercase",
                   fontWeight: 600,
@@ -429,8 +428,6 @@ export default function AddCloudAccountModal({
               >
                 {acc.provider}
               </div>
-
-              {/* Action area removed per design: unified Manage button is in the modal header */}
             </div>
           ))}
         </div>

@@ -15,6 +15,7 @@ import { AuthProvider } from "./context/AuthContext";
 import AuthGate from "./features/auth/AuthGate";
 import Login from "./features/auth/Login";
 import Profile from "./features/profile/Profile";
+import { ToastProvider } from "./components/ui/Toast";
 
 // PUBLIC_INTERFACE
 function DashboardShell() {
@@ -57,7 +58,9 @@ function App() {
     <Router basename={process.env.PUBLIC_URL || '/'}>
       <AuthProvider>
         <AuthGate requireAuth={true} fallback={LoginFallback}>
-          <DashboardShell />
+          <ToastProvider>
+            <DashboardShell />
+          </ToastProvider>
         </AuthGate>
       </AuthProvider>
     </Router>

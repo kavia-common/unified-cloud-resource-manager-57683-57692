@@ -163,7 +163,7 @@ export default function AddCloudAccountModal({
 
     setSubmitting(true);
     try {
-      // Build safe payload for demonstration. We DO NOT persist to backend here.
+      // Build payload for persistence via parent (which will call API)
       const payload =
         provider === "AWS"
           ? {
@@ -172,6 +172,7 @@ export default function AddCloudAccountModal({
               credentials: {
                 accessKeyId: form.awsAccessKeyId.trim(),
                 secretAccessKey: form.awsSecretAccessKey.trim(),
+                // Optionally allow parent to compute accountId from creds if omitted
               },
             }
           : {
@@ -185,8 +186,8 @@ export default function AddCloudAccountModal({
               },
             };
 
-      // Call optional callback so parent can mock attach or confirm.
-      onSubmit?.(payload);
+      // Call optional callback so parent can persist and handle toasts.
+      await onSubmit?.(payload);
 
       // For UX, close and reset after submit
       handleClose();

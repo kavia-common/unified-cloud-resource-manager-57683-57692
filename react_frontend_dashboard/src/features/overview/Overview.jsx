@@ -7,6 +7,8 @@ import { CLOUD_COLORS } from "../../components/ui/Charts";
 import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
+import { useToast } from "../../components/ui/Toast";
+import { createLinkedAccount, getLinkedAccounts } from "../../services/api";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
@@ -22,10 +24,7 @@ export default function Overview() {
   // Local modal states for the four stat cards
   const [showAccounts, setShowAccounts] = useState(false);
   const [showAddCloudModal, setShowAddCloudModal] = useState(false);
-  const [existingAccounts, setExistingAccounts] = useState([
-    { provider: "AWS", name: "Prod AWS", account_id: "123456789012", created_at: new Date().toISOString() },
-    { provider: "Azure", name: "Core Azure", account_id: "a1b2c3d4-sub", created_at: new Date().toISOString() },
-  ]);
+  const [existingAccounts, setExistingAccounts] = useState([]);
   const [showResources, setShowResources] = useState(false);
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
@@ -84,9 +83,27 @@ export default function Overview() {
     };
   }
 
-  // Initialize with Monthly mock data
+  // Initialize with Monthly mock data and fetch linked accounts
+  const toast = useToast();
+
   useEffect(() => {
     setChartData(buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`));
+    // Fetch linked accounts from backend
+    (async () => {
+      try {
+        const accounts = await getLinkedAccounts();
+        setExistingAccounts(accounts);
+        // Reflect counts in stats
+        setStats((prev) => ({
+          ...prev,
+          accounts: accounts.length,
+        }));
+      } catch (err) {
+        console.warn("Failed to load linked accounts:", err?.message || err);
+        // Non-blocking: show info toast
+        toast.info("Could not load linked accounts.", 2500);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -452,39 +469,38 @@ export default function Overview() {
         open={showAddCloudModal}
         onClose={() => setShowAddCloudModal(false)}
         existingAccounts={existingAccounts}
-        onSubmit={(payload) => {
-          // Frontend-only: append a mock entry to existing list (do not persist)
-          const now = new Date().toISOString();
-          const account_id =
-            payload.provider === "AWS"
-              ? (payload.credentials.accessKeyId || "").slice(0, 4) + "****"
-              : payload.credentials.subscriptionId || "(hidden)";
-          setExistingAccounts((prev) => [
-            {
+        onSubmit={async (payload) => {
+          try {
+            // Persist via Edge Function
+            const res = await createLinkedAccount({
               provider: payload.provider,
               name: payload.name,
-              account_id,
-              created_at: now,
-            },
-            ...prev,
-          ]);
+              credentials: payload.credentials,
+            });
+            // Refresh from backend to ensure list reflects saved accounts
+            const accounts = await getLinkedAccounts();
+            setExistingAccounts(accounts);
 
-          // Update stats reactively to reflect the new linked account.
-          // Linked Accounts increments by 1.
-          // Discovered Resources: simulate discovering 20-60 new resources for the added account.
-          // Daily Spend: simulate +$20 to +$80 additional daily spend.
-          // Recommendations: simulate +1 to +3 new recommendations.
-          const randInRange = (min, max) => Math.floor(min + Math.random() * (max - min + 1));
-          const addedResources = randInRange(20, 60);
-          const addedDailySpend = randInRange(20, 80);
-          const addedRecs = randInRange(1, 3);
+            // Update stats: real account count; simulate the rest for UX
+            const randInRange = (min, max) => Math.floor(min + Math.random() * (max - min + 1));
+            const addedResources = randInRange(20, 60);
+            const addedDailySpend = randInRange(20, 80);
+            const addedRecs = randInRange(1, 3);
+            setStats((prev) => ({
+              accounts: accounts.length,
+              resources: (prev.resources || 0) + addedResources,
+              daily: Number(prev.daily || 0) + addedDailySpend,
+              recs: (prev.recs || 0) + addedRecs,
+            }));
 
-          setStats((prev) => ({
-            accounts: (prev.accounts || 0) + 1,
-            resources: (prev.resources || 0) + addedResources,
-            daily: Number(prev.daily || 0) + addedDailySpend,
-            recs: (prev.recs || 0) + addedRecs,
-          }));
+            // Success toast
+            toast.success("Account has been created successfully", 3500);
+          } catch (err) {
+            console.error("Create account failed:", err);
+            // Error toast
+            toast.error("Invalid Credentials, try again.", 4000);
+            throw err; // keep rejection for modal if needed
+          }
         }}
       />
     </div>

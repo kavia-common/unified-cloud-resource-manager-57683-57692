@@ -100,11 +100,17 @@ Use Supabase Scheduled Triggers to automate back-end jobs (project Dashboard →
 All scheduled calls must include a service bearer key in headers or be configured via Supabase’s secure scheduler which injects credentials automatically.
 
 ## Frontend Usage
-lib/linkAccountApi.js exports:
+Frontend integrates via:
+- Supabase client: react_frontend_dashboard/src/lib/supabaseClient.js
+- API service: react_frontend_dashboard/src/services/api.js
+  - createLinkedAccount() -> calls Edge Function link-account (persists and stores secrets)
+  - getLinkedAccounts() -> reads public.cloud_accounts via supabase-js (RLS-scoped to user)
 
-- linkCloudAccount({ provider, name, credentials })
+UI flows:
+- Overview.jsx opens AddCloudAccountModal, calls createLinkedAccount on Create, shows toast on success/error, and refreshes list via getLinkedAccounts.
+- Toast notifications are provided by a lightweight ToastProvider at app root.
 
-Profile.jsx uses this to send credentials securely. No sensitive data is inserted directly from the client into tables.
+No sensitive data is inserted directly into tables from the client; credentials are posted only to the Edge Function.
 
 Recommendations.jsx and Automation.jsx are already wired to:
 - Read from `recommendations` and enqueue into `recommendation_actions`.

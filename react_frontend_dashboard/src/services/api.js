@@ -161,8 +161,59 @@ export async function fetchActivity({ page = 1, pageSize = 25 }, signal) {
   return callEdgeFunction('queue-processor', 'POST', { action: 'activity', page, pageSize }, signal);
 }
 
+/**
+ * PUBLIC_INTERFACE
+ */
 // PUBLIC_INTERFACE
 export async function getLinkedAccounts(signal) {
-  /** Gets the linked cloud accounts for current user from DB (via edge). */
-  return callEdgeFunction('link-account', 'POST', { action: 'list' }, signal);
+  /**
+   * Gets linked accounts for current user from DB (direct PostgREST via supabase-js).
+   * Requires RLS policy allowing user_id = auth.uid() for select.
+   * Returns array of { id, provider, name, account_id, status, metadata, created_at }
+   */
+  const query = supabase()
+    .from('cloud_accounts')
+    .select('id, provider, name, account_id, status, metadata, created_at')
+    .order('created_at', { ascending: false });
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * PUBLIC_INTERFACE
+ */
+// PUBLIC_INTERFACE
+export async function createLinkedAccount({ provider, name, credentials }) {
+  /**
+   * Creates a linked account via Edge Function to store secrets securely.
+   * - AWS credentials: { accessKeyId, secretAccessKey, accountId }
+   * - Azure credentials: { tenantId, clientId, clientSecret, subscriptionId }
+   * Returns: { account: { id, provider, name, account_id, status, metadata } }
+   */
+  const p = String(provider || '').toUpperCase();
+  let body = { provider: p, name };
+  if (p === 'AWS') {
+    body = {
+      ...body,
+      access_key_id: credentials?.accessKeyId,
+      secret_access_key: credentials?.secretAccessKey,
+      account_id: credentials?.accountId || credentials?.accessKeyId?.slice(0, 12) || '',
+    };
+  } else if (p === 'AZURE') {
+    body = {
+      ...body,
+      tenant_id: credentials?.tenantId,
+      client_id: credentials?.clientId,
+      client_secret: credentials?.clientSecret,
+      subscription_id: credentials?.subscriptionId,
+    };
+  } else if (p === 'GCP') {
+    body = {
+      ...body,
+      service_account_json: credentials?.serviceAccountJson,
+    };
+  }
+  const res = await callEdgeFunction('link-account', 'POST', body);
+  return res;
 }

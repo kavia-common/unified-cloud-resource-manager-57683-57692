@@ -264,59 +264,56 @@ button { font-family: inherit; cursor: pointer; }
   border-bottom-color: var(--bg);
 }
 
-/* Table - Dark/Minimalist enhanced */
+/* Table - Minimalist with clean grid lines */
 .table-wrapper {
   overflow: auto;
   border-radius: 12px;
   border: 1px solid rgba(17, 24, 39, 0.12);
-  background: #0f141a; /* dark surface */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  background: var(--bg); /* light surface */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
+/* Create a clean grid by using collapsed borders and consistent cell borders */
 .table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse; /* collapse for contiguous grid lines */
   background: transparent;
 }
 
+/* Header styling: light background and header text */
 .table thead th {
-  position: sticky; top: 0;
-  background:
-    linear-gradient(180deg, rgba(20,184,166,0.10), rgba(20,184,166,0.02)),
-    #111722; /* header bg */
-  color: #dfe3ea;
+  position: sticky;
+  top: 0;
+  background: #F3F4F6; /* light header background; alternative: #E5E7EB */
+  color: #111827; /* header text (dark for contrast on light bg) */
   text-align: left;
   font-weight: 600;
   letter-spacing: 0.2px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(17, 24, 39, 0.12); /* subtle grid border */
   padding: 12px 14px;
   font-size: 13px;
 }
 
+/* Body cells: pure white text on minimalist surface, grid borders between rows and columns */
 .table tbody td {
   padding: 12px 14px;
   font-size: 14px;
-  color: #e5e7eb;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: #0e141c; /* row bg */
+  color: #FFFFFF; /* enforce pure white for all values */
+  background: #0F141A; /* keep dark canvas for strong contrast with white text */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* subtle semi-transparent grid lines */
 }
 
+/* Alternate row shading remains subtle */
 .table tbody tr:nth-child(2n) td {
-  background: #0d1219; /* subtle alternate striping */
+  background: #0D1219;
 }
 
+/* Hover state for readability without breaking grid */
 .table tbody tr:hover td {
-  background: #162231; /* slightly deeper to maintain contrast with teal accents */
+  background: #162231;
 }
 
-.table .col-accent {
-  /* Teal accent for highlighted columns */
-  background: rgba(20, 184, 166, 0.10); /* teal-500 at ~10% */
-  border-left: 1px solid rgba(20, 184, 166, 0.38);
-  border-right: 1px solid rgba(20, 184, 166, 0.38);
-}
-
+/* Utility: muted and badge styles remain */
 .table .cell-muted { color: #9ca3af; }
 
 .table .cell-badge {
@@ -328,9 +325,10 @@ button { font-family: inherit; cursor: pointer; }
   line-height: 1;
   border: 1px solid rgba(20,184,166,0.35);
   background: linear-gradient(180deg, rgba(20,184,166,0.22), rgba(20,184,166,0.08));
-  color: #d6fffa; /* light aqua for contrast */
+  color: #d6fffa;
 }
 
+/* Rounded corners only for outer header cells when sticky header is used */
 .table thead th:first-child { border-top-left-radius: 10px; }
 .table thead th:last-child { border-top-right-radius: 10px; }
 
@@ -339,17 +337,17 @@ button { font-family: inherit; cursor: pointer; }
   background: #fff;
 }
 
-/* Scoped styling for DataTable columns (Provider and State) */
+/* Remove previous scoped teal background on specific columns for a cleaner grid */
 .panel-body table.table tbody td:nth-child(3),
 .panel-body table.table thead th:nth-child(3),
 .panel-body table.table tbody td:nth-child(6),
 .panel-body table.table thead th:nth-child(6) {
-  background: rgba(20, 184, 166, 0.10);
+  background: inherit;
 }
 .panel-body table.table tbody td:nth-child(3),
 .panel-body table.table tbody td:nth-child(6) {
-  border-left: 1px solid rgba(20, 184, 166, 0.36);
-  border-right: 1px solid rgba(20, 184, 166, 0.36);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Popover styling */

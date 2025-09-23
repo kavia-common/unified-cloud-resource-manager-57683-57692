@@ -5,7 +5,7 @@ export function DataTable({ columns, rows, emptyMessage = "No data" }) {
   /** Simple responsive table. columns: [{key,label,render?}] rows: array of objects */
   return (
     <div className="table-wrapper" role="region" aria-label="Data table">
-      <table className="table">
+      <table className="table table--inventory">
         <thead>
           <tr>
             {columns.map((c) => (

@@ -42,11 +42,6 @@ export default function Inventory() {
     {
       key: "provider",
       label: "Provider",
-      // Apply black border to the cell when provider is AWS or Azure (values only; headers unaffected)
-      cellClassName: (_v, r) => {
-        const p = String(r.provider || "").toLowerCase();
-        return p === "aws" || p === "azure" ? "aws-border" : "";
-      },
       render: (v) => String(v || "").toUpperCase(),
     },
     { key: "type", label: "Type" },

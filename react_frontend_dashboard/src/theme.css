@@ -338,22 +338,38 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 0 !important;
 }
 
-/* Inventory row exact-match highlight: apply to all value cells (td) only */
-.inventory-row-black-border {
-  /* Use top/bottom only per cell, and we will outline the row container using :first-child/:last-child to avoid double borders between cells */
-  border-top: 3px solid #000 !important;
-  border-bottom: 3px solid #000 !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
+/* Inventory row exact-match highlight:
+   Apply a thick horizontal line across the entire row, not per-cell.
+   We use border-collapse: separate locally on the table to allow tr borders to render cleanly,
+   and reset cell borders so no vertical black borders appear. */
+.table.table--inventory {
+  border-collapse: separate;       /* allow tr borders to show as single lines */
+  border-spacing: 0;               /* no gaps between cells */
 }
-/* Left-most and right-most cells close the rectangle edges */
-.table tbody tr .inventory-row-black-border:first-child { border-left: 3px solid #000 !important; }
-.table tbody tr .inventory-row-black-border:last-child { border-right: 3px solid #000 !important; }
 
-/* If the highlighted row is the first body row, ensure its top edge merges with header without a double line */
-.table tbody tr:first-child .inventory-row-black-border {
-  /* Use a single thick line; header bottom is none, so this becomes the single divider */
-  border-top-width: 3px !important;
+.table.table--inventory thead tr {
+  border-bottom: 1px solid rgba(17, 24, 39, 0.12); /* default seam under header */
+}
+
+.table.table--inventory tbody tr.inventory-row-black-border {
+  border-bottom: 3px solid #000;   /* single, thick horizontal line across entire row */
+}
+
+/* Ensure cells themselves do not introduce vertical black borders for highlighted rows */
+.table.table--inventory tbody tr.inventory-row-black-border > td {
+  border-top-color: rgba(17, 24, 39, 0.12);
+  border-bottom-color: transparent; /* let the tr border be the only bottom line */
+}
+
+/* When the highlighted row is the first body row, the seam under the black header should be a single continuous line.
+   Remove the default thin header-below seam and let the first row's top be clean, while its bottom shows the thick line. */
+.table--inventory thead tr {
+  border-bottom: none !important; /* avoid double seam with first body row */
+}
+
+/* Keep the first body row top border thin for grid continuity unless it's meant to visually merge; we don't draw a thick top line. */
+.table--inventory tbody tr:first-child > td {
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
 }
 
 /* Remove alternate row and hover fills for a fully transparent body */

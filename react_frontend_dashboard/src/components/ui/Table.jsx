@@ -29,11 +29,10 @@ export function DataTable({ columns, rows, emptyMessage = "No data", variant = "
           {(rows || []).map((r, idx) => {
             const rowCls = typeof rowClassName === "function" ? (rowClassName(r) || "") : (rowClassName || "");
             return (
-              <tr key={idx}>
+              <tr key={idx} className={rowCls}>
                 {columns.map((c) => {
                   const cellCls = [
                     typeof c.cellClassName === "function" ? c.cellClassName(r[c.key], r) : (c.cellClassName || ""),
-                    rowCls, // apply row-level class to each value cell
                   ].filter(Boolean).join(" ");
                   return (
                     <td key={c.key} className={cellCls}>

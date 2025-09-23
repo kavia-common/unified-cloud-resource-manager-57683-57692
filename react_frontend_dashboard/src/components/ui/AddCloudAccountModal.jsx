@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect, memo, useCallback } from "react";
+import React, { useMemo, useState, useRef, memo, useCallback } from "react";
 import { Modal } from "./Modal";
 import { Tabs } from "./Tabs";
 
@@ -144,7 +144,22 @@ export default function AddCloudAccountModal({
     keysToTouch.forEach((k) => (newTouched[k] = true));
     setTouched((t) => ({ ...t, ...newTouched }));
 
-    if (hasErrors) return;
+    // Recompute errors synchronously using current form/provider to avoid stale hasErrors closure
+    const currentErrors = (() => {
+      const e = {};
+      if (!form.name.trim()) e.name = "A friendly name is required.";
+      if (provider === "AWS") {
+        if (!form.awsAccessKeyId.trim()) e.awsAccessKeyId = "Access Key ID is required.";
+        if (!form.awsSecretAccessKey.trim()) e.awsSecretAccessKey = "Secret Access Key is required.";
+      } else if (provider === "Azure") {
+        if (!form.azureClientId.trim()) e.azureClientId = "Client ID is required.";
+        if (!form.azureClientSecret.trim()) e.azureClientSecret = "Client Secret is required.";
+        if (!form.azureTenantId.trim()) e.azureTenantId = "Tenant ID is required.";
+        if (!form.azureSubscriptionId.trim()) e.azureSubscriptionId = "Subscription ID is required.";
+      }
+      return e;
+    })();
+    if (Object.keys(currentErrors).length > 0) return;
 
     setSubmitting(true);
     try {

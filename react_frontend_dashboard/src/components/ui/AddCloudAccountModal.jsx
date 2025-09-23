@@ -1,10 +1,48 @@
-import React, { useMemo, useState, useCallback, memo, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef, useEffect, memo, useCallback } from "react";
 import { Modal } from "./Modal";
 import { Tabs } from "./Tabs";
 
 /**
  * PUBLIC_INTERFACE
  */
+// Reusable Field defined at module scope to avoid re-creation on every render,
+// ensuring inputs keep their identity and do not lose focus due to remounts.
+const Field = memo(
+  React.forwardRef(function FieldInner(
+    { label, id, type = "text", value, onChange, onBlur, placeholder = "", autoComplete, error, helpText },
+    ref
+  ) {
+    return (
+      <div>
+        <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
+          {label}
+        </label>
+        <input
+          id={id}
+          className="input"
+          type={type}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-error` : undefined}
+          autoComplete={autoComplete}
+          ref={ref}
+        />
+        {helpText && !error && (
+          <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
+        )}
+        {error && (
+          <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  })
+);
+
 // PUBLIC_INTERFACE
 export default function AddCloudAccountModal({
   open,
@@ -48,13 +86,13 @@ export default function AddCloudAccountModal({
     [existingAccounts]
   );
 
-  function markTouched(key) {
+  const markTouched = useCallback((key) => {
     setTouched((t) => ({ ...t, [key]: true }));
-  }
+  }, []);
 
-  function updateField(key, value) {
+  const updateField = useCallback((key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
-  }
+  }, []);
 
   // Validation
   const errors = useMemo(() => {
@@ -142,45 +180,9 @@ export default function AddCloudAccountModal({
     }
   }
 
-  // Helper to render field with label + error (memoized to prevent unnecessary re-renders)
-  const Field = useCallback(
-    memo(
-      // forward ref to input to preserve focus when parent re-renders
-      React.forwardRef(function FieldInner(
-        { label, id, type = "text", value, onChange, placeholder = "", autoComplete, helpText },
-        ref
-      ) {
-        const error = touched[id] && errors[id] ? errors[id] : "";
-        return (
-          <div>
-            <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
-              {label}
-            </label>
-            <input
-              id={id}
-              className="input"
-              type={type}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onBlur={() => markTouched(id)}
-              placeholder={placeholder}
-              aria-invalid={!!error}
-              aria-describedby={error ? `${id}-error` : undefined}
-              autoComplete={autoComplete}
-              ref={ref}
-            />
-            {helpText && !error && (
-              <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
-            )}
-            {error && (
-              <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
-                {error}
-              </div>
-            )}
-          </div>
-        );
-      })
-    ),
+  // derive error getter to pass to stable Field component
+  const getError = useCallback(
+    (id) => (touched[id] && errors[id] ? errors[id] : ""),
     [touched, errors]
   );
 
@@ -238,6 +240,7 @@ export default function AddCloudAccountModal({
                     const wasFocused = document.activeElement === nameInputRef.current;
                     setProvider("Azure");
                     if (wasFocused) {
+                      // keep focus on Friendly Name after switching provider
                       requestAnimationFrame(() => nameInputRef.current?.focus());
                     }
                   }}
@@ -252,71 +255,83 @@ export default function AddCloudAccountModal({
             id="name"
             label="Friendly Name"
             value={form.name}
-            onChange={(v) => updateField("name", v)}
+            onChange={(e) => updateField("name", e.target.value)}
+            onBlur={() => markTouched("name")}
             placeholder="e.g., Production Account"
             autoComplete="off"
+            error={getError("name")}
             helpText="A short label to identify this account in the dashboard."
             ref={nameInputRef}
           />
 
           {/* Provider-specific credential fields */}
-          {provider === "AWS" ? (
-            <div>
-              <Field
-                id="awsAccessKeyId"
-                label="Access Key ID"
-                value={form.awsAccessKeyId}
-                onChange={(v) => updateField("awsAccessKeyId", v)}
-                placeholder="AKIA…"
-                autoComplete="off"
-              />
-              <Field
-                id="awsSecretAccessKey"
-                label="Secret Access Key"
-                type="password"
-                value={form.awsSecretAccessKey}
-                onChange={(v) => updateField("awsSecretAccessKey", v)}
-                placeholder="•••••••••••••••••••••"
-                autoComplete="new-password"
-              />
-            </div>
-          ) : (
-            <div>
-              <Field
-                id="azureClientId"
-                label="Client ID (Application ID)"
-                value={form.azureClientId}
-                onChange={(v) => updateField("azureClientId", v)}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                autoComplete="off"
-              />
-              <Field
-                id="azureClientSecret"
-                label="Client Secret"
-                type="password"
-                value={form.azureClientSecret}
-                onChange={(v) => updateField("azureClientSecret", v)}
-                placeholder="•••••••••••••••••••••"
-                autoComplete="new-password"
-              />
-              <Field
-                id="azureTenantId"
-                label="Tenant ID"
-                value={form.azureTenantId}
-                onChange={(v) => updateField("azureTenantId", v)}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                autoComplete="off"
-              />
-              <Field
-                id="azureSubscriptionId"
-                label="Subscription ID"
-                value={form.azureSubscriptionId}
-                onChange={(v) => updateField("azureSubscriptionId", v)}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                autoComplete="off"
-              />
-            </div>
-          )}
+          <div style={{ display: provider === "AWS" ? "block" : "none" }}>
+            <Field
+              id="awsAccessKeyId"
+              label="Access Key ID"
+              value={form.awsAccessKeyId}
+              onChange={(e) => updateField("awsAccessKeyId", e.target.value)}
+              onBlur={() => markTouched("awsAccessKeyId")}
+              placeholder="AKIA…"
+              autoComplete="off"
+              error={getError("awsAccessKeyId")}
+            />
+            <Field
+              id="awsSecretAccessKey"
+              label="Secret Access Key"
+              type="password"
+              value={form.awsSecretAccessKey}
+              onChange={(e) => updateField("awsSecretAccessKey", e.target.value)}
+              onBlur={() => markTouched("awsSecretAccessKey")}
+              placeholder="•••••••••••••••••••••"
+              autoComplete="new-password"
+              error={getError("awsSecretAccessKey")}
+            />
+          </div>
+
+          <div style={{ display: provider === "Azure" ? "block" : "none" }}>
+            <Field
+              id="azureClientId"
+              label="Client ID (Application ID)"
+              value={form.azureClientId}
+              onChange={(e) => updateField("azureClientId", e.target.value)}
+              onBlur={() => markTouched("azureClientId")}
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              autoComplete="off"
+              error={getError("azureClientId")}
+            />
+            <Field
+              id="azureClientSecret"
+              label="Client Secret"
+              type="password"
+              value={form.azureClientSecret}
+              onChange={(e) => updateField("azureClientSecret", e.target.value)}
+              onBlur={() => markTouched("azureClientSecret")}
+              placeholder="•••••••••••••••••••••"
+              autoComplete="new-password"
+              error={getError("azureClientSecret")}
+            />
+            <Field
+              id="azureTenantId"
+              label="Tenant ID"
+              value={form.azureTenantId}
+              onChange={(e) => updateField("azureTenantId", e.target.value)}
+              onBlur={() => markTouched("azureTenantId")}
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              autoComplete="off"
+              error={getError("azureTenantId")}
+            />
+            <Field
+              id="azureSubscriptionId"
+              label="Subscription ID"
+              value={form.azureSubscriptionId}
+              onChange={(e) => updateField("azureSubscriptionId", e.target.value)}
+              onBlur={() => markTouched("azureSubscriptionId")}
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              autoComplete="off"
+              error={getError("azureSubscriptionId")}
+            />
+          </div>
 
           {/* Note about security (frontend only for now) */}
           <div className="text-xs" style={{ color: "var(--muted)" }}>

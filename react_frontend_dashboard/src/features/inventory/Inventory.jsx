@@ -8,9 +8,10 @@ import { Popover } from "../../components/ui/Popover";
 export default function Inventory() {
   /** Inventory with filters, actions and operation modal (start/stop/scale). */
   const [rows, setRows] = useState([
-    { id: "i-123", name: "web-1", provider: "aws", type: "ec2", region: "us-east-1", state: "running", cost_daily: 4.12 },
-    { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", state: "stopped", cost_daily: 5.44 },
-    { id: "db-01", name: "orders-db", provider: "aws", type: "rds", region: "us-west-2", state: "running", cost_daily: 7.8 },
+    // Renamed 'state' to 'status' and mapped values to capitalized strings per requirement
+    { id: "i-123", name: "web-1", provider: "aws", type: "ec2", region: "us-east-1", status: "Running", cost_daily: 4.12 },
+    { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", status: "Stopped", cost_daily: 5.44 },
+    { id: "db-01", name: "orders-db", provider: "aws", type: "rds", region: "us-west-2", status: "Running", cost_daily: 7.8 },
   ]);
   const [filters, setFilters] = useState({});
   const [search, setSearch] = useState("");
@@ -32,36 +33,60 @@ export default function Inventory() {
     });
   }, [rows, filters, search]);
 
+  // Helper: badge class based on Status
+  const statusBadge = (status) => {
+    const s = String(status || "").toLowerCase();
+    if (s === "running") return "success";
+    if (s === "stopped") return "";
+    return "";
+  };
+
   const columns = [
     { key: "id", label: "ID" },
     { key: "name", label: "Name" },
     { key: "provider", label: "Provider" },
     { key: "type", label: "Type" },
     { key: "region", label: "Region" },
-    { key: "state", label: "State", render: (v) => <span className={`badge ${v === "running" ? "success" : ""}`}>{v}</span> },
+    {
+      key: "status",
+      label: "Status",
+      render: (v) => <span className={`badge ${statusBadge(v)}`}>{v}</span>,
+    },
     { key: "cost_daily", label: "Daily Cost ($)", render: (v) => (v ? Number(v).toFixed(2) : "—") },
     {
       key: "actions",
       label: "Actions",
       render: (_v, r) => (
         <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn" onClick={() => { setSelected(r); setOpen(true); setOperation("start"); }}>Operate</button>
+          <button
+            className="btn"
+            onClick={() => {
+              setSelected(r);
+              setOpen(true);
+              setOperation("start");
+            }}
+          >
+            Operate
+          </button>
         </div>
       ),
     },
   ];
 
   function runOperation() {
-    // Mock update of state
+    // Mock update of status
     if (!selected) return;
-    setRows(prev => prev.map(r => {
-      if (r.id !== selected.id) return r;
-      if (operation === "start") return { ...r, state: "running" };
-      if (operation === "stop") return { ...r, state: "stopped" };
-      if (operation === "scale") return { ...r, size };
-      return r;
-    }));
-    setOpen(false); setSelected(null);
+    setRows((prev) =>
+      prev.map((r) => {
+        if (r.id !== selected.id) return r;
+        if (operation === "start") return { ...r, status: "Running" };
+        if (operation === "stop") return { ...r, status: "Stopped" };
+        if (operation === "scale") return { ...r, size };
+        return r;
+      })
+    );
+    setOpen(false);
+    setSelected(null);
   }
 
   return (
@@ -94,12 +119,7 @@ export default function Inventory() {
 
             {/* Popover anchored to the button; container is relatively positioned */}
             <div style={{ position: "absolute" }}>
-              <Popover
-                open={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                anchorRef={filterBtnRef}
-                ariaLabel="Inventory filters"
-              >
+              <Popover open={filterOpen} onClose={() => setFilterOpen(false)} anchorRef={filterBtnRef} ariaLabel="Inventory filters">
                 <div
                   className="panel"
                   style={{
@@ -121,8 +141,12 @@ export default function Inventory() {
                     showDateRange={false}
                   />
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
-                    <button className="btn ghost" onClick={() => { setFilters({}); setFilterOpen(false); }} aria-label="Clear filters">Clear</button>
-                    <button className="btn primary" onClick={() => setFilterOpen(false)} aria-label="Apply filters">Apply</button>
+                    <button className="btn ghost" onClick={() => { setFilters({}); setFilterOpen(false); }} aria-label="Clear filters">
+                      Clear
+                    </button>
+                    <button className="btn primary" onClick={() => setFilterOpen(false)} aria-label="Apply filters">
+                      Apply
+                    </button>
                   </div>
                 </div>
               </Popover>
@@ -142,8 +166,12 @@ export default function Inventory() {
         onClose={() => setOpen(false)}
         footer={
           <>
-            <button className="btn ghost" onClick={() => setOpen(false)}>Cancel</button>
-            <button className="btn primary" onClick={runOperation}>Run</button>
+            <button className="btn ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </button>
+            <button className="btn primary" onClick={runOperation}>
+              Run
+            </button>
           </>
         }
       >

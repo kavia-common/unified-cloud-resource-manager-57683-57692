@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, memo } from "react";
+import React, { useMemo, useState, useCallback, memo, useRef, useEffect } from "react";
 import { Modal } from "./Modal";
 import { Tabs } from "./Tabs";
 
@@ -24,6 +24,7 @@ export default function AddCloudAccountModal({
    */
   const [activeTab, setActiveTab] = useState("add");
   const [provider, setProvider] = useState("AWS");
+  const nameInputRef = useRef(null); // track Friendly Name input
   const [form, setForm] = useState({
     // AWS fields
     awsAccessKeyId: "",
@@ -143,36 +144,43 @@ export default function AddCloudAccountModal({
 
   // Helper to render field with label + error (memoized to prevent unnecessary re-renders)
   const Field = useCallback(
-    memo(function FieldInner({ label, id, type = "text", value, onChange, placeholder = "", autoComplete, helpText }) {
-      const error = touched[id] && errors[id] ? errors[id] : "";
-      return (
-        <div>
-          <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
-            {label}
-          </label>
-          <input
-            id={id}
-            className="input"
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onBlur={() => markTouched(id)}
-            placeholder={placeholder}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${id}-error` : undefined}
-            autoComplete={autoComplete}
-          />
-          {helpText && !error && (
-            <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
-          )}
-          {error && (
-            <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
-              {error}
-            </div>
-          )}
-        </div>
-      );
-    }),
+    memo(
+      // forward ref to input to preserve focus when parent re-renders
+      React.forwardRef(function FieldInner(
+        { label, id, type = "text", value, onChange, placeholder = "", autoComplete, helpText },
+        ref
+      ) {
+        const error = touched[id] && errors[id] ? errors[id] : "";
+        return (
+          <div>
+            <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
+              {label}
+            </label>
+            <input
+              id={id}
+              className="input"
+              type={type}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={() => markTouched(id)}
+              placeholder={placeholder}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${id}-error` : undefined}
+              autoComplete={autoComplete}
+              ref={ref}
+            />
+            {helpText && !error && (
+              <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>{helpText}</div>
+            )}
+            {error && (
+              <div id={`${id}-error`} role="alert" style={{ color: "var(--error)", fontSize: 12, marginTop: 6 }}>
+                {error}
+              </div>
+            )}
+          </div>
+        );
+      })
+    ),
     [touched, errors]
   );
 
@@ -198,6 +206,7 @@ export default function AddCloudAccountModal({
       open={open}
       onClose={handleClose}
       footer={activeTab === "add" ? footer : <button className="btn" onClick={handleClose}>Close</button>}
+      disableBackdropClose={true}
     >
       <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
 
@@ -225,7 +234,13 @@ export default function AddCloudAccountModal({
                   name="provider"
                   value="Azure"
                   checked={provider === "Azure"}
-                  onChange={() => setProvider("Azure")}
+                  onChange={() => {
+                    const wasFocused = document.activeElement === nameInputRef.current;
+                    setProvider("Azure");
+                    if (wasFocused) {
+                      requestAnimationFrame(() => nameInputRef.current?.focus());
+                    }
+                  }}
                 />
                 <span>Azure</span>
               </label>
@@ -241,11 +256,12 @@ export default function AddCloudAccountModal({
             placeholder="e.g., Production Account"
             autoComplete="off"
             helpText="A short label to identify this account in the dashboard."
+            ref={nameInputRef}
           />
 
           {/* Provider-specific credential fields */}
           {provider === "AWS" ? (
-            <div key="aws-fields">
+            <div>
               <Field
                 id="awsAccessKeyId"
                 label="Access Key ID"
@@ -265,7 +281,7 @@ export default function AddCloudAccountModal({
               />
             </div>
           ) : (
-            <div key="azure-fields">
+            <div>
               <Field
                 id="azureClientId"
                 label="Client ID (Application ID)"

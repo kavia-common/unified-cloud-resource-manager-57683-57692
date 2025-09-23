@@ -201,10 +201,19 @@ export default function AddCloudAccountModal({
     [touched, errors]
   );
 
-  const footer = useMemo(() => (
+  const footerAdd = useMemo(() => (
     <>
       <button className="btn" onClick={handleClose} aria-label="Cancel add cloud account">
-        Cancel
+        Close
+      </button>
+      <button
+        type="button"
+        className="btn primary-accent"
+        aria-label="Manage linked cloud accounts"
+        onClick={() => setActiveTab("existing")}
+        title="Manage"
+      >
+        Manage
       </button>
       <button
         className="btn primary"
@@ -217,24 +226,31 @@ export default function AddCloudAccountModal({
     </>
   ), [handleClose, handleSubmit, submitting]);
 
+  const footerExisting = useMemo(() => (
+    <>
+      <button className="btn" onClick={handleClose} aria-label="Close modal">
+        Close
+      </button>
+      <button
+        type="button"
+        className="btn primary-accent"
+        aria-label="Manage accounts (no-op)"
+        onClick={() => { /* placeholder: could route to account management */ }}
+        title="Manage"
+      >
+        Manage
+      </button>
+    </>
+  ), [handleClose]);
+
   return (
     <Modal
       title="Add Cloud Account"
       open={open}
       onClose={handleClose}
-      footer={activeTab === "add" ? footer : <button className="btn" onClick={handleClose}>Close</button>}
+      footer={activeTab === "add" ? footerAdd : footerExisting}
       disableBackdropClose={true}
-      headerActions={
-        <button
-          type="button"
-          className="btn primary-accent"
-          aria-label="Manage linked cloud accounts"
-          onClick={() => setActiveTab("existing")}
-          title="Manage"
-        >
-          Manage
-        </button>
-      }
+      headerActions={null}
     >
       <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
 

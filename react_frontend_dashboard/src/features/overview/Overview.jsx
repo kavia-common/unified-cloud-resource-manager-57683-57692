@@ -392,9 +392,6 @@ export default function Overview() {
           </>
         }
       >
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Placeholder: Summary of resource types discovered across clouds. Click to open full inventory.
-        </p>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
           <li>Compute: 58</li>
           <li>Storage: 42</li>
@@ -410,13 +407,16 @@ export default function Overview() {
         footer={
           <>
             <button className="btn" onClick={() => setShowDailySpend(false)}>Close</button>
-            <button className="btn primary" onClick={() => setShowDailySpend(false)}>View Costs</button>
+            <button
+              className="btn"
+              style={{ backgroundColor: "#000000", color: "#FFFFFF" }}
+              onClick={() => setShowDailySpend(false)}
+            >
+              View Costs
+            </button>
           </>
         }
       >
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Placeholder: Expanded spend insights for today with small trend sparkline and breakdown.
-        </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div className="badge">AWS: $242.12</div>
           <div className="badge">Azure: $138.44</div>
@@ -436,9 +436,6 @@ export default function Overview() {
           </>
         }
       >
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Placeholder: List of optimization recommendations with potential monthly savings.
-        </p>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
           <li>Rightsize 12 VMs — est. save $420/mo</li>
           <li>Shut down 4 idle instances — est. save $180/mo</li>

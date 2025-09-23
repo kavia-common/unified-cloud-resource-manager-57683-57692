@@ -4,6 +4,7 @@ import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
+import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
@@ -119,6 +120,14 @@ export default function Overview() {
         subtitle="Manage, monitor, and optimize your cloud with ease"
         align="left"
       />
+
+      {/* Prominent Cost Anomaly Alert */}
+      <div style={{ marginTop: 4 }}>
+        <CostAnomalyAlert
+          provider="Azure"
+          message="Cost spike detected on Azure: +27% week-on-week"
+        />
+      </div>
 
       <div className="card-grid">
         <StatCard label="Linked Accounts" value={stats.accounts} />

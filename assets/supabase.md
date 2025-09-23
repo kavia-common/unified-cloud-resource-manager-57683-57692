@@ -75,6 +75,20 @@ RLS:
 - Enable RLS and add policies to allow users to see only their own `cloud_accounts` rows.
 - Keep `cloud_credentials` fully restricted; only backend processes should access it.
 
+## Troubleshooting
+
+- 401 Unauthorized when linking accounts:
+  - Ensure the frontend includes Authorization: Bearer <access_token> when calling Edge Functions. The api.js helper now does this via supabase().auth.getSession().
+  - Make sure the user is signed in (AuthContext provides session).
+
+- 404 Not Found:
+  - Verify the function is deployed and enabled: supabase functions deploy link-account
+  - The frontend constructs absolute URL: ${REACT_APP_SUPABASE_URL}/functions/v1/link-account
+
+- Network/CORS errors:
+  - Calls are made to the Supabase URL directly (not relative). Ensure REACT_APP_SUPABASE_URL is set correctly.
+  - Supabase Edge Functions include CORS handling by default; ensure the project’s allowed origins include the app origin.
+
 ## Deployment
 Use the Supabase CLI:
 - supabase functions deploy link-account

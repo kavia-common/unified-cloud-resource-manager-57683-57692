@@ -357,9 +357,9 @@ export default function AddCloudAccountModal({
             />
           </div>
 
-          {/* Note about security (frontend only for now) */}
+          {/* Security note */}
           <div className="text-xs" style={{ color: "var(--muted)" }}>
-            Note: Credentials are not persisted yet. This is a client-side flow for preview purposes.
+            Note: Credentials are sent securely to a Supabase Edge Function for storage; only minimal metadata is shown in the app.
           </div>
         </form>
       )}

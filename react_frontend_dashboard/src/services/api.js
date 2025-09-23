@@ -6,36 +6,77 @@
 
 import { supabase } from '../lib/supabaseClient';
 
-const EDGE_BASE = '/functions/v1'; // Supabase Edge Functions base path for REST
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+// Use absolute URL for Edge Functions to avoid relative-path failures in preview/build setups.
+const EDGE_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : '/functions/v1';
 
 // Helpers
 async function callEdgeFunction(name, method = 'POST', body = null, signal) {
+  // Attach Authorization header with the current session access token.
+  // Supabase Edge Functions require a valid JWT for user-scoped operations.
+  const { data: sessionData } = await supabase().auth.getSession();
+  const accessToken = sessionData?.session?.access_token || null;
+
   const url = `${EDGE_BASE}/${name}`;
   const headers = {
     'Content-Type': 'application/json',
   };
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
   const options = {
     method,
     headers,
     signal,
-    credentials: 'include',
+    // Do not rely on browser credentials for Supabase edge calls; JWT is authoritative.
+    // credentials: 'include' is not necessary and sometimes causes CORS issues.
   };
   if (body) {
     options.body = JSON.stringify(body);
   }
-  const res = await fetch(url, options);
+
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (networkErr) {
+    const err = new Error(`Network error while calling ${name}: ${networkErr?.message || 'Failed to reach server'}`);
+    err.code = 'NETWORK_ERROR';
+    err.cause = networkErr;
+    throw err;
+  }
+
   const text = await res.text();
   let json = null;
   try {
     json = text ? JSON.parse(text) : null;
-  } catch (e) {
-    // fall back to raw text if not json
+  } catch {
     json = { raw: text };
   }
+
   if (!res.ok) {
-    const err = new Error(json?.error || res.statusText || 'Request failed');
+    // Construct informative error
+    const msg =
+      json?.error ||
+      (res.status === 401
+        ? 'Unauthorized (401): Please sign in again.'
+        : res.status === 403
+        ? 'Forbidden (403): You do not have access.'
+        : res.status === 404
+        ? 'Not found (404): The endpoint is unavailable.'
+        : res.statusText || 'Request failed');
+    const err = new Error(msg);
     err.status = res.status;
     err.payload = json;
+    err.url = url;
+    err.code =
+      res.status === 401
+        ? 'UNAUTHORIZED'
+        : res.status === 403
+        ? 'FORBIDDEN'
+        : res.status === 404
+        ? 'NOT_FOUND'
+        : 'HTTP_ERROR';
     throw err;
   }
   return json;

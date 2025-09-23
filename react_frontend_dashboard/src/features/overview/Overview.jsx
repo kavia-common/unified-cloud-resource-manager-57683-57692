@@ -6,6 +6,7 @@ import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
 import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
 import { Modal } from "../../components/ui/Modal";
+import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
 
 // PUBLIC_INTERFACE
 export default function Overview() {
@@ -19,6 +20,11 @@ export default function Overview() {
 
   // Local modal states for the four stat cards
   const [showAccounts, setShowAccounts] = useState(false);
+  const [showAddCloudModal, setShowAddCloudModal] = useState(false);
+  const [existingAccounts, setExistingAccounts] = useState([
+    { provider: "AWS", name: "Prod AWS", account_id: "123456789012", created_at: new Date().toISOString() },
+    { provider: "Azure", name: "Core Azure", account_id: "a1b2c3d4-sub", created_at: new Date().toISOString() },
+  ]);
   const [showResources, setShowResources] = useState(false);
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
@@ -280,7 +286,7 @@ export default function Overview() {
                 className="actionBtn pop-hover"
                 aria-label="Add Cloud Account"
                 style={actionBtnStyle}
-                onClick={() => setShowAccounts(true)}
+                onClick={() => setShowAddCloudModal(true)}
               >
                 <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#22C55E" }}>
                   {/* cloud-plus icon */}
@@ -365,11 +371,12 @@ export default function Overview() {
         }
       >
         <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Placeholder: View and link AWS/Azure accounts. Show connected accounts, add/remove actions.
+          Connected accounts summary:
         </p>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
-          <li>AWS: 1 account connected</li>
-          <li>Azure: 1 subscription connected</li>
+          {existingAccounts.map((acc, idx) => (
+            <li key={idx}>{acc.provider}: {acc.name} ({acc.account_id})</li>
+          ))}
         </ul>
       </Modal>
 
@@ -438,7 +445,29 @@ export default function Overview() {
         </ul>
       </Modal>
 
-      {/* Action modals removed */}
+      {/* Add Cloud Account Modal for the action button */}
+      <AddCloudAccountModal
+        open={showAddCloudModal}
+        onClose={() => setShowAddCloudModal(false)}
+        existingAccounts={existingAccounts}
+        onSubmit={(payload) => {
+          // Frontend-only: append a mock entry to existing list (do not persist)
+          const now = new Date().toISOString();
+          const account_id =
+            payload.provider === "AWS"
+              ? payload.credentials.accessKeyId?.slice(0, 4) + "****"
+              : payload.credentials.subscriptionId || "(hidden)";
+          setExistingAccounts((prev) => [
+            {
+              provider: payload.provider,
+              name: payload.name,
+              account_id,
+              created_at: now,
+            },
+            ...prev,
+          ]);
+        }}
+      />
     </div>
   );
 }

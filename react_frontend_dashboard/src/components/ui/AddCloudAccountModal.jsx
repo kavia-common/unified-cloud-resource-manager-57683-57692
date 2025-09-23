@@ -366,13 +366,52 @@ export default function AddCloudAccountModal({
             </div>
           )}
           {(existingAccounts || []).map((acc, idx) => (
-            <div key={idx} className="panel" style={{ padding: 12, display: "grid", gap: 4 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={{ fontWeight: 700 }}>{acc.name || "(no name)"}</div>
-                <div className="badge">{acc.provider}</div>
+            <div
+              key={idx}
+              className="panel"
+              style={{ padding: 12, display: "grid", gap: 8 }}
+              aria-label={`Existing account ${acc.name || "unnamed"} for ${acc.provider || "Unknown provider"}`}
+            >
+              {/* Header row with name and provider badge */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <div style={{ fontWeight: 700, minWidth: 0 }}>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
+                    {acc.name || "(no name)"}
+                  </span>
+                </div>
+                <div className="badge" aria-label={`Provider ${acc.provider || "unknown"}`}>{acc.provider}</div>
               </div>
+
+              {/* Meta row */}
               <div className="text-xs" style={{ color: "var(--muted)" }}>
                 {acc.account_id || "N/A"} · Added {new Date(acc.created_at || Date.now()).toLocaleString()}
+              </div>
+
+              {/* Provider label placed clearly above the action area */}
+              <div
+                className="text-xs"
+                style={{
+                  color: "var(--muted)",
+                  marginTop: 4,
+                  marginBottom: 2,
+                  letterSpacing: 0.2,
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                }}
+                aria-label="Provider label"
+              >
+                {acc.provider}
+              </div>
+
+              {/* Action area placeholder (kept separate so label doesn't interfere with touch target) */}
+              <div className="action-bar" style={{ marginTop: 2 }}>
+                <button
+                  type="button"
+                  className="btn primary"
+                  aria-label={`Manage ${acc.provider} account ${acc.name || ""}`}
+                >
+                  Manage
+                </button>
               </div>
             </div>
           ))}

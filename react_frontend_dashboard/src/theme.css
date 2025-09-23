@@ -275,6 +275,19 @@ button { font-family: inherit; cursor: pointer; }
 }
 .table th { background: var(--surface); color: var(--muted); font-weight: 600; }
 
+/* Table actions row above table */
+.table-actions .btn {
+  background: #fff;
+}
+
+/* Popover styling */
+.popover {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(55, 65, 81, 0.09), 0 3px 6px rgba(0,0,0,0.04);
+}
+
 /* Buttons */
 .btn {
   padding: 8px 12px;

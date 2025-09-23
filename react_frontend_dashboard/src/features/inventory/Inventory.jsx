@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 import FilterBar from "../../components/ui/Filters";
+import { Popover } from "../../components/ui/Popover";
 
 // PUBLIC_INTERFACE
 export default function Inventory() {
@@ -17,6 +18,10 @@ export default function Inventory() {
   const [operation, setOperation] = useState("start");
   const [size, setSize] = useState("medium");
   const [open, setOpen] = useState(false);
+
+  // popover (filters) state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterBtnRef = useRef(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -68,15 +73,66 @@ export default function Inventory() {
         </div>
       </div>
       <div className="panel-body">
-        <FilterBar
-          values={filters}
-          onChange={setFilters}
-          providerOptions={[
-            { value: "aws", label: "AWS" },
-            { value: "azure", label: "Azure" },
-          ]}
-        />
-        <div style={{ height: 10 }} />
+        {/* Actions row above the table: filter icon on the left */}
+        <div className="table-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <button
+              ref={filterBtnRef}
+              className="btn"
+              aria-haspopup="dialog"
+              aria-expanded={filterOpen}
+              aria-label="Open filters"
+              onClick={() => setFilterOpen((v) => !v)}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+            >
+              {/* Simple SVG filter icon to avoid extra dependencies */}
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm4 6h2v2h-2v-2z" />
+              </svg>
+              <span style={{ fontSize: 14 }}>Filters</span>
+            </button>
+
+            {/* Popover anchored to the button; container is relatively positioned */}
+            <div style={{ position: "absolute" }}>
+              <Popover
+                open={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                anchorRef={filterBtnRef}
+                ariaLabel="Inventory filters"
+              >
+                <div
+                  className="panel"
+                  style={{
+                    padding: 12,
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
+                    minWidth: 320,
+                    maxWidth: 480,
+                  }}
+                >
+                  {/* Reuse the same FilterBar; compact by hiding date range to keep it tidy */}
+                  <FilterBar
+                    values={filters}
+                    onChange={setFilters}
+                    providerOptions={[
+                      { value: "aws", label: "AWS" },
+                      { value: "azure", label: "Azure" },
+                    ]}
+                    showDateRange={false}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+                    <button className="btn ghost" onClick={() => { setFilters({}); setFilterOpen(false); }} aria-label="Clear filters">Clear</button>
+                    <button className="btn primary" onClick={() => setFilterOpen(false)} aria-label="Apply filters">Apply</button>
+                  </div>
+                </div>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Placeholder right-aligned action area for future controls */}
+          <div />
+        </div>
+
         <DataTable columns={columns} rows={filtered} emptyMessage="No resources discovered yet." />
       </div>
 

@@ -168,6 +168,29 @@ export default function Inventory() {
           emptyMessage="No resources discovered yet."
           headerClassName="table__head--inventory"
           tableClassName="table--inventory"
+          rowClassName={(r) => {
+            // Match EXACT tuples as specified (case-sensitive where noted via render/output).
+            // Our data stores provider in lowercase; header rendering uppercases provider for view.
+            // We must check the underlying raw values and cost precision exactly as per spec.
+            const tuple = [
+              r.id,
+              r.name,
+              String(r.provider || "").toUpperCase(), // normalize to compare against AWS/AZURE
+              r.type,
+              r.region,
+              r.status,
+              // Two decimal precision for comparison against the provided value strings
+              r.cost_daily != null ? Number(r.cost_daily).toFixed(2) : ""
+            ].join("|");
+
+            const targets = new Set([
+              ["i-123","web-1","AWS","ec2","us-east-1","Running","4.12"].join("|"),
+              ["vm-001","api-1","AZURE","vm","eastus","Stopped","5.44"].join("|"),
+              ["db-01","orders-db","AWS","rds","us-west-2","Running","7.80"].join("|"),
+            ]);
+
+            return targets.has(tuple) ? "inventory-row-black-border" : "";
+          }}
         />
       </div>
 

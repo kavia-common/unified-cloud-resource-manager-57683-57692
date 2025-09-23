@@ -316,6 +316,12 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 6px; /* slight rounding to make the highlight look intentional */
 }
 
+/* Inventory row exact-match highlight: apply to all value cells (td) only */
+.inventory-row-black-border {
+  border: 3px solid #000 !important; /* prominent black border */
+  border-radius: 6px; /* keep consistent rounded look */
+}
+
 /* Remove alternate row and hover fills for a fully transparent body */
 .table tbody tr:nth-child(2n) td { background: transparent; }
 .table tbody tr:hover td { background: transparent; }

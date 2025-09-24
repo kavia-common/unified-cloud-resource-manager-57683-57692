@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import { AuthProvider } from "./context/AuthContext";
+import { hasSupabaseConfig } from "./services/supabaseClient";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -30,6 +32,22 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+function MissingConfigNotice() {
+  return (
+    <div style={{ padding: 24, fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+      <h2>Supabase is not configured</h2>
+      <p>
+        Please create a <code>.env</code> file in <code>react_frontend_dashboard</code> with:
+      </p>
+      <pre style={{ background: '#f3f4f6', padding: 12, borderRadius: 6 }}>
+{`REACT_APP_SUPABASE_URL=https://<project>.supabase.co
+REACT_APP_SUPABASE_KEY=<anon-public-key>`}
+      </pre>
+      <p>Then restart the development server.</p>
+    </div>
+  );
+}
+
 // Ensure a root element exists; if not, create one to avoid silent failure.
 let rootEl = document.getElementById("root");
 if (!rootEl) {
@@ -43,7 +61,13 @@ const root = ReactDOM.createRoot(rootEl);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      {hasSupabaseConfig ? (
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      ) : (
+        <MissingConfigNotice />
+      )}
     </ErrorBoundary>
   </React.StrictMode>
 );

@@ -57,6 +57,15 @@ if (!rootEl) {
   document.body.appendChild(rootEl);
 }
 
+if (process.env.NODE_ENV === 'development') {
+  const { origin, pathname } = window.location;
+  if (pathname && pathname !== '/' && !pathname.startsWith('/static')) {
+    // In CRA dev server assets are served from root. If embedded under a subpath via proxy,
+    // some proxies may not rewrite /static/* correctly.
+    console.warn(`[Dev] App served at ${origin}${pathname}. If you see 404s for /static/js/bundle.js, ensure the proxy targets the correct CRA port and rewrites to /.`);
+  }
+}
+
 const root = ReactDOM.createRoot(rootEl);
 root.render(
   <React.StrictMode>

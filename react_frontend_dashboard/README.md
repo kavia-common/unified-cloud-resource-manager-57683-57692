@@ -10,10 +10,14 @@ Setup
 - Install dependencies:
   - npm ci (preferred in CI) or npm install
 - Start the development server:
-  - npm start
+  - npm run start:dev (pins port 3000) or npm start
     - This runs: react-scripts start (as defined in package.json "scripts.start")
 
 Troubleshooting
+- If the preview shows a blank screen or 404 for /static/js/bundle.js:
+  - Ensure the dev server is running on the same port your preview proxy expects (commonly 3000).
+  - If CRA prompts that port 3000 is in use and switches ports, your preview may still target 3000 and fail to load assets.
+  - Fix: stop other services on 3000 or run `npm run start:dev` to force CRA to port 3000. Alternatively, update the preview to the new port.
 - If the preview shows a blank screen or auth fails:
   - Ensure .env variables are set and the app was restarted after changes.
   - Check browser console for [Supabase] Missing configuration warnings.

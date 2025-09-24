@@ -6,9 +6,15 @@ Implements: Auth, cloud onboarding, inventory, costs, lifecycle actions, recomme
 Setup
 - Copy .env.example to .env and set:
   - REACT_APP_SUPABASE_URL
-  - REACT_APP_SUPABASE_KEY
+  - REACT_APP_SUPABASE_KEY  (public anon key)
 - npm install
 - npm start
+
+Troubleshooting
+- If the preview shows a blank screen or auth fails:
+  - Ensure .env variables are set and the app was restarted after changes.
+  - Check browser console for [Supabase] Missing configuration warnings.
+  - Verify imports of supabaseClient resolve to src/services/supabaseClient.js.
 
 Architecture
 - Supabase Auth for authentication (email/password)

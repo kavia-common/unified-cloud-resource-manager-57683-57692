@@ -1,10 +1,8 @@
-//
-// Centralized API service: handles all calls to Supabase Edge Functions (REST)
-// and direct Supabase queries when appropriate.
-// Follows best practices: single responsibility, error handling, minimal coupling.
-//
-
-import { supabase } from '../lib/supabaseClient';
+/**
+ * Centralized API service for Supabase interactions and Edge Functions.
+ * PUBLIC_INTERFACE exports are documented for use across the app.
+ */
+import { supabase } from '../services/supabaseClient';
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 // Use absolute URL for Edge Functions to avoid relative-path failures in preview/build setups.
@@ -14,7 +12,7 @@ const EDGE_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : '/functions/v1
 async function callEdgeFunction(name, method = 'POST', body = null, signal) {
   // Attach Authorization header with the current session access token.
   // Supabase Edge Functions require a valid JWT for user-scoped operations.
-  const { data: sessionData } = await supabase().auth.getSession();
+  const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData?.session?.access_token || null;
 
   const url = `${EDGE_BASE}/${name}`;
@@ -29,8 +27,6 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
     method,
     headers,
     signal,
-    // Do not rely on browser credentials for Supabase edge calls; JWT is authoritative.
-    // credentials: 'include' is not necessary and sometimes causes CORS issues.
   };
   if (body) {
     options.body = JSON.stringify(body);
@@ -55,7 +51,6 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
   }
 
   if (!res.ok) {
-    // Construct informative error
     const msg =
       json?.error ||
       (res.status === 401
@@ -85,7 +80,7 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
 // PUBLIC_INTERFACE
 export async function loginWithEmail(email, password) {
   /** Log in a user via email/password using Supabase Auth. Returns { user, session }. */
-  const { data, error } = await supabase().auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -99,7 +94,7 @@ export async function signUpWithEmail(email, password, siteUrl) {
    * Sign up a user via Supabase Auth with email/password.
    * emailRedirectTo must be set from SITE_URL env configured externally.
    */
-  const { data, error } = await supabase().auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -113,7 +108,7 @@ export async function signUpWithEmail(email, password, siteUrl) {
 // PUBLIC_INTERFACE
 export async function logout() {
   /** Logs out the current user session. */
-  const { error } = await supabase().auth.signOut();
+  const { error } = await supabase.auth.signOut();
   if (error) throw error;
   return true;
 }
@@ -123,7 +118,7 @@ export async function getCurrentUser() {
   /** Returns the current authenticated user (or null). */
   const {
     data: { user },
-  } = await supabase().auth.getUser();
+  } = await supabase.auth.getUser();
   return user || null;
 }
 
@@ -198,13 +193,10 @@ export async function listAutomationRules(signal) {
 
 // PUBLIC_INTERFACE
 export async function fetchActivity({ page = 1, pageSize = 25 }, signal) {
-  /** Returns activity history (audits, operations). */
+  /** Returns activity history (audits, operations). */ 
   return callEdgeFunction('queue-processor', 'POST', { action: 'activity', page, pageSize }, signal);
 }
 
-/**
- * PUBLIC_INTERFACE
- */
 // PUBLIC_INTERFACE
 export async function getLinkedAccounts(signal) {
   /**
@@ -212,18 +204,14 @@ export async function getLinkedAccounts(signal) {
    * Requires RLS policy allowing user_id = auth.uid() for select.
    * Returns array of { id, provider, name, account_id, status, metadata, created_at }
    */
-  const query = supabase()
+  const { data, error } = await supabase
     .from('cloud_accounts')
     .select('id, provider, name, account_id, status, metadata, created_at')
     .order('created_at', { ascending: false });
-  const { data, error } = await query;
   if (error) throw error;
   return data || [];
 }
 
-/**
- * PUBLIC_INTERFACE
- */
 // PUBLIC_INTERFACE
 export async function createLinkedAccount({ provider, name, credentials }) {
   /**

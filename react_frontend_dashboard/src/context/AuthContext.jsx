@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../services/supabaseClient";
 
 /**
  * Authentication context backed by Supabase.
@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
     let mounted = true;
     async function init() {
       try {
-        const { data } = await supabase().auth.getSession();
+        const { data } = await supabase.auth.getSession();
         if (!mounted) return;
         setSession(data?.session || null);
       } finally {
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
     init();
 
     // Subscribe to auth changes
-    const { data: subscription } = supabase().auth.onAuthStateChange((_event, newSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession || null);
     });
 
@@ -60,11 +60,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function signInWithEmail({ email, password }) {
-    return supabase().auth.signInWithPassword({ email, password });
+    return supabase.auth.signInWithPassword({ email, password });
   }
 
   async function signUpWithEmail({ email, password }) {
-    return supabase().auth.signUp({
+    return supabase.auth.signUp({
       email,
       password,
       options: {
@@ -74,7 +74,7 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    const { error } = await supabase().auth.signOut();
+    const { error } = await supabase.auth.signOut();
     return { error };
   }
 

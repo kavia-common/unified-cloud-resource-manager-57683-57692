@@ -7,7 +7,8 @@ export default function StatCard({
   deltaLabel,
   deltaType = "up",
   onClick,
-  // Default to violet to satisfy new dashboard card color requirement
+  // Variant controls ONLY the background and border. Text/icon colors remain unchanged.
+  // Supported: "violet" | "mint" | "blue" | "amber" | "neutral"
   variant = "violet",
   valueStyleOverride,
 }) {

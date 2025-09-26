@@ -144,6 +144,7 @@
   will-change: transform, box-shadow, background, border-color, opacity;
   transform-origin: center center;
   animation: card-enter 420ms ease both;
+  color: inherit; /* keep text color from theme, do not auto-adjust with bg */
   /* stagger feel when multiple are present in .card-grid */
   /* Use nth-child to vary the delay slightly for the first row of 4 */
 }

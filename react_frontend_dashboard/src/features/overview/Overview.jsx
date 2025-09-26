@@ -219,21 +219,25 @@ export default function Overview() {
         <StatCard
           label="Linked Accounts"
           value={stats.accounts}
+          variant="violet"
           onClick={() => setShowAccounts(true)}
         />
         <StatCard
           label="Discovered Resources"
           value={stats.resources}
+          variant="mint"
           onClick={() => setShowResources(true)}
         />
         <StatCard
           label="Daily Spend"
           value={`$${Number(stats.daily).toFixed(2)}`}
+          variant="blue"
           onClick={() => setShowDailySpend(true)}
         />
         <StatCard
           label="Open Recommendations"
           value={stats.recs}
+          variant="amber"
           onClick={() => setShowRecs(true)}
         />
       </div>

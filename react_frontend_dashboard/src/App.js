@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Sidebar from "./components/ui/Sidebar";
+import SidebarNav from "./components/ui/SidebarNav";
+import "./components/ui/SidebarNav.css";
 import Topbar from "./components/ui/Topbar";
 import Overview from "./features/overview/Overview";
 import Inventory from "./features/inventory/Inventory";
@@ -25,7 +26,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-shell">
-        <Sidebar />
+        <SidebarNav />
         <main className="main">
           <Topbar />
           <div className="content">
@@ -42,6 +43,8 @@ function App() {
               {/* Remove or redirect any legacy auth paths */}
               <Route path="/login" element={<Navigate to="/overview" replace />} />
               <Route path="/signin" element={<Navigate to="/overview" replace />} />
+              <Route path="/help" element={<div style={{padding:20}}>Help coming soon.</div>} />
+              <Route path="/logout" element={<Navigate to="/overview" replace />} />
               <Route path="*" element={<Navigate to="/overview" replace />} />
             </Routes>
           </div>

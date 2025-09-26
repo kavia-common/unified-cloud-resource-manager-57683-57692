@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { FiMail, FiBell } from "react-icons/fi";
 
@@ -17,7 +16,6 @@ export default function Topbar({ onSearch }) {
           .slice(0, 2)
           .join("") || "U"
       : "G";
-  const navigate = useNavigate();
 
   return (
     <div className="topbar">
@@ -66,9 +64,8 @@ export default function Topbar({ onSearch }) {
         <div
           className="avatar"
           title={userLabel}
-          onClick={() => navigate("/profile")}
-          style={{ cursor: "pointer" }}
-          aria-label="Open profile"
+          style={{ cursor: "default" }}
+          aria-label="User avatar"
         >
           {initials}
         </div>

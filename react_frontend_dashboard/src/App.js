@@ -1,27 +1,48 @@
 import React from "react";
-import { supabase } from "./services/supabaseClient";
-import Auth from "./Auth";
-import AuthGate from "./features/auth/AuthGate";
-import { useAuth } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Sidebar from "./components/ui/Sidebar";
+import Topbar from "./components/ui/Topbar";
+import Overview from "./features/overview/Overview";
+import Inventory from "./features/inventory/Inventory";
+import Costs from "./features/costs/Costs";
+import Recommendations from "./features/recommendations/Recommendations";
+import Automation from "./features/automation/Automation";
+import Activity from "./features/activity/Activity";
+import CloudConnections from "./features/settings/CloudConnections";
+import Profile from "./features/profile/Profile";
+import "./App.css";
 
-function DashboardHome() {
-  const { user } = useAuth();
-  return (
-    <div style={{ padding: 24, fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
-      <h2>Dashboard</h2>
-      <p>Welcome{user ? `, ${user.email}` : ""}.</p>
-      <div style={{ marginTop: 12 }}>
-        <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * App shell without authentication screens.
+ * Removes login/sign-in routes and renders the dashboard directly.
+ */
 function App() {
   return (
-    <AuthGate requireAuth fallback={<Auth />}>
-      <DashboardHome />
-    </AuthGate>
+    <BrowserRouter>
+      <div className="app-shell">
+        <Sidebar />
+        <main className="main">
+          <Topbar />
+          <div className="content">
+            <Routes>
+              <Route path="/" element={<Navigate to="/overview" replace />} />
+              <Route path="/overview" element={<Overview />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/costs" element={<Costs />} />
+              <Route path="/recommendations" element={<Recommendations />} />
+              <Route path="/automation" element={<Automation />} />
+              <Route path="/activity" element={<Activity />} />
+              <Route path="/settings" element={<CloudConnections />} />
+              <Route path="/profile" element={<Profile />} />
+              {/* Remove or redirect any legacy auth paths */}
+              <Route path="/login" element={<Navigate to="/overview" replace />} />
+              <Route path="/signin" element={<Navigate to="/overview" replace />} />
+              <Route path="*" element={<Navigate to="/overview" replace />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
 

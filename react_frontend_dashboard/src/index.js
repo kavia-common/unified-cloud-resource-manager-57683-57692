@@ -65,6 +65,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const root = ReactDOM.createRoot(rootEl);
+
+// Basic boot fallback UI while React mounts, then replaced on first paint.
+// This is defensive and ensures something visible appears immediately.
+rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111">App booting…</div>';
+
 root.render(
   <React.StrictMode>
     <ErrorBoundary>

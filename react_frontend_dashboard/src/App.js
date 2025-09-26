@@ -42,14 +42,22 @@ const ReportsAnalytics = () => (
 );
 
 /**
+ * PUBLIC_INTERFACE
  * App shell without authentication screens.
  * Removes login/sign-in routes and renders the dashboard directly.
+ *
+ * Returns:
+ * - A BrowserRouter-wrapped application shell containing:
+ *    - SidebarNav: left navigation
+ *    - Topbar: top header
+ *    - Routes: overview, inventory, operations, costs, recommendations, automation, reports, plus legacy routes
+ * Notes:
+ * - Providers (e.g., ToastProvider, AuthContext) are expected to be applied at src/index.js.
+ * - Authentication screens are intentionally omitted to meet the current product requirements.
  */
-// PUBLIC_INTERFACE
 function App() {
   /**
    * This is the public root shell for the dashboard UI.
-   * Providers (e.g., ToastProvider, AuthContext) are expected to be applied at src/index.js.
    */
   return (
     <BrowserRouter>

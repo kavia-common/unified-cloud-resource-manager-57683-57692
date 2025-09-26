@@ -1,7 +1,12 @@
 /* Minimal reset applied; theme variables in theme.css */
 html, body, #root { height: 100%; }
-body { margin: 0; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background: #fff; color: #111827; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Ensure the app shell is visible and laid out correctly */
+.app-shell { display: flex; min-height: 100vh; }
+.app-shell .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.app-shell .content { padding: 16px; }
 
 /* Ensure high contrast in sidebar regardless of global overrides */
 .sidebar a,
@@ -15,8 +20,6 @@ body { margin: 0; }
 td.aws-border {
   border: 2px solid #111; /* black border for AWS/Azure provider cells */
 }
-
-
 
 /* Chart legend helpers (as per design notes) */
 .chart-legend {

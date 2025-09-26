@@ -14,13 +14,40 @@ import Profile from "./features/profile/Profile";
 import "./App.css";
 import "./theme.css";
 
+// Lightweight placeholders to satisfy new routes with minimal style
+const ResourceOps = () => (
+  <div className="panel">
+    <div className="panel-header">
+      <div className="panel-title">Resource Ops</div>
+    </div>
+    <div className="panel-body">
+      <div className="text-sm" style={{ color: "var(--muted)" }}>
+        Perform start/stop/scale actions on discovered resources. (Coming soon)
+      </div>
+    </div>
+  </div>
+);
+
+const ReportsAnalytics = () => (
+  <div className="panel">
+    <div className="panel-header">
+      <div className="panel-title">Reports & Analytics</div>
+    </div>
+    <div className="panel-body">
+      <div className="text-sm" style={{ color: "var(--muted)" }}>
+        Generate and view consolidated cross-cloud reports. (Coming soon)
+      </div>
+    </div>
+  </div>
+);
+
 /**
  * App shell without authentication screens.
  * Removes login/sign-in routes and renders the dashboard directly.
  */
 // PUBLIC_INTERFACE
 function App() {
-  /** 
+  /**
    * This is the public root shell for the dashboard UI.
    * Providers (e.g., ToastProvider, AuthContext) are expected to be applied at src/index.js.
    */
@@ -36,9 +63,12 @@ function App() {
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
+              <Route path="/operations" element={<ResourceOps />} />
               <Route path="/costs" element={<Costs />} />
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/automation" element={<Automation />} />
+              <Route path="/reports" element={<ReportsAnalytics />} />
+              {/* Legacy/unrelated routes retained but not linked in nav */}
               <Route path="/activity" element={<Activity />} />
               <Route path="/settings" element={<CloudConnections />} />
               <Route path="/profile" element={<Profile />} />

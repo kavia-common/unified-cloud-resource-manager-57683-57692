@@ -215,15 +215,31 @@ export default function Overview() {
         />
       </div>
 
-      <div className="card-grid">
-        <StatCard label="Linked Accounts" value={stats.accounts} onClick={() => setShowAccounts(true)} />
-        <StatCard label="Discovered Resources" value={stats.resources} onClick={() => setShowResources(true)} />
+      <div className="card-grid" aria-label="Key metrics">
+        <StatCard
+          label="Linked Accounts"
+          value={stats.accounts}
+          onClick={() => setShowAccounts(true)}
+          variant="neutral"
+        />
+        <StatCard
+          label="Discovered Resources"
+          value={stats.resources}
+          onClick={() => setShowResources(true)}
+          variant="neutral"
+        />
         <StatCard
           label="Daily Spend"
           value={`$${Number(stats.daily).toFixed(2)}`}
           onClick={() => setShowDailySpend(true)}
+          variant="neutral"
         />
-        <StatCard label="Open Recommendations" value={stats.recs} onClick={() => setShowRecs(true)} />
+        <StatCard
+          label="Open Recommendations"
+          value={stats.recs}
+          onClick={() => setShowRecs(true)}
+          variant="neutral"
+        />
       </div>
 
       <div className="panel">

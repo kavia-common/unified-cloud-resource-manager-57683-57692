@@ -7,6 +7,13 @@
   --border: #E5E7EB;
   --muted: #6B7280;
   --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.04);
+
+  /* Card tokens */
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+
+  /* Chart/legend example tokens */
+  --legend-text: #6B7280;
 }
 
 /* App shell: sidebar + main content in a row, full-height viewport */
@@ -73,6 +80,61 @@
 .content {
   padding: 16px;
   min-height: 0;
+}
+
+/* Generic panel */
+.panel {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+}
+.panel-body {
+  padding: 12px 14px;
+}
+
+/* Card grid for stat cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1200px) {
+  .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+/* Card hover and focus affordances */
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06);
+}
+.stat-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Minimal select */
+.select {
+  appearance: none;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--text);
 }
 
 /* Ensure global html/body/root take full height */

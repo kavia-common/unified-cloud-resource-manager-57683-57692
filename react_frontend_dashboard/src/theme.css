@@ -14,6 +14,13 @@
 
   /* Chart/legend example tokens */
   --legend-text: #6B7280;
+
+  /* Donut chart palette per assets/donut_chart_design_notes.md */
+  --chart-apples: #F86E6C;   /* salmon/coral red */
+  --chart-pears: #1CC7C8;    /* teal/cyan */
+  --chart-oranges: #FFA24A;  /* orange */
+  --chart-label-text: #666A6D;
+  --chart-bg: #FFFFFF;
 }
 
 /* App shell: sidebar + main content in a row, full-height viewport */

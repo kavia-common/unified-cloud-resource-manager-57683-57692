@@ -266,7 +266,9 @@ const DEFAULT_COLORS = ["#374151", "#9CA3AF", "#10B981", "#EF4444", "#3B82F6", "
 
 // PUBLIC_INTERFACE
 export function PieBreakdownChart({ data, dataKey = "value", nameKey = "name", colors = DEFAULT_COLORS, height = 260, innerRadius = 60 }) {
-  /** Pie breakdown chart for category shares. data: [{name, value}] */
+  /** Pie breakdown chart for category shares. data: [{name, value}]
+   * Note: For donut appearance, set innerRadius to a higher value (e.g., 48% of container).
+   */
   return (
     <div className="card" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>

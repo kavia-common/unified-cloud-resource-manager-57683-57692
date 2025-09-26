@@ -12,6 +12,7 @@ import Activity from "./features/activity/Activity";
 import CloudConnections from "./features/settings/CloudConnections";
 import Profile from "./features/profile/Profile";
 import "./App.css";
+import "./theme.css";
 
 /**
  * App shell without authentication screens.
@@ -25,9 +26,10 @@ function App() {
    */
   return (
     <BrowserRouter>
-      <div className="app-shell">
+      {/* App shell layout: [SidebarNav | Main] */}
+      <div className="app-shell" role="application" aria-label="Cross-Cloud Manager App Shell">
         <SidebarNav />
-        <main className="main">
+        <main className="main" role="main">
           <Topbar />
           <div className="content">
             <Routes>

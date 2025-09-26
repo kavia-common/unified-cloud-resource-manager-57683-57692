@@ -25,10 +25,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: auto;
+  /* Make sidebar part of the normal flow so it scrolls with content */
+  position: relative;
+  top: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  flex: 0 0 auto;
 }
 
 .sidebarNav__brand {
@@ -159,5 +162,6 @@
   .sidebarNav {
     position: relative;
     height: auto;
+    overflow: visible;
   }
 }

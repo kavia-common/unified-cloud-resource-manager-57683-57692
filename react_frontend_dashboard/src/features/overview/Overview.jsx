@@ -315,7 +315,7 @@ export default function Overview() {
                 justifyContent: "center",
               }}
             >
-              <PieChart data={pieData} size={280} strokeWidth={2} />
+              <PieChart data={pieData} size={300} ringThickness={64} />
             </div>
 
             {/* Right column: Actions stack */}

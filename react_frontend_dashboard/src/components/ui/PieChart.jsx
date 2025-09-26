@@ -24,6 +24,8 @@ export default function PieChart({
   data,
   size = 320,
   className = "",
+  // PUBLIC_INTERFACE: ringThickness controls the donut thickness in pixels. If not provided, it’s computed from size.
+  ringThickness: ringThicknessProp,
 }) {
   // Normalize data: ensure array, non-negative values
   const safe = useMemo(
@@ -54,15 +56,16 @@ export default function PieChart({
   // Empty state ring when no data/zero total
   const hasData = total > 0 && safe.length > 0;
 
-  // Design notes: outer ≈ 48% of min dim, inner ≈ 28%
-  const outerR = Math.round((Math.min(size, size) * 0.48));
-  const innerR = Math.round((Math.min(size, size) * 0.28));
-  const ringThickness = Math.max(outerR - innerR, 12);
+  // Design notes: outer ≈ 48% of min dim, inner from ring thickness (default 20% of min dim)
+  const outerR = Math.round(Math.min(size, size) * 0.48);
+  const computedThickness = Math.max(Math.round(Math.min(size, size) * 0.20), 12);
+  const ringThickness = Math.max(ringThicknessProp ?? computedThickness, 8);
+  const innerR = Math.max(outerR - ringThickness, 4);
   const cx = size / 2;
   const cy = size / 2;
 
   // Label offset outside outer radius (8–12px)
-  const labelOffset = Math.max(8, Math.round(size * 0.03));
+  const labelOffset = Math.max(10, Math.round(size * 0.05));
 
   // Angles: start at 12 o'clock; proceed clockwise
   // We'll compute endAngle cumulatively with fractions of 360
@@ -109,7 +112,7 @@ export default function PieChart({
   const labelFor = (seg) => {
     const mid = (seg.startDeg + seg.endDeg) / 2;
     const p = toXY(outerR + labelOffset, mid);
-    const percent = hasData ? Math.round(seg.frac * 100) : 0;
+    const percent = hasData ? Math.max(0, Math.round(seg.frac * 100)) : 0;
 
     // Alignment rule: if label is on the right half (angle in [-90,90]), left-align; else right-align
     const normalizedMid = ((mid % 360) + 360) % 360; // 0..359
@@ -179,8 +182,9 @@ export default function PieChart({
         position: "relative",
         width: size,
         height: size,
-        padding: 16, // prevent clipping
+        padding: Math.round(size * 0.06), // scale padding with size to avoid clipping
         background: "var(--chart-bg, #FFFFFF)",
+        overflow: "visible", // allow labels to extend
       }}
       role="img"
       aria-label={ariaSummary}
@@ -189,24 +193,23 @@ export default function PieChart({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
+        style={{ display: "block", overflow: "visible" }}
         aria-hidden
       >
         <title>Donut breakdown</title>
-        <g transform={`translate(0, 0)`}>
-          {/* Draw ring segments */}
-          {finalSegments.map((seg, idx) => (
-            <path
-              key={`${seg.label}-${idx}`}
-              d={buildPath(outerR, innerR, seg.startDeg, seg.endDeg)}
-              fill={seg.color}
-              stroke={hoverIdx === idx ? "#FFFFFF" : "none"}
-              strokeWidth={hoverIdx === idx ? 1 : 0}
-              onMouseEnter={() => setHoverIdx(idx)}
-              onMouseLeave={() => setHoverIdx(null)}
-              style={{ transition: "stroke 120ms ease" }}
-            />
-          ))}
-        </g>
+        {/* Draw ring segments */}
+        {finalSegments.map((seg, idx) => (
+          <path
+            key={`${seg.label}-${idx}`}
+            d={buildPath(outerR, innerR, seg.startDeg, seg.endDeg)}
+            fill={seg.color}
+            stroke={hoverIdx === idx ? "#FFFFFF" : "none"}
+            strokeWidth={hoverIdx === idx ? 1 : 0}
+            onMouseEnter={() => setHoverIdx(idx)}
+            onMouseLeave={() => setHoverIdx(null)}
+            style={{ transition: "stroke 120ms ease" }}
+          />
+        ))}
       </svg>
 
       {/* External labels */}

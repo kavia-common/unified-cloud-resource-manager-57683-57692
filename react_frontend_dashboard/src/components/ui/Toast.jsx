@@ -61,12 +61,40 @@ export function ToastProvider({ children, placement = "top-right", defaultDurati
  */
 // PUBLIC_INTERFACE
 export function useToast() {
-  /** Hook to access toast API from anywhere under provider */
+  /** Hook to access toast API from anywhere under provider.
+   * If no provider is present, return a safe no-op API to avoid runtime crashes that can blank the UI.
+   */
   const ctx = useContext(ToastContext);
-  if (!ctx) {
-    throw new Error("useToast must be used within <ToastProvider>");
-  }
-  return ctx;
+  if (ctx) return ctx;
+
+  // Provide a graceful fallback to avoid throwing errors in environments/tests
+  // where the ToastProvider may not be mounted. This prevents the entire app
+  // from unmounting due to a context error.
+  const noop = () => 0;
+  const warn = (msg) =>
+    typeof console !== "undefined" &&
+    console.warn &&
+    console.warn("[Toast] Provider missing. Toast ignored:", msg);
+
+  return {
+    show: ({ message }) => {
+      warn(message);
+      return 0;
+    },
+    success: (message) => {
+      warn(message);
+      return 0;
+    },
+    error: (message) => {
+      warn(message);
+      return 0;
+    },
+    info: (message) => {
+      warn(message);
+      return 0;
+    },
+    remove: () => {},
+  };
 }
 
 function ToastContainer({ toasts, placement, onClose }) {

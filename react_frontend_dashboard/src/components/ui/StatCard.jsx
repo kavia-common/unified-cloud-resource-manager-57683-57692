@@ -7,7 +7,8 @@ export default function StatCard({
   deltaLabel,
   deltaType = "up",
   onClick,
-  variant = "neutral",
+  // Default to violet to satisfy new dashboard card color requirement
+  variant = "violet",
   valueStyleOverride,
 }) {
   /**
@@ -56,11 +57,13 @@ export default function StatCard({
       ["--card-oncolor-strong"]: "#111827",
     };
   } else if (variant === "violet") {
+    // Accessible violet on light surface: background and border are soft,
+    // text uses deep violet for strong contrast.
     cardVars = {
-      ["--card-bg"]: "#F3E8FF",
-      ["--card-border"]: "#E9D5FF",
-      ["--card-oncolor"]: "#6B21A8",
-      ["--card-oncolor-strong"]: "#4C1D95",
+      ["--card-bg"]: "#EDE9FE",            // Violet-100 (soft background)
+      ["--card-border"]: "#DDD6FE",        // Violet-200 (subtle border)
+      ["--card-oncolor"]: "#5B21B6",       // Violet-800 for labels
+      ["--card-oncolor-strong"]: "#3B0764",// Violet-950 for primary value
     };
   }
 

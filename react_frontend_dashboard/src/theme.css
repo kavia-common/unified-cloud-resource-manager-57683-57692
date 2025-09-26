@@ -23,6 +23,11 @@
   --chart-bg: #FFFFFF;
 }
 
+/* Minimal popover base to ensure consistent spacing and pointer-events */
+.popover {
+  pointer-events: auto;
+}
+
 /* App shell: sidebar + main content in a row, full-height viewport */
 .app-shell {
   display: flex;

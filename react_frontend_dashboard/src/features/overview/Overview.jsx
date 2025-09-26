@@ -8,13 +8,17 @@ import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
 import { useToast } from "../../components/ui/Toast";
-import { createLinkedAccount, getLinkedAccounts } from "../../services/api";
+import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
 
-// PUBLIC_INTERFACE
+/* PUBLIC_INTERFACE */
 export default function Overview() {
-  /** 
+  /**
    * Overview dashboard with a curved-edge banner header, key stats, and a styled comparison chart per design.
    * Enhancement: Dynamic axes/labels for Daily/Monthly/Yearly with mock data.
+   *
+   * Linked accounts loading:
+   * - If authenticated, fetch from Supabase and update stats.
+   * - If unauthenticated (auth-less workflow), do not show error; render 0 accounts gracefully.
    */
   // Dashboard stats state - initialize with mock baseline
   const [stats, setStats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
@@ -88,19 +92,25 @@ export default function Overview() {
 
   useEffect(() => {
     setChartData(buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`));
-    // Fetch linked accounts from backend
+    // Fetch linked accounts from backend (auth-aware)
     (async () => {
       try {
+        const authed = await isAuthenticated();
+        if (!authed) {
+          // Auth-less mode: do not attempt DB call; show 0 accounts silently
+          setExistingAccounts([]);
+          setStats((prev) => ({ ...prev, accounts: 0 }));
+          return;
+        }
         const accounts = await getLinkedAccounts();
         setExistingAccounts(accounts);
-        // Reflect counts in stats
         setStats((prev) => ({
           ...prev,
           accounts: accounts.length,
         }));
       } catch (err) {
         console.warn("Failed to load linked accounts:", err?.message || err);
-        // Non-blocking: show info toast
+        // Only show toast for real errors when authenticated; info level to avoid alarming users.
         toast.info("Could not load linked accounts.", 2500);
       }
     })();
@@ -411,11 +421,17 @@ export default function Overview() {
         <p className="text-sm" style={{ color: "var(--muted)" }}>
           Connected accounts summary:
         </p>
-        <ul style={{ margin: 0, paddingLeft: 18 }}>
-          {existingAccounts.map((acc, idx) => (
-            <li key={idx}>{acc.provider}: {acc.name} ({acc.account_id})</li>
-          ))}
-        </ul>
+        {existingAccounts.length === 0 ? (
+          <div className="text-xs" style={{ color: "var(--muted)" }}>
+            No linked accounts.
+          </div>
+        ) : (
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {existingAccounts.map((acc, idx) => (
+              <li key={idx}>{acc.provider}: {acc.name} ({acc.account_id})</li>
+            ))}
+          </ul>
+        )}
       </Modal>
 
       <Modal

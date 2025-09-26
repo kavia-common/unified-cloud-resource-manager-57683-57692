@@ -40,7 +40,11 @@ if (!hasSupabaseConfig) {
 }
 
 /* PUBLIC_INTERFACE */
-/** Export a configured Supabase client instance for use across the app. */
+/**
+ * Export a configured Supabase client instance for use across the app.
+ * Note: In development without env vars, client will be created with placeholders.
+ * Many requests will fail until env is provided, which is handled gracefully by callers.
+ */
 export const supabase = createClient(
   supabaseUrl || "about:blank",
   supabaseAnonKey || "missing-key"

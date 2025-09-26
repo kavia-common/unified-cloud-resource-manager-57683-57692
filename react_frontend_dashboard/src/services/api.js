@@ -197,13 +197,31 @@ export async function fetchActivity({ page = 1, pageSize = 25 }, signal) {
   return callEdgeFunction('queue-processor', 'POST', { action: 'activity', page, pageSize }, signal);
 }
 
+/**
+ * PUBLIC_INTERFACE
+ */
+// PUBLIC_INTERFACE
+export async function isAuthenticated() {
+  /** Returns true if there is an active session, else false (auth-less mode). */
+  const { data } = await supabase.auth.getSession();
+  return Boolean(data?.session);
+}
+
 // PUBLIC_INTERFACE
 export async function getLinkedAccounts(signal) {
   /**
    * Gets linked accounts for current user from DB (direct PostgREST via supabase-js).
    * Requires RLS policy allowing user_id = auth.uid() for select.
    * Returns array of { id, provider, name, account_id, status, metadata, created_at }
+   *
+   * In auth-less mode (no session), this resolves to [] instead of throwing, so
+   * callers can render a neutral empty state without error noise.
    */
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData?.session) {
+    // Auth-less workflow: no session; skip querying and return empty array.
+    return [];
+  }
   const { data, error } = await supabase
     .from('cloud_accounts')
     .select('id, provider, name, account_id, status, metadata, created_at')

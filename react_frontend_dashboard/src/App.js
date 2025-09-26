@@ -16,7 +16,12 @@ import "./App.css";
  * App shell without authentication screens.
  * Removes login/sign-in routes and renders the dashboard directly.
  */
+// PUBLIC_INTERFACE
 function App() {
+  /** 
+   * This is the public root shell for the dashboard UI.
+   * Providers (e.g., ToastProvider, AuthContext) are expected to be applied at src/index.js.
+   */
   return (
     <BrowserRouter>
       <div className="app-shell">

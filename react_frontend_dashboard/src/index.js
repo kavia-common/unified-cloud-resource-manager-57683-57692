@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { hasSupabaseConfig } from "./services/supabaseClient";
+import { ToastProvider } from "./components/ui/Toast";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -67,7 +68,9 @@ const root = ReactDOM.createRoot(rootEl);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      {hasSupabaseConfig ? <App /> : <MissingConfigNotice />}
+      <ToastProvider>
+        {hasSupabaseConfig ? <App /> : <MissingConfigNotice />}
+      </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

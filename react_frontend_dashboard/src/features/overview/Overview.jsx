@@ -215,7 +215,7 @@ export default function Overview() {
         />
       </div>
 
-      <div className="card-grid" aria-label="Key metrics">
+      <div className="card-grid" aria-label="Key metrics" style={{ marginTop: 4 }}>
         <StatCard
           label="Linked Accounts"
           value={stats.accounts}

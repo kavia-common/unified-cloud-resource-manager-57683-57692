@@ -95,16 +95,6 @@ export default function StatCard({
       onClick={onClick}
       onKeyDown={handleKeyDown}
       {...(onClick ? { role: "button", tabIndex: 0, "aria-label": `${label}: ${value}` } : {})}
-      onMouseDown={(e) => {
-        // micro interaction press
-        e.currentTarget.style.transform = "translateY(0.5px)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
     >
       <div className="label" style={labelStyle}>
         {label}

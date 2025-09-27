@@ -11,6 +11,7 @@ import DiscoverResourcesModal from "../../components/ui/DiscoverResourcesModal";
 import RunOptimizationModal from "../../components/ui/RunOptimizationModal";
 import { useToast } from "../../components/ui/Toast";
 import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
+import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } from "../../services/accountStore";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -103,21 +104,28 @@ export default function Overview() {
       try {
         const authed = await isAuthenticated();
         if (!authed) {
-          // Auth-less mode: do not attempt DB call; show 0 accounts silently
-          setExistingAccounts([]);
-          setStats((prev) => ({ ...prev, accounts: 0 }));
+          // Auth-less mode: use in-memory only
+          setAccounts([]); // ensure empty seed
+          setExistingAccounts(getAccounts());
+          setStats((prev) => ({ ...prev, ...computeStatsFromAccounts(prev) }));
           return;
         }
         const accounts = await getLinkedAccounts();
-        setExistingAccounts(accounts);
+        setAccounts(accounts || []);
+        const all = getAccounts();
+        setExistingAccounts(all);
         setStats((prev) => ({
           ...prev,
-          accounts: accounts.length,
+          ...computeStatsFromAccounts(prev),
         }));
       } catch (err) {
         console.warn("Failed to load linked accounts:", err?.message || err);
         // Only show toast for real errors when authenticated; info level to avoid alarming users.
         toast.info("Could not load linked accounts.", 2500);
+        // Fall back to in-memory
+        const all = getAccounts();
+        setExistingAccounts(all);
+        setStats((prev) => ({ ...prev, ...computeStatsFromAccounts(prev) }));
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -620,35 +628,67 @@ export default function Overview() {
         existingAccounts={existingAccounts}
         onSubmit={async (payload) => {
           try {
-            // Persist via Edge Function
-            await createLinkedAccount({
-              provider: payload.provider,
-              name: payload.name,
-              credentials: payload.credentials,
-            });
-            // Refresh from backend to ensure list reflects saved accounts
-            const accounts = await getLinkedAccounts();
-            setExistingAccounts(accounts);
+            // Try to persist via backend only if authenticated; otherwise operate in-memory
+            const authed = await isAuthenticated();
+            if (authed) {
+              await createLinkedAccount({
+                provider: payload.provider,
+                name: payload.name,
+                credentials: payload.credentials,
+              });
+              // Re-seed from backend
+              const backendAccounts = await getLinkedAccounts();
+              setAccounts(backendAccounts || []);
+            } else {
+              // Create a mock account_id if not provided
+              const mockId =
+                (payload.credentials?.accountId) ||
+                (payload.credentials?.subscriptionId) ||
+                (payload.credentials?.accessKeyId?.slice(0, 12)) ||
+                Math.random().toString(36).slice(2, 10);
+              appendAccount({
+                provider: payload.provider,
+                name: payload.name,
+                account_id: mockId,
+              });
+            }
 
-            // Update stats: real account count; simulate the rest for UX
-            const randInRange = (min, max) => Math.floor(min + Math.random() * (max - min + 1));
-            const addedResources = randInRange(20, 60);
-            const addedDailySpend = randInRange(20, 80);
-            const addedRecs = randInRange(1, 3);
+            // Refresh UI from in-memory store (which is now merged/seeded)
+            const all = getAccounts();
+            setExistingAccounts(all);
             setStats((prev) => ({
-              accounts: accounts.length,
-              resources: (prev.resources || 0) + addedResources,
-              daily: Number(prev.daily || 0) + addedDailySpend,
-              recs: (prev.recs || 0) + addedRecs,
+              ...prev,
+              ...computeStatsFromAccounts(prev),
             }));
 
             // Success toast
             toast.success("Account has been created successfully", 3500);
           } catch (err) {
             console.error("Create account failed:", err);
-            // Error toast
-            toast.error("Invalid Credentials, try again.", 4000);
-            throw err; // keep rejection for modal if needed
+            // Keep in-memory append as ultimate fallback if backend fails
+            try {
+              const mockId =
+                (payload.credentials?.accountId) ||
+                (payload.credentials?.subscriptionId) ||
+                (payload.credentials?.accessKeyId?.slice(0, 12)) ||
+                Math.random().toString(36).slice(2, 10);
+              appendAccount({
+                provider: payload.provider,
+                name: payload.name,
+                account_id: mockId,
+              });
+              const all = getAccounts();
+              setExistingAccounts(all);
+              setStats((prev) => ({
+                ...prev,
+                ...computeStatsFromAccounts(prev),
+              }));
+              toast.info("Saved locally (offline mode).", 3500);
+            } catch (_) {
+              // Error toast
+              toast.error("Invalid Credentials, try again.", 4000);
+              throw err; // preserve rejection for modal if needed
+            }
           }
         }}
       />

@@ -7,6 +7,8 @@ import { CLOUD_COLORS } from "../../components/ui/Charts";
 
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
+import DiscoverResourcesModal from "../../components/ui/DiscoverResourcesModal";
+import RunOptimizationModal from "../../components/ui/RunOptimizationModal";
 import { useToast } from "../../components/ui/Toast";
 import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
 
@@ -32,6 +34,10 @@ export default function Overview() {
   const [showResources, setShowResources] = useState(false);
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
+
+  // Mini panels
+  const [showDiscoverModal, setShowDiscoverModal] = useState(false);
+  const [showOptimizeModal, setShowOptimizeModal] = useState(false);
 
   // One-click action modal states (removed: Add Account, Discover, Optimize)
   // const [showAddAccount, setShowAddAccount] = useState(false);
@@ -467,7 +473,7 @@ export default function Overview() {
                 className="actionBtn pop-hover"
                 aria-label="Discover Resources"
                 style={actionBtnStyle}
-                onClick={() => setShowResources(true)}
+                onClick={() => setShowDiscoverModal(true)}
               >
                 <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#A78BFA" }}>
                   {/* magnifier icon */}
@@ -489,7 +495,7 @@ export default function Overview() {
                 className="actionBtn pop-hover"
                 aria-label="Run Optimization"
                 style={actionBtnStyle}
-                onClick={() => setShowRecs(true)}
+                onClick={() => setShowOptimizeModal(true)}
               >
                 <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#60A5FA" }}>
                   {/* rocket icon */}
@@ -615,7 +621,7 @@ export default function Overview() {
         onSubmit={async (payload) => {
           try {
             // Persist via Edge Function
-            const res = await createLinkedAccount({
+            await createLinkedAccount({
               provider: payload.provider,
               name: payload.name,
               credentials: payload.credentials,
@@ -645,6 +651,29 @@ export default function Overview() {
             throw err; // keep rejection for modal if needed
           }
         }}
+      />
+
+      {/* Discover Resources mini panel */}
+      <DiscoverResourcesModal
+        open={showDiscoverModal}
+        onClose={() => setShowDiscoverModal(false)}
+        onComplete={(payload) => {
+          // Update stats with discovered counts for immediate feedback
+          if (payload?.summary) {
+            const total =
+              (payload.summary.compute || 0) +
+              (payload.summary.storage || 0) +
+              (payload.summary.databases || 0) +
+              (payload.summary.networking || 0);
+            setStats((prev) => ({ ...prev, resources: total || prev.resources }));
+          }
+        }}
+      />
+
+      {/* Run Optimization mini panel */}
+      <RunOptimizationModal
+        open={showOptimizeModal}
+        onClose={() => setShowOptimizeModal(false)}
       />
     </div>
   );

@@ -28,9 +28,26 @@ export const Modal = memo(function Modal({ title, open, onClose, children, foote
       className="modal-backdrop"
       onClick={disableBackdropClose ? undefined : onClose}
       role="presentation"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(17, 24, 39, 0.35)",
+        display: "grid",
+        placeItems: "center",
+        padding: 16,
+        zIndex: 50
+      }}
     >
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+      <div className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()} style={{
+        width: "100%",
+        maxWidth: 520,
+        background: "#FFFFFF",
+        border: "1px solid var(--border, #E5E7EB)",
+        borderRadius: 12,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+        overflow: "hidden"
+      }}>
+        <div className="modal-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 14px", borderBottom: "1px solid var(--border, #E5E7EB)", fontWeight: 700 }}>
           <span>{title}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {headerActions}
@@ -45,8 +62,8 @@ export const Modal = memo(function Modal({ title, open, onClose, children, foote
             </button>
           </div>
         </div>
-        <div className="modal-body">{children}</div>
-        <div className="modal-footer">
+        <div className="modal-body" style={{ padding: 14 }}>{children}</div>
+        <div className="modal-footer" style={{ padding: 12, display: "flex", justifyContent: "flex-end", gap: 8, borderTop: "1px solid var(--border, #E5E7EB)" }}>
           {footer ?? (
             <button className="btn" onClick={onClose}>Close</button>
           )}

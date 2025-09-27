@@ -4,7 +4,7 @@ import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
-import CostAnomalyAlert from "../../components/ui/CostAnomalyAlert";
+
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
 import { useToast } from "../../components/ui/Toast";
@@ -217,13 +217,7 @@ export default function Overview() {
 
       {/* Action bar removed to streamline layout per request */}
 
-      {/* Prominent Cost Anomaly Alert */}
-      <div style={{ marginTop: 8 }}>
-        <CostAnomalyAlert
-          provider="Azure"
-          message="Cost spike detected on Azure: +27% week-on-week"
-        />
-      </div>
+
 
       <div className="card-grid" aria-label="Key metrics" style={{ marginTop: 4 }}>
         <StatCard
@@ -358,49 +352,7 @@ export default function Overview() {
               </div>
             </li>
 
-            <li
-              className="rec-item"
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "12px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                background: "#FFFFFF",
-                boxShadow: "var(--shadow)",
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  width: 28,
-                  height: 28,
-                  minWidth: 28,
-                  borderRadius: 8,
-                  display: "grid",
-                  placeItems: "center",
-                  background: "#FEF2F2", // red-50
-                  color: "#EF4444", // error
-                  border: "1px solid #FECACA", // red-200
-                }}
-              >
-                {/* anomaly icon */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 9v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M12 3 2 21h20L12 3z" stroke="currentColor" strokeWidth="2" fill="none" />
-                </svg>
-              </div>
-              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
-                  Anomaly: AWS bill spiked 20% yesterday
-                </div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>
-                  Review top services and recent deployments.
-                </div>
-              </div>
-            </li>
+
           </ul>
 
           {/* Responsive: tighten spacing on very small screens */}
@@ -634,7 +586,7 @@ export default function Overview() {
           <div className="badge" style={{ color: "#000000" }}>AWS: $242.12</div>
           <div className="badge" style={{ color: "#000000" }}>Azure: $138.44</div>
           <div className="badge" style={{ color: "#000000" }}>GCP: $31.76</div>
-          <div className="badge success" style={{ color: "#000000" }}>Anomaly checks: OK</div>
+
         </div>
       </Modal>
 

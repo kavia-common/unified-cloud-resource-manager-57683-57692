@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { hasSupabaseConfig } from "./services/supabaseClient";
 import { ToastProvider } from "./components/ui/Toast";
+import DevConfigNotice from "./components/ui/DevConfigNotice";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -32,22 +33,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-function MissingConfigNotice() {
-  return (
-    <div style={{ padding: 24, fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
-      <h2>Supabase is not configured</h2>
-      <p>
-        Please create a <code>.env</code> file in <code>react_frontend_dashboard</code> with:
-      </p>
-      <pre style={{ background: '#f3f4f6', padding: 12, borderRadius: 6 }}>
-{`REACT_APP_SUPABASE_URL=https://<project>.supabase.co
-REACT_APP_SUPABASE_KEY=<anon-public-key>`}
-      </pre>
-      <p>Then restart the development server.</p>
-    </div>
-  );
-}
-
 // Ensure a root element exists; if not, create one to avoid silent failure.
 let rootEl = document.getElementById("root");
 if (!rootEl) {
@@ -73,8 +58,9 @@ rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
+      <DevConfigNotice />
       <ToastProvider>
-        {hasSupabaseConfig ? <App /> : <MissingConfigNotice />}
+        {hasSupabaseConfig ? <App /> : null}
       </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>

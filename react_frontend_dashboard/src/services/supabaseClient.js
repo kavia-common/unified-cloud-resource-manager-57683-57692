@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
  * - export const supabase
  * - export const hasSupabaseConfig
  * - export function assertSupabaseConfigured()
+ * - export function getEdgeFunctionsBaseUrl()
  *
  * Required environment variables (must be set in this container's .env by the orchestrator):
  * - REACT_APP_SUPABASE_URL  (e.g., https://<project-ref>.supabase.co)
@@ -25,6 +26,13 @@ const supabaseAnonKey =
 
 // Track configuration state for conditional rendering elsewhere
 export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+
+// PUBLIC_INTERFACE
+export function getEdgeFunctionsBaseUrl() {
+  /** Returns the absolute base URL for Edge Functions, or null if not configured. */
+  if (!supabaseUrl) return null;
+  return `${supabaseUrl}/functions/v1`;
+}
 
 // Provide explicit assertion to fail fast in dev if config is missing
 // PUBLIC_INTERFACE

@@ -8,7 +8,7 @@ import { CLOUD_COLORS } from "../../components/ui/Charts";
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
 import DiscoverResourcesModal from "../../components/ui/DiscoverResourcesModal";
-import RunOptimizationModal from "../../components/ui/RunOptimizationModal";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/ui/Toast";
 import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
 import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } from "../../services/accountStore";
@@ -38,7 +38,7 @@ export default function Overview() {
 
   // Mini panels
   const [showDiscoverModal, setShowDiscoverModal] = useState(false);
-  const [showOptimizeModal, setShowOptimizeModal] = useState(false);
+  const navigate = useNavigate();
 
   // One-click action modal states (removed: Add Account, Discover, Optimize)
   // const [showAddAccount, setShowAddAccount] = useState(false);
@@ -497,22 +497,24 @@ export default function Overview() {
                 </svg>
               </button>
 
-              {/* Run Optimization */}
+              {/* View Recommendations (replaces Run Optimization) */}
               <button
                 type="button"
                 className="actionBtn pop-hover"
-                aria-label="Run Optimization"
+                aria-label="View Recommendations"
                 style={actionBtnStyle}
-                onClick={() => setShowOptimizeModal(true)}
+                onClick={() => navigate("/recommendations")}
               >
                 <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#60A5FA" }}>
-                  {/* rocket icon */}
+                  {/* bar chart icon */}
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-                    <path d="M5 19s2-1 4-1 4 1 4 1 0-3 2-5 5-2 5-2 0-3-2-5-5-2-5-2-0 3-2 5-5 2-5 2 1 2-1 4-4 3-4 3 1-3 3-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 10l-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 20V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    <path d="M10 20V10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    <path d="M16 20v-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    <path d="M22 20V4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                   </svg>
                 </div>
-                <span className="label" style={actionLabelStyle}>Run Optimization</span>
+                <span className="label" style={actionLabelStyle}>View Recommendations</span>
                 <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
                   <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -710,11 +712,7 @@ export default function Overview() {
         }}
       />
 
-      {/* Run Optimization mini panel */}
-      <RunOptimizationModal
-        open={showOptimizeModal}
-        onClose={() => setShowOptimizeModal(false)}
-      />
+
     </div>
   );
 }

@@ -6,10 +6,31 @@ import { supabase } from '../services/supabaseClient';
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 // Use absolute URL for Edge Functions to avoid relative-path failures in preview/build setups.
-const EDGE_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : '/functions/v1';
+// Do NOT default to relative path – it fails in CI/preview environments that don't proxy to Supabase.
+const EDGE_BASE = (() => {
+  if (!SUPABASE_URL) {
+    // Provide actionable guidance: missing env
+    const err = new Error(
+      'Supabase URL is not configured. Set REACT_APP_SUPABASE_URL in your .env to enable Edge Function calls.'
+    );
+    err.code = 'CONFIG_MISSING';
+    // We won't throw here immediately to avoid breaking import time; callEdgeFunction will check and throw with context.
+    return null;
+  }
+  return `${SUPABASE_URL}/functions/v1`;
+})();
 
 // Helpers
 async function callEdgeFunction(name, method = 'POST', body = null, signal) {
+  // Validate configuration early to avoid confusing 404s on relative paths.
+  if (!EDGE_BASE) {
+    const err = new Error(
+      `Supabase is not configured. Cannot call edge function "${name}". Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_KEY in your .env, then restart.`
+    );
+    err.code = 'CONFIG_MISSING';
+    throw err;
+  }
+
   // Attach Authorization header with the current session access token.
   // Supabase Edge Functions require a valid JWT for user-scoped operations.
   const { data: sessionData } = await supabase.auth.getSession();

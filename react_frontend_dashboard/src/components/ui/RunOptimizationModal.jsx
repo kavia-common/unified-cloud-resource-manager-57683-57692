@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { fetchRecommendations } from "../../services/api";
+import { assertSupabaseConfigured } from "../../services/supabaseClient";
 
 /**
  * PUBLIC_INTERFACE
@@ -27,6 +28,14 @@ export default function RunOptimizationModal({ open, onClose }) {
 
   async function run() {
     if (running) return;
+    // Validate config before starting timers to give instant feedback.
+    try {
+      assertSupabaseConfigured();
+    } catch (cfgErr) {
+      setMessage(`Setup required: ${cfgErr.message}`);
+      return;
+    }
+
     setRunning(true);
     setMessage("Analyzing usage and generating recommendations…");
     setProgress(10);
@@ -49,12 +58,14 @@ export default function RunOptimizationModal({ open, onClose }) {
       setMessage("Optimization complete.");
     } catch (err) {
       // Provide clearer, actionable messages for common cases
-      if (err?.code === 'UNAUTHORIZED' || err?.status === 401) {
+      if (err?.code === 'CONFIG_MISSING') {
+        setMessage("Configuration missing: Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_KEY in .env and restart the app.");
+      } else if (err?.code === 'UNAUTHORIZED' || err?.status === 401) {
         setMessage("Error: Unauthorized. Please sign in to run optimization.");
       } else if (err?.code === 'NOT_FOUND' || err?.status === 404) {
         setMessage("Error: Optimization endpoint not found. Ensure the 'recommendations' Edge Function is deployed and reachable at /recommendations/run.");
       } else if (err?.code === 'NETWORK_ERROR') {
-        setMessage("Network error: Unable to reach the server. Check your network and Supabase URL configuration.");
+        setMessage("Network error: Unable to reach Supabase Edge Functions. Verify REACT_APP_SUPABASE_URL and check CORS/Supabase project availability.");
       } else {
         setMessage(`Error: ${err?.message || "Failed to run optimization"}`);
       }

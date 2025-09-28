@@ -120,9 +120,9 @@ export default function Inventory() {
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
-  const [operation, setOperation] = useState("start");
-  const [size, setSize] = useState("medium");
+  // Operate modal state: show current status and allow changing it
   const [open, setOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState("");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -155,9 +155,11 @@ export default function Inventory() {
             className="btn ghost"
             onClick={() => {
               setSelected(r);
+              setPendingStatus(r.status || "");
               setOpen(true);
-              setOperation("start");
             }}
+            aria-label={`Operate ${r.name}`}
+            title="Operate"
           >
             Operate
           </button>
@@ -166,19 +168,17 @@ export default function Inventory() {
     },
   ];
 
-  function runOperation() {
+  // PUBLIC_INTERFACE
+  function saveStatusChange() {
+    /** Save the selected status to the selected resource and close modal. */
     if (!selected) return;
+    const newStatus = pendingStatus || selected.status;
     setRows((prev) =>
-      prev.map((r) => {
-        if (r.id !== selected.id) return r;
-        if (operation === "start") return { ...r, status: "Running" };
-        if (operation === "stop") return { ...r, status: "Stopped" };
-        if (operation === "scale") return { ...r, size };
-        return r;
-      })
+      prev.map((r) => (r.id === selected.id ? { ...r, status: newStatus } : r))
     );
     setOpen(false);
     setSelected(null);
+    setPendingStatus("");
   }
 
   return (
@@ -243,32 +243,56 @@ export default function Inventory() {
             <button className="btn ghost" onClick={() => setOpen(false)}>
               Cancel
             </button>
-            <button className="btn primary" onClick={runOperation}>
-              Run
+            <button className="btn primary" onClick={saveStatusChange}>
+              Save
             </button>
           </>
         }
       >
-        <div style={{ display: "grid", gap: 10 }}>
-          <label>
-            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Operation</div>
-            <select className="select" value={operation} onChange={(e) => setOperation(e.target.value)}>
-              <option value="start">Start</option>
-              <option value="stop">Stop</option>
-              <option value="scale">Scale</option>
-            </select>
-          </label>
-          {operation === "scale" && (
-            <label>
-              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Target Size</div>
-              <select className="select" value={size} onChange={(e) => setSize(e.target.value)}>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </label>
-          )}
-        </div>
+        {selected && (
+          <div style={{ display: "grid", gap: 12 }}>
+            <div
+              style={{
+                padding: 10,
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                background: "var(--surface)",
+              }}
+              aria-live="polite"
+            >
+              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>Current status</div>
+              <div style={{ fontWeight: 600 }}>{selected.status || "Unknown"}</div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Change status</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  className="btn"
+                  onClick={() => setPendingStatus("Running")}
+                  aria-pressed={pendingStatus === "Running"}
+                  style={{
+                    borderColor: pendingStatus === "Running" ? "var(--primary)" : "var(--border)",
+                    background: pendingStatus === "Running" ? "color-mix(in oklab, #FFFFFF 92%, var(--surface) 8%)" : "#fff",
+                  }}
+                >
+                  Running
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => setPendingStatus("Stopped")}
+                  aria-pressed={pendingStatus === "Stopped"}
+                  style={{
+                    borderColor: pendingStatus === "Stopped" ? "var(--primary)" : "var(--border)",
+                    background: pendingStatus === "Stopped" ? "color-mix(in oklab, #FFFFFF 92%, var(--surface) 8%)" : "#fff",
+                  }}
+                >
+                  Stopped
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

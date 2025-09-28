@@ -92,36 +92,74 @@ body { margin: 0; background: var(--background); }
 @media (max-width: 1024px) { .topbar .search input { min-width: 160px; } }
 
 /* Minimalist semantic table styles for Pure White theme */
-.table-wrapper { width: 100%; overflow-x: auto; }
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  /* Ensure rounded corners are preserved if the wrapper scrolls */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
 .table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  /* Rounded outer corners */
+  border-radius: 12px;
+  /* Clip inner contents to the rounding for a clean edge */
+  overflow: hidden;
 }
+
 .table thead th {
   text-align: left;
   font: 600 12px/1.2 "Helvetica Neue", Arial, sans-serif;
   /* Ensure high contrast against black header background */
   color: #FFFFFF;
   padding: 10px 12px;
-  /* Black header background per request; keep minimalist look */
+  /* Minimalist dark header for contrast */
   background: #000000;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
+
+/* Round the header row top corners to match the table container */
+.table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+.table thead th:last-child {
+  border-top-right-radius: 12px;
+}
+
 .table tbody td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   font-size: 14px;
 }
-.table tbody tr:last-child td { border-bottom: none; }
-.table--transparent { background: transparent; border-color: var(--border); }
+
+/* Remove bottom border on last row, and round the bottom corners for a unified capsule feel */
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Variant that removes fill while preserving structure */
+.table--transparent {
+  background: transparent;
+  border-color: var(--border);
+}
+
+/* Cells */
 .table__cell--empty { text-align: center; color: var(--muted); padding: 16px; }
 .table__cell--actions { text-align: right; }
+
+/* Header modifier for Inventory if needed */
 .table__head--inventory { /* reserved for Inventory header customization if needed */ }
 
 /* Utility for action group inside table cells */

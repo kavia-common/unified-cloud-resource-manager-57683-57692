@@ -104,9 +104,11 @@ body { margin: 0; background: var(--background); }
 .table thead th {
   text-align: left;
   font: 600 12px/1.2 "Helvetica Neue", Arial, sans-serif;
-  color: var(--muted);
+  /* Ensure high contrast against black header background */
+  color: #FFFFFF;
   padding: 10px 12px;
-  background: var(--surface);
+  /* Black header background per request; keep minimalist look */
+  background: #000000;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }

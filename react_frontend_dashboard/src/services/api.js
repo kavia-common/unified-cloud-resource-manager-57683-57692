@@ -63,6 +63,16 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
     throw err;
   }
 
+  // Some CORS failures can yield opaque responses; treat them as network/CORS issues with guidance.
+  // Note: In standard mode, fetch with 'cors' returns res.type === 'cors'; opaque means blocked by CORS.
+  if (res && res.type === 'opaque') {
+    const err = new Error('CORS/opaque response when calling Edge Function. Check Supabase CORS settings and the app origin.');
+    err.code = 'NETWORK_ERROR';
+    err.status = 0;
+    err.url = url;
+    throw err;
+  }
+
   const text = await res.text();
   let json = null;
   try {

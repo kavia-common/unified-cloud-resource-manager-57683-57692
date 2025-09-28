@@ -9,6 +9,15 @@ import { createClient } from "@supabase/supabase-js";
  * - export const supabase
  * - export const hasSupabaseConfig
  * - export function assertSupabaseConfigured()
+ *
+ * Required environment variables (must be set in this container's .env by the orchestrator):
+ * - REACT_APP_SUPABASE_URL  (e.g., https://<project-ref>.supabase.co)
+ * - REACT_APP_SUPABASE_KEY  (anon public key)
+ *
+ * Notes:
+ * - Do not hardcode credentials; request env values from the user/orchestrator.
+ * - Ensure Supabase project CORS settings include this app's origin.
+ * - Edge Functions will be invoked at: ${REACT_APP_SUPABASE_URL}/functions/v1/<function-name>
  */
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey =

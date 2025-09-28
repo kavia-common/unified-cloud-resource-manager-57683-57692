@@ -65,7 +65,10 @@ export default function RunOptimizationModal({ open, onClose }) {
       } else if (err?.code === 'NOT_FOUND' || err?.status === 404) {
         setMessage("Error: Optimization endpoint not found. Ensure the 'recommendations' Edge Function is deployed and reachable at /recommendations/run.");
       } else if (err?.code === 'NETWORK_ERROR') {
-        setMessage("Network error: Unable to reach Supabase Edge Functions. Verify REACT_APP_SUPABASE_URL and check CORS/Supabase project availability.");
+        // Provide explicit CORS guidance if fetch failed pre-flight or due to origin block.
+        setMessage("Network error: Unable to reach Supabase Edge Functions. 1) Verify REACT_APP_SUPABASE_URL in .env. 2) Ensure your Supabase project's URL matches this env. 3) In Supabase Dashboard > Authentication > URL Configuration & Storage > CORS, add this app's origin. 4) Confirm the project is reachable.");
+      } else if (err?.status === 403) {
+        setMessage("Access denied: Check Supabase Auth session and CORS settings for your app origin.");
       } else {
         setMessage(`Error: ${err?.message || "Failed to run optimization"}`);
       }

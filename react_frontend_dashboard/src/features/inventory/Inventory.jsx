@@ -8,7 +8,6 @@ import { Popover } from "../../components/ui/Popover";
 export default function Inventory() {
   /** Inventory with filters, actions and operation modal (start/stop/scale). */
   const [rows, setRows] = useState([
-    // Renamed 'state' to 'status' and mapped values to capitalized strings per requirement
     { id: "i-123", name: "web-1", provider: "aws", type: "ec2", region: "us-east-1", status: "Running", cost_daily: 4.12 },
     { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", status: "Stopped", cost_daily: 5.44 },
     { id: "db-01", name: "orders-db", provider: "aws", type: "rds", region: "us-west-2", status: "Running", cost_daily: 7.8 },
@@ -33,9 +32,6 @@ export default function Inventory() {
     });
   }, [rows, filters, search]);
 
-  // Status is rendered as plain text; no styling or badges per requirement
-  const statusBadge = () => "";
-
   const columns = [
     { key: "id", label: "ID" },
     { key: "name", label: "Name" },
@@ -46,19 +42,15 @@ export default function Inventory() {
     },
     { key: "type", label: "Type" },
     { key: "region", label: "Region" },
-    {
-      key: "status",
-      label: "Status",
-      render: (v) => <span>{v}</span>,
-    },
+    { key: "status", label: "Status" },
     { key: "cost_daily", label: "Daily Cost ($)", render: (v) => (v ? Number(v).toFixed(2) : "—") },
     {
       key: "actions",
       label: "Actions",
       render: (_v, r) => (
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="table__actions">
           <button
-            className="btn action"
+            className="btn ghost"
             onClick={() => {
               setSelected(r);
               setOpen(true);
@@ -73,7 +65,6 @@ export default function Inventory() {
   ];
 
   function runOperation() {
-    // Mock update of status
     if (!selected) return;
     setRows((prev) =>
       prev.map((r) => {
@@ -97,7 +88,6 @@ export default function Inventory() {
         </div>
       </div>
       <div className="panel-body">
-        {/* Actions row above the table: filter icon on the left */}
         <div className="table-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div style={{ position: "relative", display: "inline-block" }}>
             <button
@@ -109,14 +99,12 @@ export default function Inventory() {
               onClick={() => setFilterOpen((v) => !v)}
               style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
             >
-              {/* Simple SVG filter icon to avoid extra dependencies */}
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm4 6h2v2h-2v-2z" />
               </svg>
               <span style={{ fontSize: 14 }}>Filters</span>
             </button>
 
-            {/* Popover anchored to the button; container is relatively positioned */}
             <div style={{ position: "absolute" }}>
               <Popover open={filterOpen} onClose={() => setFilterOpen(false)} anchorRef={filterBtnRef} ariaLabel="Inventory filters">
                 <div
@@ -129,7 +117,6 @@ export default function Inventory() {
                     maxWidth: 480,
                   }}
                 >
-                  {/* Reuse the same FilterBar; compact by hiding date range to keep it tidy */}
                   <FilterBar
                     values={filters}
                     onChange={setFilters}
@@ -152,7 +139,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Placeholder right-aligned action area for future controls */}
           <div />
         </div>
 
@@ -163,29 +149,6 @@ export default function Inventory() {
           emptyMessage="No resources discovered yet."
           headerClassName="table__head--inventory"
           tableClassName="table--inventory"
-          rowClassName={(r) => {
-            // Match EXACT tuples as specified (case-sensitive where noted via render/output).
-            // Our data stores provider in lowercase; header rendering uppercases provider for view.
-            // We must check the underlying raw values and cost precision exactly as per spec.
-            const tuple = [
-              r.id,
-              r.name,
-              String(r.provider || "").toUpperCase(), // normalize to compare against AWS/AZURE
-              r.type,
-              r.region,
-              r.status,
-              // Two decimal precision for comparison against the provided value strings
-              r.cost_daily != null ? Number(r.cost_daily).toFixed(2) : ""
-            ].join("|");
-
-            const targets = new Set([
-              ["i-123","web-1","AWS","ec2","us-east-1","Running","4.12"].join("|"),
-              ["vm-001","api-1","AZURE","vm","eastus","Stopped","5.44"].join("|"),
-              ["db-01","orders-db","AWS","rds","us-west-2","Running","7.80"].join("|"),
-            ]);
-
-            return targets.has(tuple) ? "inventory-row-black-border" : "";
-          }}
         />
       </div>
 

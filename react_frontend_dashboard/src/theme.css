@@ -16,19 +16,17 @@
   --legend-text: #6B7280;
 
   /* Donut chart palette per assets/donut_chart_design_notes.md */
-  --chart-apples: #F86E6C;   /* salmon/coral red */
-  --chart-pears: #1CC7C8;    /* teal/cyan */
-  --chart-oranges: #FFA24A;  /* orange */
+  --chart-apples: #F86E6C;
+  --chart-pears: #1CC7C8;
+  --chart-oranges: #FFA24A;
   --chart-label-text: #666A6D;
   --chart-bg: #FFFFFF;
 }
 
-/* Minimal popover base to ensure consistent spacing and pointer-events */
-.popover {
-  pointer-events: auto;
-}
+/* Minimal popover base */
+.popover { pointer-events: auto; }
 
-/* App shell: sidebar + main content in a row, full-height viewport */
+/* App shell */
 .app-shell {
   display: flex;
   min-height: 100vh;
@@ -36,172 +34,97 @@
   color: var(--text);
 }
 
-/* Main column contains Topbar and route content */
-.main {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-width: 0;
-}
+/* Main column */
+.main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
 
-/* Topbar row */
+/* Topbar */
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--border);
 }
-
-/* Topbar parts */
 .topbar .search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; box-shadow: var(--shadow);
 }
 .topbar .search input {
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background: transparent;
-  min-width: 260px;
+  border: none; outline: none; font-size: 14px; background: transparent; min-width: 260px;
 }
 .topbar .user-badge .avatar {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #111827;
-  color: #fff;
-  font-weight: 700;
-  font-size: 12px;
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px;
+  background: #111827; color: #fff; font-weight: 700; font-size: 12px;
 }
 
-/* Content area below the topbar */
-.content {
-  padding: 16px;
-  min-height: 0;
-}
+/* Content */
+.content { padding: 16px; min-height: 0; }
 
-/* Generic panel */
-.panel {
-  background: #FFFFFF;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-}
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
-}
-.panel-title {
-  font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif;
-  color: var(--text);
-}
-.panel-body {
-  padding: 12px 14px;
-}
+/* Panel */
+.panel { background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.panel-title { font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif; color: var(--text); }
+.panel-body { padding: 12px 14px; }
 
-/* Card grid for stat cards */
-.card-grid {
-  /* Even spacing and consistent alignment across breakpoints */
-  display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
-  gap: clamp(10px, 2vw, 16px);
-  align-items: stretch;
-  align-content: start;
-}
+/* Card grid */
+.card-grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: clamp(10px, 2vw, 16px); align-items: stretch; align-content: start; }
+@media (max-width: 1280px) { .card-grid { grid-template-columns: repeat(3, minmax(220px, 1fr)); } }
+@media (max-width: 1024px) { .card-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+@media (max-width: 640px) { .card-grid { grid-template-columns: 1fr; } }
 
-/* Large tablets/desktop: switch to 3 across if container is narrower */
-@media (max-width: 1280px) {
-  .card-grid {
-    grid-template-columns: repeat(3, minmax(220px, 1fr));
-  }
-}
-/* Tablets: 2 across */
-@media (max-width: 1024px) {
-  .card-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
-}
-/* Mobile: 1 across */
-@media (max-width: 640px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Entrance animation for cards (subtle fade/slide-in) */
-@keyframes card-enter {
-  from { opacity: 0; transform: translateY(6px) scale(0.995); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Card hover and focus affordances */
-.stat-card {
-  will-change: transform, box-shadow, background, border-color, opacity;
-  transform-origin: center center;
-  animation: card-enter 420ms ease both;
-  color: inherit; /* keep text color from theme, do not auto-adjust with bg */
-  /* stagger feel when multiple are present in .card-grid */
-  /* Use nth-child to vary the delay slightly for the first row of 4 */
-}
+/* Card motion */
+@keyframes card-enter { from { opacity: 0; transform: translateY(6px) scale(0.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.stat-card { will-change: transform, box-shadow, background, border-color, opacity; transform-origin: center; animation: card-enter 420ms ease both; color: inherit; }
 .card-grid > .stat-card:nth-child(1) { animation-delay: 40ms; }
 .card-grid > .stat-card:nth-child(2) { animation-delay: 80ms; }
 .card-grid > .stat-card:nth-child(3) { animation-delay: 120ms; }
 .card-grid > .stat-card:nth-child(4) { animation-delay: 160ms; }
+.stat-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-1px) scale(1.01);
+  background: color-mix(in oklab, var(--card-bg, #FFFFFF) 92%, #FFFFFF 8%); border-color: color-mix(in oklab, var(--card-border, #E5E7EB) 70%, #A5B4FC 30%); }
+.stat-card:active { transform: translateY(0) scale(0.999); }
+.stat-card:focus-visible { outline: 2px solid --primary; outline-offset: 2px; }
 
-.stat-card:hover {
-  /* subtle elevation and micro-scale */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-  transform: translateY(-1px) scale(1.01);
-  background: color-mix(in oklab, var(--card-bg, #FFFFFF) 92%, #FFFFFF 8%);
-  border-color: color-mix(in oklab, var(--card-border, #E5E7EB) 70%, #A5B4FC 30%);
-}
-.stat-card:active {
-  transform: translateY(0) scale(0.999);
-}
-.stat-card:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
+/* Minimal inputs */
+.select { appearance: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
 
-/* Minimal select */
-.select {
-  appearance: none;
-  padding: 8px 10px;
+/* Global sizing */
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--background); }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (max-width: 1024px) { .topbar .search input { min-width: 160px; } }
+
+/* Minimalist semantic table styles for Pure White theme */
+.table-wrapper { width: 100%; overflow-x: auto; }
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #fff;
-  font-size: 14px;
+}
+.table thead th {
+  text-align: left;
+  font: 600 12px/1.2 "Helvetica Neue", Arial, sans-serif;
+  color: var(--muted);
+  padding: 10px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
   color: var(--text);
+  font-size: 14px;
 }
+.table tbody tr:last-child td { border-bottom: none; }
+.table--transparent { background: transparent; border-color: var(--border); }
+.table__cell--empty { text-align: center; color: var(--muted); padding: 16px; }
+.table__cell--actions { text-align: right; }
+.table__head--inventory { /* reserved for Inventory header customization if needed */ }
 
-/* Ensure global html/body/root take full height */
-html, body, #root {
-  height: 100%;
-}
-body {
-  margin: 0;
-  background: var(--background);
-}
-:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* Utility for action group inside table cells */
+.table__actions { display: inline-flex; gap: 8px; align-items: center; }
 
-/* Responsive: narrow screens collapse spacing slightly */
-@media (max-width: 1024px) {
-  .topbar .search input { min-width: 160px; }
-}
+/* Example row highlight hook if needed:
+.inventory-row-black-border { outline: 1px solid #000; }
+*/

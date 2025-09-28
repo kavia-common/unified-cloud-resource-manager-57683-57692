@@ -1,27 +1,39 @@
 import React from "react";
 
 // PUBLIC_INTERFACE
-export function DataTable({ columns, rows, emptyMessage = "No data", variant = "default", headerClassName = "", tableClassName = "", rowClassName }) {
-  /** Simple responsive table. columns: [{key,label,render?, cellClassName?}] rows: array of objects
-   * rowClassName: optional function (row) => string; applied to each td (value cells) in that row.
+export function DataTable({
+  columns,
+  rows,
+  emptyMessage = "No data",
+  variant = "default",
+  headerClassName = "",
+  tableClassName = "",
+  rowClassName,
+}) {
+  /** Simple, semantic table for minimalist UI.
+   * columns: [{ key, label, render?, cellClassName? }]
+   * rows: array of objects
+   * rowClassName: optional function(row) => string; applied to <tr>
    */
   const variantClass = variant === "transparent" ? "table--transparent" : "";
-  // Keep 'table' base class first so theme.css rules apply predictably; inventory modifier follows.
-  const tableClass = `table table--inventory ${variantClass} ${tableClassName}`.trim();
+  const tableClass = ["table", variantClass, tableClassName].filter(Boolean).join(" ").trim();
+
   return (
     <div className="table-wrapper" role="region" aria-label="Data table">
       <table className={tableClass}>
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.key} className={headerClassName}>{c.label}</th>
+              <th key={c.key} scope="col" className={headerClassName}>
+                {c.label}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {(!rows || rows.length === 0) && (
             <tr>
-              <td colSpan={columns.length} style={{ textAlign: "center", color: "var(--muted)" }}>
+              <td colSpan={columns.length} className="table__cell--empty">
                 {emptyMessage}
               </td>
             </tr>
@@ -31,16 +43,16 @@ export function DataTable({ columns, rows, emptyMessage = "No data", variant = "
             return (
               <tr key={idx} className={rowCls}>
                 {columns.map((c) => {
+                  const rawVal = r[c.key];
                   const cellCls = [
-                    typeof c.cellClassName === "function" ? c.cellClassName(r[c.key], r) : (c.cellClassName || ""),
-                  ].filter(Boolean).join(" ");
-                  // Mark the Actions column cell so styles can be scoped in theme.css
-                  const scopedCellCls = c.key === "actions"
-                    ? `${cellCls} table__cell--actions`
-                    : cellCls;
+                    typeof c.cellClassName === "function" ? c.cellClassName(rawVal, r) : (c.cellClassName || ""),
+                    c.key === "actions" ? "table__cell--actions" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
                   return (
-                    <td key={c.key} className={scopedCellCls}>
-                      {c.render ? c.render(r[c.key], r) : r[c.key]}
+                    <td key={c.key} className={cellCls}>
+                      {c.render ? c.render(rawVal, r) : rawVal}
                     </td>
                   );
                 })}

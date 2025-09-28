@@ -84,6 +84,11 @@
 
 /* Minimal inputs */
 .select { appearance: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
+.input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
+.btn { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); cursor: pointer; }
+.btn:hover { background: #fff; border-color: #D1D5DB; }
+.btn.ghost { background: #fff; border-color: var(--border); }
+.btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 /* Global sizing */
 html, body, #root { height: 100%; }

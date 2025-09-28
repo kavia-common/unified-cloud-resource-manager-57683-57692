@@ -1,8 +1,110 @@
 import React, { useMemo, useRef, useState } from "react";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
-import FilterBar from "../../components/ui/Filters";
 import { Popover } from "../../components/ui/Popover";
+
+// A compact vertical dropdown component local to Inventory for minimalist control
+function VerticalDropdown({ label = "Filter", options = [], value, onChange, width = 220 }) {
+  // PUBLIC_INTERFACE
+  /** Minimal vertical dropdown:
+   * - Trigger button in Pure White style
+   * - Options stack vertically when opened
+   * - Click outside or Escape closes via parent Popover
+   */
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+
+  const selectedLabel =
+    (options.find((o) => (o.value ?? o) === value)?.label ?? value ?? "All");
+
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <button
+        ref={btnRef}
+        className="btn"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          background: "#fff",
+          border: "1px solid var(--border)",
+          borderRadius: 10,
+          padding: "8px 10px",
+          fontSize: 14,
+          color: "var(--text)",
+          minWidth: width,
+          justifyContent: "space-between",
+          boxShadow: "var(--shadow)",
+        }}
+      >
+        <span style={{ color: "var(--muted)" }}>{label}:</span>
+        <span>{selectedLabel}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M7 10l5 5 5-5z" />
+        </svg>
+      </button>
+
+      <div style={{ position: "absolute" }}>
+        <Popover open={open} onClose={() => setOpen(false)} anchorRef={btnRef} ariaLabel={`${label} options`}>
+          <div
+            role="listbox"
+            tabIndex={-1}
+            className="panel"
+            style={{
+              padding: 6,
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
+              minWidth: width,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            <button
+              role="option"
+              aria-selected={value === "" || value == null}
+              className="btn ghost"
+              onClick={() => {
+                onChange?.("");
+                setOpen(false);
+              }}
+              style={{ justifyContent: "flex-start" }}
+            >
+              All
+            </button>
+            {options.map((o) => {
+              const v = o.value ?? o;
+              const l = o.label ?? o.value ?? o;
+              const active = v === value;
+              return (
+                <button
+                  key={v}
+                  role="option"
+                  aria-selected={active}
+                  className="btn ghost"
+                  onClick={() => {
+                    onChange?.(v);
+                    setOpen(false);
+                  }}
+                  style={{
+                    justifyContent: "flex-start",
+                    background: active ? "#fff" : undefined,
+                    borderColor: active ? "var(--border)" : undefined,
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </Popover>
+      </div>
+    </div>
+  );
+}
 
 // PUBLIC_INTERFACE
 export default function Inventory() {
@@ -12,25 +114,25 @@ export default function Inventory() {
     { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", status: "Stopped", cost_daily: 5.44 },
     { id: "db-01", name: "orders-db", provider: "aws", type: "rds", region: "us-west-2", status: "Running", cost_daily: 7.8 },
   ]);
-  const [filters, setFilters] = useState({});
+
+  // Filter state: provider and status for meaningful control
+  const [provider, setProvider] = useState("");
+  const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [operation, setOperation] = useState("start");
   const [size, setSize] = useState("medium");
   const [open, setOpen] = useState(false);
 
-  // popover (filters) state
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterBtnRef = useRef(null);
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
-      if (filters.provider && r.provider !== filters.provider) return false;
-      if (q && ![r.name, r.id, r.type, r.region].some(v => String(v || "").toLowerCase().includes(q))) return false;
+      if (provider && r.provider !== provider) return false;
+      if (status && String(r.status).toLowerCase() !== String(status).toLowerCase()) return false;
+      if (q && ![r.name, r.id, r.type, r.region].some((v) => String(v || "").toLowerCase().includes(q))) return false;
       return true;
     });
-  }, [rows, filters, search]);
+  }, [rows, provider, status, search]);
 
   const columns = [
     { key: "id", label: "ID" },
@@ -88,57 +190,37 @@ export default function Inventory() {
         </div>
       </div>
       <div className="panel-body">
-        <div className="table-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <button
-              ref={filterBtnRef}
-              className="btn"
-              aria-haspopup="dialog"
-              aria-expanded={filterOpen}
-              aria-label="Open filters"
-              onClick={() => setFilterOpen((v) => !v)}
-              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm4 6h2v2h-2v-2z" />
-              </svg>
-              <span style={{ fontSize: 14 }}>Filters</span>
-            </button>
-
-            <div style={{ position: "absolute" }}>
-              <Popover open={filterOpen} onClose={() => setFilterOpen(false)} anchorRef={filterBtnRef} ariaLabel="Inventory filters">
-                <div
-                  className="panel"
-                  style={{
-                    padding: 12,
-                    border: "1px solid var(--border)",
-                    background: "var(--surface)",
-                    minWidth: 320,
-                    maxWidth: 480,
-                  }}
-                >
-                  <FilterBar
-                    values={filters}
-                    onChange={setFilters}
-                    providerOptions={[
-                      { value: "aws", label: "AWS" },
-                      { value: "azure", label: "Azure" },
-                    ]}
-                    showDateRange={false}
-                  />
-                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
-                    <button className="btn ghost" onClick={() => { setFilters({}); setFilterOpen(false); }} aria-label="Clear filters">
-                      Clear
-                    </button>
-                    <button className="btn primary" onClick={() => setFilterOpen(false)} aria-label="Apply filters">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </Popover>
-            </div>
+        <div
+          className="table-actions"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 10,
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <VerticalDropdown
+              label="Provider"
+              value={provider}
+              onChange={setProvider}
+              options={[
+                { value: "aws", label: "AWS" },
+                { value: "azure", label: "Azure" },
+              ]}
+            />
+            <VerticalDropdown
+              label="Status"
+              value={status}
+              onChange={setStatus}
+              options={[
+                { value: "Running", label: "Running" },
+                { value: "Stopped", label: "Stopped" },
+              ]}
+            />
           </div>
-
           <div />
         </div>
 

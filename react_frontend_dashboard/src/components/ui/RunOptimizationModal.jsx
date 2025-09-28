@@ -38,12 +38,26 @@ export default function RunOptimizationModal({ open, onClose }) {
     }, 320);
     try {
       const res = await fetchRecommendations({ scope: "all" });
+      // The recommendations function returns { message, inserted, modes } on success.
+      // In some dev setups, it may return an array of items; normalize defensively.
       const items = Array.isArray(res) ? res : (res?.items || []);
-      setCount(items.length || Math.floor(2 + Math.random() * 4));
+      const inferredCount =
+        typeof res?.inserted === "number" ? res.inserted :
+        (Array.isArray(items) ? items.length : Math.floor(2 + Math.random() * 4));
+      setCount(inferredCount);
       setProgress(100);
       setMessage("Optimization complete.");
     } catch (err) {
-      setMessage(`Error: ${err?.message || "Failed to run optimization"}`);
+      // Provide clearer, actionable messages for common cases
+      if (err?.code === 'UNAUTHORIZED' || err?.status === 401) {
+        setMessage("Error: Unauthorized. Please sign in to run optimization.");
+      } else if (err?.code === 'NOT_FOUND' || err?.status === 404) {
+        setMessage("Error: Optimization endpoint not found. Ensure the 'recommendations' Edge Function is deployed and reachable at /recommendations/run.");
+      } else if (err?.code === 'NETWORK_ERROR') {
+        setMessage("Network error: Unable to reach the server. Check your network and Supabase URL configuration.");
+      } else {
+        setMessage(`Error: ${err?.message || "Failed to run optimization"}`);
+      }
     } finally {
       clearInterval(timerRef.current);
       setRunning(false);

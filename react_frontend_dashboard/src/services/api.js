@@ -172,8 +172,22 @@ export async function controlResource({ provider, resourceId, operation, params 
 
 // PUBLIC_INTERFACE
 export async function fetchRecommendations({ scope = 'all' }, signal) {
-  /** Returns AI/ML recommendations from Edge Function. */
-  return callEdgeFunction('recommendations', 'POST', { scope }, signal);
+  /** Returns AI/ML recommendations from Edge Function.
+   * Note: The recommendations edge function handles POST /run, so the correct
+   * route path is 'recommendations/run' rather than just 'recommendations'.
+   */
+  try {
+    return await callEdgeFunction('recommendations/run', 'POST', { scope }, signal);
+  } catch (err) {
+    // Provide clearer guidance for common misconfigurations
+    if (err?.code === 'NOT_FOUND') {
+      const e = new Error('Optimization endpoint not found. Ensure the Supabase Edge Function "recommendations" is deployed and accessible at /recommendations/run.');
+      e.cause = err;
+      e.code = err.code;
+      throw e;
+    }
+    throw err;
+  }
 }
 
 // PUBLIC_INTERFACE

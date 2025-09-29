@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { DataTable } from "../../components/ui/Table";
 import StatCard from "../../components/ui/StatCard";
+import { useToast } from "../../components/ui/Toast";
 
 /**
  * PUBLIC_INTERFACE
@@ -16,6 +17,8 @@ import StatCard from "../../components/ui/StatCard";
  * TODO: Replace mock analysis with backend/AI integration via Supabase Edge Function.
  */
 export default function Recommendations() {
+  const toast = useToast();
+
   // Mock inventory/usage data (dev/test scale)
   const [compute, setCompute] = useState([
     { id: "i-001", name: "web-01", provider: "aws", type: "t3.large", region: "us-east-1", env: "prod", status: "running", cpu: 7, mem: 22, hourly: 0.0832 },
@@ -37,6 +40,9 @@ export default function Recommendations() {
     { id: "vol-az-01", type: "volume", attached: false, age_days: 60, monthly: 2.4 },
   ]);
 
+  // Track which recommendation is currently being executed to disable button/show spinner
+  const [runningId, setRunningId] = useState(null);
+
   // Analysis thresholds (heuristics)
   const THRESHOLDS = {
     cpu_low: 10, // percent
@@ -56,6 +62,16 @@ export default function Recommendations() {
     const unusedAssets = [];
     const scheduling = [];
 
+    // Helper to build a unified action handler descriptor for each recommendation
+    const makeAction = (id, actionLabel, payload) => ({
+      id,
+      actionLabel,
+      // Used for spinner/disabled
+      isRunning: runningId === id,
+      // Encodes the task to perform (mocked here)
+      actionPayload: payload,
+    });
+
     // Underutilized compute => consider stopping or resizing
     for (const vm of compute) {
       if ((vm.cpu ?? 0) < THRESHOLDS.cpu_low && (vm.mem ?? 0) < THRESHOLDS.mem_low && vm.status === "running") {
@@ -67,8 +83,11 @@ export default function Recommendations() {
           rationale: `CPU ${vm.cpu}% • Mem ${vm.mem}% over past 24h`,
           estMonthly: (vm.hourly * 24 * 30).toFixed(2),
           priority: "high",
-          actionLabel: "Stop (Mock)",
-          onApply: () => alert(`TODO: Stop VM via backend => ${vm.id}`),
+          ...makeAction(`underutilized-${vm.id}`, "Stop (Mock)", {
+            kind: "stop",
+            provider: vm.provider,
+            resourceId: vm.id,
+          }),
         });
       }
     }
@@ -86,8 +105,12 @@ export default function Recommendations() {
             rationale: `Avg CPU ${vm.cpu}% below target ${THRESHOLDS.rightsize_cpu_target}%`,
             estMonthly: (vm.hourly * 24 * 30 * 0.6).toFixed(2), // pretend 40% cheaper
             priority: "medium",
-            actionLabel: "Resize (Mock)",
-            onApply: () => alert(`TODO: Resize VM via backend => ${vm.id} -> ${target}`),
+            ...makeAction(`rightsize-${vm.id}`, "Resize (Mock)", {
+              kind: "resize",
+              provider: vm.provider,
+              resourceId: vm.id,
+              target,
+            }),
           });
         }
       }
@@ -107,8 +130,12 @@ export default function Recommendations() {
             rationale: `Avg CPU ${db.cpu}% below target ${THRESHOLDS.rightsize_cpu_target}%`,
             estMonthly: (db.hourly * 24 * 30 * 0.7).toFixed(2), // pretend 30% cheaper
             priority: "medium",
-            actionLabel: "Scale (Mock)",
-            onApply: () => alert(`TODO: Scale DB via backend => ${db.id} -> ${target}`),
+            ...makeAction(`rightsize-db-${db.id}`, "Scale (Mock)", {
+              kind: "db-scale",
+              provider: db.provider,
+              resourceId: db.id,
+              target,
+            }),
           });
         }
       }
@@ -125,8 +152,12 @@ export default function Recommendations() {
           rationale: `Unattached for ${a.age_days} days`,
           estMonthly: a.monthly.toFixed(2),
           priority: "high",
-          actionLabel: "Delete (Mock)",
-          onApply: () => alert(`TODO: Delete asset via backend => ${a.id}`),
+          ...makeAction(`unused-${a.id}`, "Delete (Mock)", {
+            kind: "delete-asset",
+            provider: "aws",
+            resourceId: a.id,
+            resourceType: a.type,
+          }),
         });
       }
     }
@@ -140,8 +171,12 @@ export default function Recommendations() {
           rationale: `No access for ${b.last_access_days} days • Size ${b.size_gb} GB`,
           estMonthly: b.monthly.toFixed(2),
           priority: "low",
-          actionLabel: "Archive/Delete (Mock)",
-          onApply: () => alert(`TODO: Lifecycle policy or delete via backend => ${b.id}`),
+          ...makeAction(`stale-${b.id}`, "Archive/Delete (Mock)", {
+            kind: "archive-or-delete",
+            provider: b.provider,
+            resourceId: b.id,
+            resourceType: b.type,
+          }),
         });
       }
     }
@@ -159,8 +194,12 @@ export default function Recommendations() {
           rationale: `Non-prod instance running 24/7 • ${offNote}`,
           estMonthly: (vm.hourly * 24 * 30 * 0.6).toFixed(2),
           priority: "medium",
-          actionLabel: "Set Schedule (Mock)",
-          onApply: () => alert(`TODO: Create schedule via backend => ${vm.id}`),
+          ...makeAction(`schedule-${vm.id}`, "Set Schedule (Mock)", {
+            kind: "schedule",
+            provider: vm.provider,
+            resourceId: vm.id,
+            note: offNote,
+          }),
         });
       }
     }
@@ -174,22 +213,99 @@ export default function Recommendations() {
           rationale: `Non-prod DB • ${offNote}`,
           estMonthly: (db.hourly * 24 * 30 * 0.5).toFixed(2),
           priority: "medium",
-          actionLabel: "Set Schedule (Mock)",
-          onApply: () => alert(`TODO: Create schedule for DB via backend => ${db.id}`),
+          ...makeAction(`schedule-db-${db.id}`, "Set Schedule (Mock)", {
+            kind: "db-schedule",
+            provider: db.provider,
+            resourceId: db.id,
+            note: offNote,
+          }),
         });
       }
     }
 
     return { underutilized, rightsizing, unusedAssets, scheduling };
-  }, [compute, databases, storage, assets]);
+  }, [compute, databases, storage, assets, runningId]);
 
-  // Flatten for totals
+  // Local UI list of recommendations to render/remove rows without recomputing originals
   const allRecs = useMemo(
     () => [...recs.underutilized, ...recs.rightsizing, ...recs.unusedAssets, ...recs.scheduling],
     [recs]
   );
 
-  // Map to table rows for a unified list
+  // Track visible rows (so we can remove only one on success)
+  const [visibleIds, setVisibleIds] = useState([]);
+  useEffect(() => {
+    // Initialize visible ids when recomputed lists change (keep existing removals)
+    const ids = allRecs.map((r) => r.id);
+    setVisibleIds((prev) => {
+      // Preserve any previously removed ids by intersecting prev with new ids
+      const prevSet = new Set(prev);
+      const next = ids.filter((id) => prevSet.has(id) || !prev.length).concat(prev.length ? [] : []);
+      // If first run (prev empty), show all ids
+      return prev.length ? prev.filter((id) => ids.includes(id)) : ids;
+    });
+  }, [allRecs]);
+
+  // Derived rows to show
+  const displayedRows = useMemo(() => {
+    const allowed = new Set(visibleIds);
+    return allRecs.filter((r) => allowed.has(r.id));
+  }, [allRecs, visibleIds]);
+
+  // Simple category filter
+  const [activeFilter, setActiveFilter] = useState("all");
+  const filteredRows = useMemo(() => {
+    const base = displayedRows;
+    if (activeFilter === "all") return base;
+    if (activeFilter === "underutilized") return base.filter((r) => r.id.startsWith("underutilized-"));
+    if (activeFilter === "rightsizing") return base.filter((r) => r.id.startsWith("rightsize"));
+    if (activeFilter === "unused") return base.filter((r) => r.id.startsWith("unused-") || r.id.startsWith("stale-"));
+    if (activeFilter === "scheduling") return base.filter((r) => r.id.startsWith("schedule"));
+    return base;
+  }, [activeFilter, displayedRows]);
+
+  // Execute the action associated to a recommendation (mock flow)
+  const runRecommendation = useCallback(async (rec) => {
+    if (!rec || !rec.id) return;
+    if (runningId) return; // Prevent concurrently running multiple actions
+    setRunningId(rec.id);
+    try {
+      // Simulate a network call. In future, integrate: e.g., controlResource(...) or specific function.
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // 15% chance to throw an error to exercise error UI
+          if (Math.random() < 0.15) {
+            reject(new Error(`Failed to execute ${rec.actionPayload?.kind || "action"} on ${rec.resource}`));
+          } else {
+            resolve();
+          }
+        }, 900);
+      });
+
+      // Success: toast and remove only the completed row
+      toast.success(`Completed: ${rec.suggestion}`);
+      setVisibleIds((ids) => ids.filter((id) => id !== rec.id));
+    } catch (err) {
+      // Error: show error toast
+      toast.error(err?.message || "Failed to run the action.");
+    } finally {
+      setRunningId(null);
+    }
+  }, [runningId, toast]);
+
+  // Simulate refresh
+  function refresh() {
+    // TODO: Replace with fetch to Edge Function: /functions/v1/recommendations
+    toast.info("Fetching latest recommendations…");
+    // For mock, just re-trigger the recompute by toggling some state or no-op
+    setTimeout(() => toast.success("Recommendations refreshed."), 600);
+  }
+
+  useEffect(() => {
+    // Placeholder effect; in real impl, fetch on mount
+  }, []);
+
+  // Map to table columns for a unified list
   const columns = [
     { key: "category", label: "Category" },
     { key: "suggestion", label: "Recommendation" },
@@ -204,46 +320,46 @@ export default function Recommendations() {
     {
       key: "actions",
       label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn primary" onClick={r.onApply}>{r.actionLabel}</button>
-          <button
-            className="btn ghost"
-            onClick={() => alert(`TODO: Ignore/Archive recommendation => ${r.id}`)}
-          >
-            Ignore
-          </button>
-        </div>
-      ),
+      render: (_v, r) => {
+        const isRunning = runningId === r.id;
+        return (
+          <div className="table__actions">
+            <button
+              className="btn primary"
+              onClick={() => runRecommendation(r)}
+              disabled={isRunning}
+            >
+              {isRunning ? (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Spinner size={14} />
+                  Running…
+                </span>
+              ) : (
+                r.actionLabel
+              )}
+            </button>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                // archive/ignore only removes from view without running anything
+                setVisibleIds((ids) => ids.filter((id) => id !== r.id));
+                toast.info("Recommendation ignored.");
+              }}
+              disabled={isRunning}
+            >
+              Ignore
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
   // Card stats
   const totalMonthlySave = useMemo(
-    () => allRecs.reduce((sum, r) => sum + Number(r.estMonthly || 0), 0),
-    [allRecs]
+    () => filteredRows.reduce((sum, r) => sum + Number(r.estMonthly || 0), 0),
+    [filteredRows]
   );
-
-  // Simple category filter
-  const [activeFilter, setActiveFilter] = useState("all");
-  const filteredRows = useMemo(() => {
-    if (activeFilter === "all") return allRecs;
-    if (activeFilter === "underutilized") return recs.underutilized;
-    if (activeFilter === "rightsizing") return recs.rightsizing;
-    if (activeFilter === "unused") return recs.unusedAssets;
-    if (activeFilter === "scheduling") return recs.scheduling;
-    return allRecs;
-  }, [activeFilter, allRecs, recs]);
-
-  // Simulate refresh
-  function refresh() {
-    // TODO: Replace with fetch to Edge Function: /functions/v1/recommendations
-    alert("TODO: Fetch fresh recommendations from backend/AI.");
-  }
-
-  useEffect(() => {
-    // Placeholder effect; in real impl, fetch on mount
-  }, []);
 
   return (
     <div className="panel">
@@ -278,21 +394,21 @@ export default function Recommendations() {
           />
           <StatCard
             label="Underutilized"
-            value={recs.underutilized.length}
+            value={recs.underutilized.filter((r) => visibleIds.includes(r.id)).length}
             deltaLabel="Compute/Storage"
             deltaType="up"
             variant="neutral"
           />
           <StatCard
             label="Right-Sizing"
-            value={recs.rightsizing.length}
+            value={recs.rightsizing.filter((r) => visibleIds.includes(r.id)).length}
             deltaLabel="Instances & DBs"
             deltaType="up"
             variant="neutral"
           />
           <StatCard
             label="Unused Assets"
-            value={recs.unusedAssets.length}
+            value={recs.unusedAssets.filter((r) => visibleIds.includes(r.id)).length}
             deltaLabel="Snapshots/IPs/Volumes"
             deltaType="up"
             variant="neutral"
@@ -313,5 +429,24 @@ export default function Recommendations() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Simple inline spinner to avoid extra dependencies */
+function Spinner({ size = 12 }) {
+  const s = size;
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: s,
+        height: s,
+        border: "2px solid rgba(255,255,255,0.45)",
+        borderTopColor: "#ffffff",
+        borderRadius: "50%",
+        display: "inline-block",
+        animation: "spin 0.8s linear infinite",
+      }}
+    />
   );
 }

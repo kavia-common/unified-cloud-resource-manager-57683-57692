@@ -419,6 +419,11 @@ body { margin: 0; background: var(--background); }
   flex-wrap: wrap; /* enable wrapping for narrow cells/vertical arrays */
 }
 
+/* Simple spinner animation used by inline Spinner component */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Example row highlight hook if needed:
 .inventory-row-black-border { outline: 1px solid #000; }
 */

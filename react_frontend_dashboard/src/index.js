@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import "./theme.css";
+import "./components/ui/dark-theme-overrides.css";
 import App from "./App";
 import { hasSupabaseConfig } from "./services/supabaseClient";
 import { ToastProvider } from "./components/ui/Toast";

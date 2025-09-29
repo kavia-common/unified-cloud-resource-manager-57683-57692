@@ -1,0 +1,72 @@
+:root .topbar, .Topbar, .top-bar {
+  background: rgba(20,26,36,0.7);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--color-text);
+}
+
+.stat-card, .StatCard, .stats-card {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+}
+
+.table-wrapper, .Table, .data-table {
+  background: var(--table-row-bg);
+  border: 1px solid var(--table-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.modal, .Modal {
+  /* rely on theme.css modal hooks; kept for specificity if needed */
+}
+
+.popover, .Popover {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-sm);
+}
+
+.tabs, .Tabs {
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+}
+.tabs .tab, .Tabs .tab {
+  color: var(--color-text-muted);
+}
+.tabs .tab.active, .Tabs .tab.active {
+  color: var(--color-text);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.banner, .Banner {
+  background: linear-gradient(90deg, rgba(79,156,255,0.12), rgba(35,199,138,0.10));
+  border: 1px solid var(--border-color);
+  color: var(--color-text);
+}
+
+.toast, .Toast {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.empty-state, .EmptyState {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.filters, .Filters {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}

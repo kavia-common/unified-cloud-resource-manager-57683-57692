@@ -1,45 +1,33 @@
-/* Minimal reset applied; theme variables in theme.css */
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background: #fff; color: #111827; }
-:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-elevated) 100%);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
-/* Ensure the app shell is visible and laid out correctly */
+/* Layout helpers */
 .app-shell { display: flex; min-height: 100vh; }
 .app-shell .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .app-shell .content { padding: 16px; }
 
-/* Ensure high contrast in sidebar regardless of global overrides */
+/* Sidebar text overrides for contrast if legacy SidebarNav is used */
 .sidebar a,
 .sidebar .nav-btn,
 .sidebar .nav-btn span,
 .sidebar .brand .title {
-  color: #FFFFFF;
+  color: var(--color-text);
 }
 
-/* Provider cell border - only for value cells (td), never headers (th) */
-td.aws-border {
-  border: 2px solid #111; /* black border for AWS/Azure provider cells */
-}
+/* Table utility */
+.table__cell--empty { text-align: center; color: var(--color-text-muted); padding: 16px; }
 
-/* Chart legend helpers (as per design notes) */
+/* Chart legend helpers */
 .chart-legend {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 24px; margin-bottom: 4px;
   color: var(--legend-text);
   font: 500 12px/1 "Helvetica Neue", Arial, sans-serif;
 }
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-.legend-dot.series-1 { background: var(--series-1); }
-.legend-dot.series-2 { background: var(--series-2); }
-.legend-dot.series-3 { background: var(--series-3); }
+.legend-item { display: inline-flex; align-items: center; gap: 8px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }

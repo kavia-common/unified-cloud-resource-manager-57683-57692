@@ -12,7 +12,7 @@ import {
   Area,
   BarChart,
   Bar,
-  PieChart,
+  PieChart as RPieChart,
   Pie,
   Cell,
 } from "recharts";
@@ -25,19 +25,16 @@ import {
 export const CLOUD_COLORS = {
   AWS: "#000000",      // black
   Azure: "#1a237e",    // dark blue
-  GCP: "var(--series-3)", // original token/color used for GCP in bar chart
+  GCP: "var(--series-3)", // token for GCP
 };
 
 /**
- * Small toolkit of charts using Recharts for the minimalist Pure White theme.
- * These components are intentionally simple to keep bundle size and complexity small.
+ * PUBLIC_INTERFACE
+ * Minimal trend line chart. data: [{date, value}]
  */
-
-// PUBLIC_INTERFACE
-export function TrendLineChart({ data, dataKey = "value", xKey = "date", color = "#374151", gradient = false, height = 220 }) {
-  /** Minimal trend line chart. data: [{date, value}] */
+export function TrendLineChart({ data, dataKey = "value", xKey = "date", color = "#64a9ff", gradient = false, height = 220 }) {
   return (
-    <div className="card" style={{ padding: 8, minWidth: 0 }}>
+    <div className="card surface" style={{ padding: 8, minWidth: 0 }}>
       <ResponsiveContainer width="100%" height={height}>
         {gradient ? (
           <AreaChart data={data}>
@@ -47,17 +44,17 @@ export function TrendLineChart({ data, dataKey = "value", xKey = "date", color =
                 <stop offset="95%" stopColor={color} stopOpacity={0.05}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+            <YAxis tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
             <Tooltip />
             <Area type="monotone" dataKey={dataKey} stroke={color} fillOpacity={1} fill="url(#trendGradient)" />
           </AreaChart>
         ) : (
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+            <YAxis tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
             <Tooltip />
             <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
           </LineChart>
@@ -72,26 +69,24 @@ export function TrendLineChart({ data, dataKey = "value", xKey = "date", color =
  * Multi-series line chart with legend. Expects data like:
  * [{ date: '09-01', aws: 12, azure: 10, gcp: 8 }, ...]
  */
-// PUBLIC_INTERFACE
 export function MultiSeriesLineChart({
   data,
   xKey = "date",
   series = [
-    { key: "aws", label: "AWS", color: "#F59E0B" },   // amber
-    { key: "azure", label: "Azure", color: "#3B82F6" }, // blue
-    { key: "gcp", label: "GCP", color: "#10B981" },   // emerald
+    { key: "aws", label: "AWS", color: "#d1d6de" },   // light gray on dark
+    { key: "azure", label: "Azure", color: "#64a9ff" }, // light blue
+    { key: "gcp", label: "GCP", color: "#23c78a" },   // emerald
   ],
   height = 260,
   showLegend = true,
 }) {
-  /** Minimal multi-series line chart for provider trends with legend. */
   return (
-    <div className="card" style={{ padding: 8 }}>
+    <div className="card surface" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+          <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+          <YAxis tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
           <Tooltip />
           {showLegend && <Legend />}
           {series.map((s) => (
@@ -114,56 +109,34 @@ export function MultiSeriesLineChart({
 
 /**
  * PUBLIC_INTERFACE
- * Multi-series Overview chart styled to match assets/overview_graph_design_notes.md
- * Expects data like: [{ name: "Item 1", s1: 10, s2: 22, s3: 14 }, ...]
+ * Multi-series Overview bar chart styled for dark theme.
+ * Expects data like: [{ name: "Item 1", series1: 10, series2: 22, series3: 14 }, ...]
  */
 export function MultiSeriesOverviewChart({
   data,
   xKey = "name",
   seriesOrder = [
-    // Renamed labels to cloud providers by default
-    { key: "series2", label: "AWS", color: "var(--series-2)" },   // back
-    { key: "series1", label: "Azure", color: "var(--series-1)" }, // middle
-    { key: "series3", label: "GCP", color: "var(--series-3)" },   // front
+    { key: "series2", label: "AWS", color: "#d1d6de" },  // back
+    { key: "series1", label: "Azure", color: "#64a9ff" },// middle
+    { key: "series3", label: "GCP", color: "#23c78a" },  // front
   ],
   height = 260,
-  // New dynamic axis props
   xTickFormatter,
   xAxisLabel = "",
   yAxisLabel = "Spend ($)",
   yDomain = [0, 50],
   yTicks = [0, 10, 20, 30, 40, 50],
 }) {
-  /** Styled multi-series line chart with right-aligned legend [graph | legend] layout. */
   const cardStyle = {
-    background: "var(--bg-canvas)",
-    border: "2px solid var(--accent-outline)",
-    borderRadius: 8,
+    background: "var(--color-surface)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "var(--radius-md)",
     padding: 16,
+    color: "var(--color-text)",
   };
-
-  // Container for horizontal layout
-  const layoutStyle = {
-    display: "grid",
-    gridTemplateColumns: "1fr auto",
-    alignItems: "stretch",
-    gap: 16,
-  };
-
-  const chartContainerStyle = {
-    minWidth: 0,
-  };
-
-  // Right-side legend: stacked vertically with minimalist typography
-  const sideLegendStyle = {
-    display: "grid",
-    alignContent: "start",
-    gap: 8,
-    padding: "4px 0 4px 0",
-    minWidth: 0,
-    width: "min(140px, 35vw)"
-  };
-
+  const layoutStyle = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "stretch", gap: 16 };
+  const chartContainerStyle = { minWidth: 0 };
+  const sideLegendStyle = { display: "grid", alignContent: "start", gap: 8, padding: "4px 0", width: "min(140px, 35vw)" };
   const legendItemStyle = {
     display: "flex",
     alignItems: "center",
@@ -174,24 +147,14 @@ export function MultiSeriesOverviewChart({
     fontSize: 12,
     whiteSpace: "nowrap",
   };
-
-  const colorDot = (color) => ({
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    background: color,
-  });
+  const colorDot = (color) => ({ width: 8, height: 8, borderRadius: "50%", background: color });
 
   return (
     <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview bar chart: Series comparison by cloud provider">
       <div style={layoutStyle}>
-        {/* Graph area (left) */}
         <div style={chartContainerStyle}>
           <ResponsiveContainer width="100%" height={height}>
-            <BarChart
-              data={data}
-              margin={{ top: 16, right: 12, bottom: 36, left: 48 }}
-            >
+            <BarChart data={data} margin={{ top: 16, right: 12, bottom: 36, left: 48 }}>
               <CartesianGrid stroke="var(--gridline)" vertical={false} strokeWidth={1} />
               <XAxis
                 dataKey={xKey}
@@ -199,7 +162,11 @@ export function MultiSeriesOverviewChart({
                 tickFormatter={xTickFormatter}
                 tickLine={false}
                 axisLine={false}
-                label={xAxisLabel ? { value: xAxisLabel, position: "insideBottom", offset: -4, fill: "var(--axis-text)", fontSize: 12 } : undefined}
+                label={
+                  xAxisLabel
+                    ? { value: xAxisLabel, position: "insideBottom", offset: -4, fill: "var(--axis-text)", fontSize: 12 }
+                    : undefined
+                }
               />
               <YAxis
                 domain={yDomain}
@@ -209,11 +176,8 @@ export function MultiSeriesOverviewChart({
                 axisLine={false}
                 label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: "insideLeft", offset: 12, fill: "var(--axis-text)", fontSize: 12 } : undefined}
               />
-              {/* Tooltip retained for accessibility */}
               <Tooltip contentStyle={{ fontSize: 12 }} />
-
-              {/* Grouped bars: one per provider per x value */}
-              {seriesOrder.map((s, idx) => (
+              {seriesOrder.map((s) => (
                 <Bar
                   key={s.key}
                   dataKey={s.key}
@@ -227,8 +191,6 @@ export function MultiSeriesOverviewChart({
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Legend area (right) */}
         <div aria-label="Chart legend" style={sideLegendStyle}>
           {seriesOrder.map((s) => (
             <div key={s.key} className="legend-item" style={legendItemStyle}>
@@ -242,20 +204,22 @@ export function MultiSeriesOverviewChart({
   );
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Stacked bar chart for cost by provider/service. keys: ['aws','azure']
+ */
 export function StackedBarChart({ data, keys, colors, xKey = "name", height = 260, legend = true }) {
-  /** Stacked bar chart for cost by provider/service. keys: ['aws','azure'] */
   return (
-    <div className="card" style={{ padding: 8 }}>
+    <div className="card surface" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey={xKey} tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+          <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+          <YAxis tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
           <Tooltip />
           {legend && <Legend />}
           {keys.map((k, i) => (
-            <Bar key={k} dataKey={k} stackId="a" fill={colors[i] || "#9CA3AF"} />
+            <Bar key={k} dataKey={k} stackId="a" fill={colors?.[i] || "#9CA3AF"} />
           ))}
         </BarChart>
       </ResponsiveContainer>
@@ -263,25 +227,37 @@ export function StackedBarChart({ data, keys, colors, xKey = "name", height = 26
   );
 }
 
-const DEFAULT_COLORS = ["#374151", "#9CA3AF", "#10B981", "#EF4444", "#3B82F6", "#F59E0B"];
+const DEFAULT_COLORS = ["#64a9ff", "#d1d6de", "#23c78a", "#ff5d5d", "#5fb3ff", "#f8b84b"];
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Pie breakdown chart for category shares. data: [{name, value}]
+ */
 export function PieBreakdownChart({ data, dataKey = "value", nameKey = "name", colors = DEFAULT_COLORS, height = 260, innerRadius = 60 }) {
-  /** Pie breakdown chart for category shares. data: [{name, value}]
-   * Note: For donut appearance, set innerRadius to a higher value (e.g., 48% of container).
-   */
   return (
-    <div className="card" style={{ padding: 8 }}>
+    <div className="card surface" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>
-        <PieChart>
+        <RPieChart>
           <Tooltip />
           <Pie data={data} dataKey={dataKey} nameKey={nameKey} cx="50%" cy="50%" outerRadius={Math.max(innerRadius + 40, 90)} innerRadius={innerRadius}>
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Pie>
-        </PieChart>
+        </RPieChart>
       </ResponsiveContainer>
+    </div>
+  );
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Default simple Charts wrapper (kept for compatibility with prior usage).
+ */
+export default function Charts() {
+  return (
+    <div className="Charts surface" style={{ padding: 12, color: 'var(--color-text-muted)' }}>
+      Charts
     </div>
   );
 }

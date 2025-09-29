@@ -11,6 +11,12 @@ export default function Costs() {
   const [delta, setDelta] = useState(6.3);
   const [breakdown, setBreakdown] = useState([]);
 
+  // Hold available options for dropdowns (mocked locally)
+  const [accountOptions, setAccountOptions] = useState([]);
+  const [regionOptions, setRegionOptions] = useState([]);
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [tagOptions, setTagOptions] = useState([]);
+
   const [filters, setFilters] = useState({
     provider: "",
     account: "",
@@ -21,21 +27,48 @@ export default function Costs() {
     to: "",
   });
 
+  // Seed mock data and derive options + filtered rows
   useEffect(() => {
-    // mock breakdown rows
+    // Mock rows now include region and tags for realistic filtering
     const rows = [
-      { provider: "aws", account_name: "prod", service: "EC2", amount: 1240.22 },
-      { provider: "aws", account_name: "prod", service: "RDS", amount: 320.48 },
-      { provider: "azure", account_name: "shared", service: "VM", amount: 890.13 },
-      { provider: "azure", account_name: "shared", service: "Storage", amount: 140.67 },
+      { provider: "aws", account_name: "prod", region: "us-east-1", service: "EC2", amount: 1240.22, tags: ["env:prod", "team:core"] },
+      { provider: "aws", account_name: "prod", region: "us-east-1", service: "RDS", amount: 320.48, tags: ["env:prod"] },
+      { provider: "azure", account_name: "shared", region: "eastus", service: "VM", amount: 890.13, tags: ["env:shared", "team:data"] },
+      { provider: "azure", account_name: "shared", region: "eastus", service: "Storage", amount: 140.67, tags: ["env:shared"] },
+      // Optional GCP mock for completeness
+      { provider: "gcp", account_name: "analytics", region: "us-central1", service: "Compute", amount: 210.25, tags: ["env:dev", "team:ml"] },
     ];
-    const filtered = rows.filter(r => !filters.provider || r.provider === filters.provider);
+
+    // Build options from dataset (unique lists)
+    const accounts = Array.from(new Set(rows.map(r => r.account_name))).map(n => ({ value: n, label: n }));
+    const regions = Array.from(new Set(rows.map(r => r.region))).map(n => ({ value: n, label: n }));
+    const services = Array.from(new Set(rows.map(r => r.service))).map(n => ({ value: n, label: n }));
+    const tags = Array.from(
+      new Set(rows.flatMap(r => Array.isArray(r.tags) ? r.tags : []).filter(Boolean))
+    ).map(t => ({ value: t, label: t }));
+
+    setAccountOptions(accounts);
+    setRegionOptions(regions);
+    setServiceOptions(services);
+    setTagOptions(tags);
+
+    // Apply filtering across all filter fields
+    const filtered = rows.filter(r => {
+      if (filters.provider && r.provider !== filters.provider) return false;
+      if (filters.account && r.account_name !== filters.account) return false;
+      if (filters.region && r.region !== filters.region) return false;
+      if (filters.service && r.service !== filters.service) return false;
+      if (filters.tag && !(Array.isArray(r.tags) && r.tags.includes(filters.tag))) return false;
+      return true;
+    });
+
     setBreakdown(filtered);
-  }, [filters.provider]);
+  }, [filters]);
 
   const breakdownColumns = [
     { key: "provider", label: "Provider" },
     { key: "account_name", label: "Account" },
+    { key: "region", label: "Region" },
     { key: "service", label: "Service" },
     {
       key: "amount",
@@ -92,6 +125,10 @@ export default function Costs() {
           { value: "azure", label: "Azure" },
           { value: "gcp", label: "GCP" },
         ]}
+        accountOptions={accountOptions}
+        regionOptions={regionOptions}
+        serviceOptions={serviceOptions}
+        tagOptions={tagOptions}
       />
 
       <div

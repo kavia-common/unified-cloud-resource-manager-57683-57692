@@ -2,6 +2,8 @@ import React, { useMemo, useRef, useState } from "react";
 import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 import { Popover } from "../../components/ui/Popover";
+import Tabs from "../../components/ui/Tabs";
+import InventoryComputeInstances from "./InventoryComputeInstances";
 
 // A compact vertical dropdown component local to Inventory for minimalist control
 function VerticalDropdown({ label = "Filter", options = [], value, onChange, width = 220 }) {
@@ -106,9 +108,16 @@ function VerticalDropdown({ label = "Filter", options = [], value, onChange, wid
   );
 }
 
+/** Tabs available under Inventory */
+const INVENTORY_TABS = [
+  { id: "all", label: "All Resources" },
+  { id: "compute", label: "Compute Instances" },
+];
+
 // PUBLIC_INTERFACE
 export default function Inventory() {
   /** Inventory with filters, actions and operation modal (start/stop/scale). */
+  const [activeTab, setActiveTab] = useState("compute");
   const [rows, setRows] = useState([
     { id: "i-123", name: "web-1", provider: "aws", type: "ec2", region: "us-east-1", status: "Running", cost_daily: 4.12 },
     { id: "vm-001", name: "api-1", provider: "azure", type: "vm", region: "eastus", status: "Stopped", cost_daily: 5.44 },
@@ -190,48 +199,58 @@ export default function Inventory() {
         </div>
       </div>
       <div className="panel-body">
-        <div
-          className="table-actions"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 10,
-            gap: 10,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <VerticalDropdown
-              label="Provider"
-              value={provider}
-              onChange={setProvider}
-              options={[
-                { value: "aws", label: "AWS" },
-                { value: "azure", label: "Azure" },
-              ]}
-            />
-            <VerticalDropdown
-              label="Status"
-              value={status}
-              onChange={setStatus}
-              options={[
-                { value: "Running", label: "Running" },
-                { value: "Stopped", label: "Stopped" },
-              ]}
-            />
-          </div>
-          <div />
+        <div style={{ marginBottom: 8 }}>
+          <Tabs tabs={INVENTORY_TABS} active={activeTab} onChange={setActiveTab} />
         </div>
 
-        <DataTable
-          variant="transparent"
-          columns={columns}
-          rows={filtered}
-          emptyMessage="No resources discovered yet."
-          headerClassName="table__head--inventory"
-          tableClassName="table--inventory"
-        />
+        {activeTab === "compute" ? (
+          <InventoryComputeInstances />
+        ) : (
+          <>
+            <div
+              className="table-actions"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 10,
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <VerticalDropdown
+                  label="Provider"
+                  value={provider}
+                  onChange={setProvider}
+                  options={[
+                    { value: "aws", label: "AWS" },
+                    { value: "azure", label: "Azure" },
+                  ]}
+                />
+                <VerticalDropdown
+                  label="Status"
+                  value={status}
+                  onChange={setStatus}
+                  options={[
+                    { value: "Running", label: "Running" },
+                    { value: "Stopped", label: "Stopped" },
+                  ]}
+                />
+              </div>
+              <div />
+            </div>
+
+            <DataTable
+              variant="transparent"
+              columns={columns}
+              rows={filtered}
+              emptyMessage="No resources discovered yet."
+              headerClassName="table__head--inventory"
+              tableClassName="table--inventory"
+            />
+          </>
+        )}
       </div>
 
       <Modal

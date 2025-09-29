@@ -1,127 +1,325 @@
-import React, { useMemo, useState } from "react";
-import { DataTable } from "../../../components/ui/Table";
-import { Modal } from "../../../components/ui/Modal";
-import { useToast } from "../../../components/ui/Toast";
+import React, { useMemo, useState } from 'react';
+import Table from '../../../components/ui/Table';
+import Modal from '../../../components/ui/Modal';
 
 /**
  * PUBLIC_INTERFACE
+ * StoragePanel shows S3 and Azure Blob containers with mock actions
+ * for permissions, lifecycle, and basic maintenance.
  */
-export default function StoragePanel() {
-  /**
-   * Manage object storage buckets/containers: create/delete, toggle public/private, stats, empty.
-   */
-  const toast = useToast();
-  const [buckets, setBuckets] = useState([
-    { id: "bkt-logs", name: "prod-logs", provider: "aws", type: "s3", region: "us-east-1", public: false, objects: 124000, size_gb: 320.4, est_cost: 7.2 },
-    { id: "cont-media", name: "media", provider: "azure", type: "blob", region: "eastus", public: true, objects: 7600, size_gb: 82.1, est_cost: 2.8 },
-  ]);
-  const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ name: "", provider: "aws", region: "", public: false });
+const StoragePanel = () => {
+  const data = useMemo(
+    () => ({
+      'AWS S3': [
+        { name: 'prod-logs', region: 'us-east-1', objects: 125430, storageClass: 'STANDARD', versioning: 'Enabled' },
+        { name: 'media-assets', region: 'us-west-2', objects: 20485, storageClass: 'INTELLIGENT_TIERING', versioning: 'Disabled' },
+      ],
+      'Azure Blob': [
+        { name: 'az-prod-data', region: 'eastus', objects: 55340, tier: 'Hot', versioning: 'Enabled' },
+        { name: 'az-backups', region: 'westeurope', objects: 9980, tier: 'Cool', versioning: 'Disabled' },
+      ],
+    }),
+    []
+  );
 
-  function resetForm() { setForm({ name: "", provider: "aws", region: "", public: false }); }
+  const [expanded, setExpanded] = useState({ 'AWS S3': true, 'Azure Blob': true });
+  const [modal, setModal] = useState(null);
 
-  // PUBLIC_INTERFACE
-  function createBucket() {
-    if (!form.name) return toast.info("Name is required");
-    const id = `${form.provider}-${form.name}`;
-    setBuckets(prev => [{ id, name: form.name, provider: form.provider, type: form.provider === "aws" ? "s3" : "blob", region: form.region || (form.provider === "aws" ? "us-east-1" : "eastus"), public: !!form.public, objects: 0, size_gb: 0, est_cost: 0 }, ...prev]);
-    toast.success("Bucket/Container created");
-    setShowCreate(false);
-    // TODO: Call backend to create bucket/container and set policy
-  }
+  const toggle = (key) => setExpanded((e) => ({ ...e, [key]: !e[key] }));
+  const close = () => setModal(null);
+  const notify = (m) => {
+    close();
+    setTimeout(() => window.alert(m), 10);
+  };
 
-  // PUBLIC_INTERFACE
-  function togglePublic(id) {
-    setBuckets(prev => prev.map(b => (b.id === id ? { ...b, public: !b.public } : b)));
-    toast.info("Access updated");
-    // TODO: backend call to update policy
-  }
+  const openPermissions = (row, provider) => {
+    setModal({
+      title: `Edit Permissions - ${row.name}`,
+      content: <PermissionsForm provider={provider} bucket={row} onSubmit={() => notify('Permissions updated (mock)')} />,
+    });
+  };
 
-  // PUBLIC_INTERFACE
-  function emptyBucket(id) {
-    setBuckets(prev => prev.map(b => (b.id === id ? { ...b, objects: 0, size_gb: 0 } : b)));
-    toast.success("Bucket emptied");
-    // TODO: backend call to delete all objects with safeguards
-  }
+  const openLifecycle = (row) => {
+    setModal({
+      title: `Lifecycle Rules - ${row.name}`,
+      content: <LifecycleForm bucket={row} onSubmit={() => notify('Lifecycle rules saved (mock)')} />,
+    });
+  };
 
-  // PUBLIC_INTERFACE
-  function deleteBucket(id) {
-    setBuckets(prev => prev.filter(b => b.id !== id));
-    toast.error("Bucket deleted");
-    // TODO: backend deletion with force flag if empty
-  }
+  const openEmpty = (row) => {
+    setModal({
+      title: `Empty Bucket - ${row.name}`,
+      content: (
+        <p style={{ color: '#6B7280', fontSize: 14 }}>
+          This will delete all objects from the bucket. Proceed?
+        </p>
+      ),
+      onConfirm: () => notify('Empty operation scheduled (mock)'),
+    });
+  };
 
-  const columns = useMemo(() => [
-    { key: "name", label: "Name" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "type", label: "Type" },
-    { key: "region", label: "Region" },
-    { key: "public", label: "Access", render: v => (v ? "Public" : "Private") },
-    { key: "objects", label: "Objects" },
-    { key: "size_gb", label: "Size (GB)", render: v => (v ? Number(v).toFixed(1) : "0.0") },
-    { key: "est_cost", label: "Est. Cost ($)", render: v => (v ? Number(v).toFixed(2) : "0.00") },
+  const openDelete = (row) => {
+    setModal({
+      title: `Delete Bucket - ${row.name}`,
+      content: (
+        <p style={{ color: '#6B7280', fontSize: 14 }}>
+          This will permanently delete the bucket. Ensure it is empty.
+        </p>
+      ),
+      onConfirm: () => notify('Delete scheduled (mock)'),
+    });
+  };
+
+  const s3Columns = [
+    { header: 'Bucket', accessor: 'name' },
+    { header: 'Region', accessor: 'region' },
+    { header: 'Objects', accessor: 'objects' },
+    { header: 'Class', accessor: 'storageClass' },
+    { header: 'Versioning', accessor: 'versioning' },
     {
-      key: "actions",
-      label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn ghost" onClick={() => togglePublic(r.id)}>{r.public ? "Make Private" : "Make Public"}</button>
-          <button className="btn ghost" onClick={() => emptyBucket(r.id)}>Empty</button>
-          <button className="btn" style={{ borderColor: "var(--border)", color: "#EF4444" }} onClick={() => deleteBucket(r.id)}>Delete</button>
+      header: 'Actions',
+      accessor: 'actions',
+      render: (row) => (
+        <div style={styles.actionRow}>
+          <button style={styles.actionBtn} onClick={() => openPermissions(row, 'AWS')}>Permissions</button>
+          <button style={styles.actionBtn} onClick={() => openLifecycle(row)}>Lifecycle</button>
+          <button style={styles.actionBtn} onClick={() => notify('Upload (mock)')}>Upload</button>
+          <button style={styles.actionBtn} onClick={() => openEmpty(row)}>Empty</button>
+          <button style={styles.actionBtnDanger} onClick={() => openDelete(row)}>Delete</button>
         </div>
-      )
-    }
-  ], []);
+      ),
+    },
+  ];
+
+  const blobColumns = [
+    { header: 'Container', accessor: 'name' },
+    { header: 'Region', accessor: 'region' },
+    { header: 'Objects', accessor: 'objects' },
+    { header: 'Tier', accessor: 'tier' },
+    { header: 'Versioning', accessor: 'versioning' },
+    {
+      header: 'Actions',
+      accessor: 'actions',
+      render: (row) => (
+        <div style={styles.actionRow}>
+          <button style={styles.actionBtn} onClick={() => openPermissions(row, 'Azure')}>Permissions</button>
+          <button style={styles.actionBtn} onClick={() => openLifecycle(row)}>Lifecycle</button>
+          <button style={styles.actionBtn} onClick={() => notify('Upload (mock)')}>Upload</button>
+          <button style={styles.actionBtnDanger} onClick={() => openDelete(row)}>Delete</button>
+        </div>
+      ),
+    },
+  ];
+
+  const cards = [
+    { key: 'AWS S3', title: 'AWS S3 Buckets', columns: s3Columns, list: data['AWS S3'] },
+    { key: 'Azure Blob', title: 'Azure Blob Containers', columns: blobColumns, list: data['Azure Blob'] },
+  ];
 
   return (
-    <>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-        <button className="btn primary" onClick={() => setShowCreate(true)}>Create Bucket/Container</button>
-      </div>
+    <div>
+      {cards.map((c) => (
+        <section key={c.key} style={styles.card}>
+          <header style={styles.cardHeader} onClick={() => toggle(c.key)} role="button" tabIndex={0}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={styles.chevron(expanded[c.key])}>▾</span>
+              <h3 style={styles.cardTitle}>
+                {c.title}
+                <span style={styles.countBadge}>{c.list.length}</span>
+              </h3>
+            </div>
+            <span style={styles.hint}>{expanded[c.key] ? 'Collapse' : 'Expand'}</span>
+          </header>
+          {expanded[c.key] && (
+            <div style={styles.cardBody}>
+              <Table columns={c.columns} data={c.list} />
+            </div>
+          )}
+        </section>
+      ))}
 
-      <DataTable
-        variant="transparent"
-        columns={columns}
-        rows={buckets}
-        emptyMessage="No buckets found."
-      />
-
-      <Modal
-        title="Create Bucket/Container"
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-        footer={(
-          <>
-            <button className="btn ghost" onClick={() => setShowCreate(false)}>Cancel</button>
-            <button className="btn primary" onClick={createBucket}>Create</button>
-          </>
-        )}
-      >
-        <div style={{ display: "grid", gap: 10 }}>
-          <div>
-            <div className="text-xs" style={{ color: "var(--muted)", marginBottom: 4 }}>Name</div>
-            <input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., app-uploads" />
-          </div>
-          <div>
-            <div className="text-xs" style={{ color: "var(--muted)", marginBottom: 4 }}>Provider</div>
-            <select className="select" value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })}>
-              <option value="aws">AWS (S3)</option>
-              <option value="azure">Azure (Blob)</option>
-            </select>
-          </div>
-          <div>
-            <div className="text-xs" style={{ color: "var(--muted)", marginBottom: 4 }}>Region</div>
-            <input className="input" value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} placeholder="e.g., us-east-1 / eastus" />
-          </div>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <input type="checkbox" checked={!!form.public} onChange={(e) => setForm({ ...form, public: e.target.checked })} />
-            <span className="text-sm">Public</span>
-          </label>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>
-            TODO: Validate naming and region availability via backend.
-          </div>
-        </div>
-      </Modal>
-    </>
+      {modal && (
+        <Modal title={modal.title} onClose={() => setModal(null)} onConfirm={modal.onConfirm}>
+          {modal.content}
+        </Modal>
+      )}
+    </div>
   );
-}
+};
+
+const PermissionsForm = ({ provider, bucket, onSubmit }) => {
+  const [publicRead, setPublicRead] = useState(false);
+  const [blockPublicAccess, setBlockPublicAccess] = useState(true);
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <div style={styles.formRow}>
+        <label style={styles.label}>
+          <input type="checkbox" checked={publicRead} onChange={(e) => setPublicRead(e.target.checked)} /> Public read
+        </label>
+      </div>
+      <div style={styles.formRow}>
+        <label style={styles.label}>
+          <input type="checkbox" checked={blockPublicAccess} onChange={(e) => setBlockPublicAccess(e.target.checked)} /> Block public access
+        </label>
+      </div>
+      <p style={{ color: '#6B7280', fontSize: 12, marginTop: 6 }}>
+        Provider: {provider}. Bucket/Container: {bucket.name}. This is a mock configuration.
+      </p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <button type="submit" style={styles.primaryBtn}>Save</button>
+      </div>
+    </form>
+  );
+};
+
+const LifecycleForm = ({ bucket, onSubmit }) => {
+  const [days, setDays] = useState(30);
+  const [transition, setTransition] = useState('GLACIER/Archive');
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Transition after days</label>
+        <input
+          type="number"
+          min="1"
+          value={days}
+          onChange={(e) => setDays(parseInt(e.target.value || '1', 10))}
+          style={styles.input}
+        />
+      </div>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Transition to</label>
+        <select value={transition} onChange={(e) => setTransition(e.target.value)} style={styles.select}>
+          <option>GLACIER/Archive</option>
+          <option>INTELLIGENT_TIERING/Cool</option>
+          <option>DEEP_ARCHIVE</option>
+        </select>
+      </div>
+      <p style={{ color: '#6B7280', fontSize: 12, marginTop: 6 }}>
+        Applying to: {bucket.name}. Demo only.
+      </p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Save Rules</button>
+      </div>
+    </form>
+  );
+};
+
+const styles = {
+  card: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    padding: '12px 14px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
+  chevron: (open) => ({
+    display: 'inline-block',
+    transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    color: '#9CA3AF',
+    width: 16,
+  }),
+  cardTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#111827',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    fontSize: 12,
+    color: '#374151',
+    background: '#F3F4F6',
+    border: '1px solid #E5E7EB',
+    padding: '2px 6px',
+    borderRadius: 999,
+  },
+  cardBody: {
+    padding: 12,
+  },
+  actionRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  actionBtn: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#374151',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  actionBtnDanger: {
+    background: '#FFFFFF',
+    border: '1px solid #EF4444',
+    color: '#EF4444',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  primaryBtn: {
+    background: '#111827',
+    border: '1px solid #111827',
+    color: '#FFFFFF',
+    padding: '6px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  formRow: {
+    marginBottom: 12,
+  },
+  label: {
+    color: '#111827',
+    fontSize: 14,
+  },
+  smallLabel: {
+    display: 'block',
+    color: '#374151',
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  input: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  select: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  hint: { color: '#9CA3AF', fontSize: 12 },
+};
+
+export default StoragePanel;

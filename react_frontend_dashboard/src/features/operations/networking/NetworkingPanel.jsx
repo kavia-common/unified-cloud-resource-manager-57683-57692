@@ -1,226 +1,279 @@
-import React, { useMemo, useState } from "react";
-import { DataTable } from "../../../components/ui/Table";
-import { Modal } from "../../../components/ui/Modal";
-import { useToast } from "../../../components/ui/Toast";
+import React, { useMemo, useState } from 'react';
+import Table from '../../../components/ui/Table';
+import Modal from '../../../components/ui/Modal';
 
 /**
  * PUBLIC_INTERFACE
+ * NetworkingPanel shows security group and load balancer management with mock actions.
  */
-export default function NetworkingPanel() {
-  /**
-   * Manage networking: security groups/firewalls, public IPs, load balancers, VPCs/subnets.
-   */
-  const toast = useToast();
+const NetworkingPanel = () => {
+  const data = useMemo(
+    () => ({
+      'Security Groups': [
+        { id: 'sg-0a1b2c', name: 'web-sg', rules: 5, attached: 3, provider: 'AWS' },
+        { id: 'az-nsg-01', name: 'az-web-nsg', rules: 7, attached: 2, provider: 'Azure' },
+      ],
+      'Load Balancers': [
+        { id: 'alb-123', name: 'public-alb', type: 'application', listeners: 2, targets: 4, provider: 'AWS' },
+        { id: 'az-lb-1', name: 'front-door', type: 'layer4', listeners: 3, targets: 6, provider: 'Azure' },
+      ],
+    }),
+    []
+  );
 
-  // Security groups / firewalls
-  const [secGroups, setSecGroups] = useState([
-    { id: "sg-web", name: "web-sg", provider: "aws", rules: 5 },
-    { id: "nsg-app", name: "app-nsg", provider: "azure", rules: 8 },
-  ]);
+  const [expanded, setExpanded] = useState({ 'Security Groups': true, 'Load Balancers': true });
+  const [modal, setModal] = useState(null);
+  const toggle = (k) => setExpanded((e) => ({ ...e, [k]: !e[k] }));
+  const notify = (m) => setTimeout(() => window.alert(m), 10);
 
-  // Public IP attachments
-  const [publicIps, setPublicIps] = useState([
-    { id: "eip-1", ip: "54.12.45.67", attached_to: "i-001", provider: "aws" },
-    { id: "pip-1", ip: "20.50.10.22", attached_to: null, provider: "azure" },
-  ]);
+  const openAttach = (row) =>
+    setModal({
+      title: `Attach to Instances - ${row.name}`,
+      content: <AttachForm onSubmit={(ids) => { setModal(null); notify(`Attached to: ${ids} (mock)`); }} />,
+    });
 
-  // Load balancers
-  const [lbs, setLbs] = useState([
-    { id: "alb-1", name: "public-alb", provider: "aws", type: "ALB", dns: "alb-1.elb.amazonaws.com" },
-    { id: "lb-az-1", name: "app-lb", provider: "azure", type: "Public", dns: "app-lb.eastus.cloudapp.azure.com" },
-  ]);
+  const openRule = (row) =>
+    setModal({
+      title: `Add Rule - ${row.name}`,
+      content: <RuleForm onSubmit={(r) => { setModal(null); notify(`Rule added: ${r.protocol}/${r.port} (mock)`); }} />,
+    });
 
-  // VPCs/Subnets
-  const [networks] = useState([
-    { id: "vpc-1", provider: "aws", name: "prod-vpc", cidr: "10.0.0.0/16", subnets: 6 },
-    { id: "vnet-1", provider: "azure", name: "prod-vnet", cidr: "10.20.0.0/16", subnets: 4 },
-  ]);
+  const openLBTargets = (row) =>
+    setModal({
+      title: `Manage Targets - ${row.name}`,
+      content: <TargetsForm onSubmit={(action) => { setModal(null); notify(`${action} targets requested (mock)`); }} />,
+    });
 
-  const [showSgModal, setShowSgModal] = useState(false);
-  const [sgName, setSgName] = useState("");
-  const [selectedIp, setSelectedIp] = useState(null);
-  const [attachTarget, setAttachTarget] = useState("");
-
-  // PUBLIC_INTERFACE
-  function createSecGroup() {
-    if (!sgName) return toast.info("Name is required");
-    setSecGroups(prev => [{ id: `sg-${sgName}`, name: sgName, provider: "aws", rules: 0 }, ...prev]);
-    setShowSgModal(false);
-    toast.success("Security group created");
-    // TODO: Backend create SG/NSG
-  }
-
-  // PUBLIC_INTERFACE
-  function deleteSecGroup(id) {
-    setSecGroups(prev => prev.filter(s => s.id !== id));
-    toast.error("Security group deleted");
-    // TODO: Backend delete SG/NSG
-  }
-
-  // PUBLIC_INTERFACE
-  function attachIp(id, targetId) {
-    setPublicIps(prev => prev.map(p => (p.id === id ? { ...p, attached_to: targetId || null } : p)));
-    toast.success("Public IP attached");
-    // TODO: Backend associate EIP/Public IP
-  }
-
-  // PUBLIC_INTERFACE
-  function detachIp(id) {
-    setPublicIps(prev => prev.map(p => (p.id === id ? { ...p, attached_to: null } : p)));
-    toast.info("Public IP detached");
-    // TODO: Backend disassociate IP
-  }
-
-  // PUBLIC_INTERFACE
-  function createLoadBalancer() {
-    const id = `lb-${Math.random().toString(36).slice(2, 6)}`;
-    setLbs(prev => [{ id, name: `lb-${prev.length + 1}`, provider: "aws", type: "ALB", dns: `${id}.elb.amazonaws.com` }, ...prev]);
-    toast.success("Load balancer created");
-    // TODO: Backend create LB
-  }
-
-  // PUBLIC_INTERFACE
-  function deleteLoadBalancer(id) {
-    setLbs(prev => prev.filter(l => l.id !== id));
-    toast.error("Load balancer deleted");
-    // TODO: Backend delete LB
-  }
-
-  const sgCols = useMemo(() => [
-    { key: "name", label: "Name" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "rules", label: "Rules" },
+  const sgColumns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'SG/NSG ID', accessor: 'id' },
+    { header: 'Rules', accessor: 'rules' },
+    { header: 'Attached', accessor: 'attached' },
+    { header: 'Provider', accessor: 'provider' },
     {
-      key: "actions", label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn" style={{ borderColor: "var(--border)", color: "#EF4444" }} onClick={() => deleteSecGroup(r.id)}>Delete</button>
+      header: 'Actions',
+      accessor: 'actions',
+      render: (row) => (
+        <div style={styles.actionRow}>
+          <button style={styles.actionBtn} onClick={() => openAttach(row)}>Attach</button>
+          <button style={styles.actionBtn} onClick={() => notify('Detach requested (mock)')}>Detach</button>
+          <button style={styles.actionBtn} onClick={() => openRule(row)}>Add Rule</button>
+          <button style={styles.actionBtnDanger} onClick={() => notify('Delete requested (mock)')}>Delete</button>
         </div>
-      )
-    }
-  ], []);
+      ),
+    },
+  ];
 
-  const ipCols = useMemo(() => [
-    { key: "ip", label: "Public IP" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "attached_to", label: "Attached To", render: v => v || "—" },
+  const lbColumns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'LB ID', accessor: 'id' },
+    { header: 'Type', accessor: 'type' },
+    { header: 'Listeners', accessor: 'listeners' },
+    { header: 'Targets', accessor: 'targets' },
+    { header: 'Provider', accessor: 'provider' },
     {
-      key: "actions", label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          {r.attached_to ? (
-            <button className="btn ghost" onClick={() => detachIp(r.id)}>Detach</button>
-          ) : (
-            <>
-              <button className="btn ghost" onClick={() => { setSelectedIp(r); }}>Attach</button>
-            </>
-          )}
+      header: 'Actions',
+      accessor: 'actions',
+      render: (row) => (
+        <div style={styles.actionRow}>
+          <button style={styles.actionBtn} onClick={() => openLBTargets(row)}>Manage Targets</button>
+          <button style={styles.actionBtn} onClick={() => notify('Add Listener (mock)')}>Add Listener</button>
+          <button style={styles.actionBtnDanger} onClick={() => notify('Delete LB (mock)')}>Delete</button>
         </div>
-      )
-    }
-  ], []);
+      ),
+    },
+  ];
 
-  const lbCols = useMemo(() => [
-    { key: "name", label: "Name" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "type", label: "Type" },
-    { key: "dns", label: "DNS Name" },
-    {
-      key: "actions", label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn ghost" onClick={createLoadBalancer}>Create</button>
-          <button className="btn" style={{ borderColor: "var(--border)", color: "#EF4444" }} onClick={() => deleteLoadBalancer(r.id)}>Delete</button>
-        </div>
-      )
-    }
-  ], []);
-
-  const netCols = useMemo(() => [
-    { key: "name", label: "VPC/VNet" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "cidr", label: "CIDR" },
-    { key: "subnets", label: "Subnets" },
-  ], []);
+  const cards = [
+    { key: 'Security Groups', title: 'Security Groups / NSGs', columns: sgColumns, list: data['Security Groups'] },
+    { key: 'Load Balancers', title: 'Load Balancers', columns: lbColumns, list: data['Load Balancers'] },
+  ];
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">Security Groups / Firewalls</div>
-          <div>
-            <button className="btn primary" onClick={() => setShowSgModal(true)}>Create</button>
-          </div>
-        </div>
-        <div className="panel-body">
-          <DataTable variant="transparent" columns={sgCols} rows={secGroups} emptyMessage="No security groups." />
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">Public IPs</div>
-        </div>
-        <div className="panel-body">
-          <DataTable variant="transparent" columns={ipCols} rows={publicIps} emptyMessage="No public IPs." />
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">Load Balancers</div>
-        </div>
-        <div className="panel-body">
-          <DataTable variant="transparent" columns={lbCols} rows={lbs} emptyMessage="No load balancers." />
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="panel-header">
-          <div className="panel-title">VPCs / VNets</div>
-        </div>
-        <div className="panel-body">
-          <DataTable variant="transparent" columns={netCols} rows={networks} emptyMessage="No networks discovered." />
-        </div>
-      </section>
-
-      <Modal
-        title={selectedIp ? `Attach IP ${selectedIp.ip}` : "Attach IP"}
-        open={!!selectedIp}
-        onClose={() => { setSelectedIp(null); setAttachTarget(""); }}
-        footer={(
-          <>
-            <button className="btn ghost" onClick={() => { setSelectedIp(null); setAttachTarget(""); }}>Cancel</button>
-            <button className="btn primary" onClick={() => { attachIp(selectedIp.id, attachTarget); setSelectedIp(null); setAttachTarget(""); }}>Attach</button>
-          </>
-        )}
-      >
-        <div style={{ display: "grid", gap: 10 }}>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>Attach to instance ID</div>
-          <input className="input" placeholder="e.g., i-0abcd1234 / vm-xyz" value={attachTarget} onChange={(e) => setAttachTarget(e.target.value)} />
-          <div className="text-xs" style={{ color: "var(--muted)" }}>TODO: Search/validate target from inventory via backend.</div>
-        </div>
-      </Modal>
-
-      <Modal
-        title="Create Security Group"
-        open={showSgModal}
-        onClose={() => setShowSgModal(false)}
-        footer={(
-          <>
-            <button className="btn ghost" onClick={() => setShowSgModal(false)}>Cancel</button>
-            <button className="btn primary" onClick={createSecGroup}>Create</button>
-          </>
-        )}
-      >
-        <div style={{ display: "grid", gap: 10 }}>
-          <div>
-            <div className="text-xs" style={{ color: "var(--muted)", marginBottom: 4 }}>Name</div>
-            <input className="input" placeholder="e.g., web-sg" value={sgName} onChange={(e) => setSgName(e.target.value)} />
-          </div>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>TODO: Choose provider/VPC and define initial rules.</div>
-        </div>
-      </Modal>
+    <div>
+      {cards.map((c) => (
+        <section key={c.key} style={styles.card}>
+          <header style={styles.cardHeader} onClick={() => toggle(c.key)} role="button" tabIndex={0}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={styles.chevron(expanded[c.key])}>▾</span>
+              <h3 style={styles.cardTitle}>
+                {c.title}
+                <span style={styles.countBadge}>{c.list.length}</span>
+              </h3>
+            </div>
+            <span style={styles.hint}>{expanded[c.key] ? 'Collapse' : 'Expand'}</span>
+          </header>
+          {expanded[c.key] && (
+            <div style={styles.cardBody}>
+              <Table columns={c.columns} data={c.list} />
+            </div>
+          )}
+        </section>
+      ))}
+      {modal && (
+        <Modal title={modal.title} onClose={() => setModal(null)}>
+          {modal.content}
+        </Modal>
+      )}
     </div>
   );
-}
+};
+
+const AttachForm = ({ onSubmit }) => {
+  const [ids, setIds] = useState('i-0a1b2c3,i-1234567');
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(ids); }}>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Instance IDs (comma separated)</label>
+        <input value={ids} onChange={(e) => setIds(e.target.value)} style={styles.input} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Attach</button>
+      </div>
+    </form>
+  );
+};
+
+const RuleForm = ({ onSubmit }) => {
+  const [protocol, setProtocol] = useState('tcp');
+  const [port, setPort] = useState(443);
+  const [cidr, setCidr] = useState('0.0.0.0/0');
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ protocol, port, cidr }); }}>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Protocol</label>
+        <select value={protocol} onChange={(e) => setProtocol(e.target.value)} style={styles.select}>
+          <option>tcp</option>
+          <option>udp</option>
+        </select>
+      </div>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Port</label>
+        <input type="number" value={port} onChange={(e) => setPort(parseInt(e.target.value || '0', 10))} style={styles.input} />
+      </div>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>CIDR</label>
+        <input value={cidr} onChange={(e) => setCidr(e.target.value)} style={styles.input} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Add Rule</button>
+      </div>
+    </form>
+  );
+};
+
+const TargetsForm = ({ onSubmit }) => {
+  const [action, setAction] = useState('Register');
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(action); }}>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Action</label>
+        <select value={action} onChange={(e) => setAction(e.target.value)} style={styles.select}>
+          <option>Register</option>
+          <option>Deregister</option>
+        </select>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Apply</button>
+      </div>
+    </form>
+  );
+};
+
+const styles = {
+  card: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    padding: '12px 14px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
+  chevron: (open) => ({
+    display: 'inline-block',
+    transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    color: '#9CA3AF',
+    width: 16,
+  }),
+  cardTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#111827',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    fontSize: 12,
+    color: '#374151',
+    background: '#F3F4F6',
+    border: '1px solid #E5E7EB',
+    padding: '2px 6px',
+    borderRadius: 999,
+  },
+  cardBody: {
+    padding: 12,
+  },
+  actionRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  actionBtn: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#374151',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  actionBtnDanger: {
+    background: '#FFFFFF',
+    border: '1px solid #EF4444',
+    color: '#EF4444',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  primaryBtn: {
+    background: '#111827',
+    border: '1px solid #111827',
+    color: '#FFFFFF',
+    padding: '6px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  select: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  input: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  formRow: {
+    marginBottom: 12,
+  },
+  hint: { color: '#9CA3AF', fontSize: 12 },
+};
+
+export default NetworkingPanel;

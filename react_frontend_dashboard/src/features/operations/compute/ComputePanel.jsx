@@ -1,163 +1,252 @@
-import React, { useMemo, useState } from "react";
-import { DataTable } from "../../../components/ui/Table";
-import { Modal } from "../../../components/ui/Modal";
-import { useToast } from "../../../components/ui/Toast";
+import React, { useMemo, useState } from 'react';
+import Table from '../../../components/ui/Table';
+import Modal from '../../../components/ui/Modal';
 
 /**
  * PUBLIC_INTERFACE
+ * ComputePanel renders expandable resource sections for VMs across clouds
+ * and provides mock action handlers (Start/Stop/Restart/Resize/Terminate).
  */
-export default function ComputePanel() {
-  /**
-   * Minimalist table of instances with action dropdown via inline buttons.
-   * Supports Start/Stop/Restart/Resize/Terminate, and a Details modal.
-   */
-  const { show: showToast } = useToast();
-  const [instances, setInstances] = useState([
-    { id: "i-001", name: "web-01", provider: "aws", type: "t3.medium", region: "us-east-1", status: "running", cpu: 22, mem: 58 },
-    { id: "i-002", name: "web-02", provider: "aws", type: "t3.small", region: "us-east-1", status: "stopped", cpu: 0, mem: 0 },
-    { id: "vm-az-01", name: "api-01", provider: "azure", type: "Standard_B2s", region: "eastus", status: "running", cpu: 18, mem: 44 },
-  ]);
-  const [selected, setSelected] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showResize, setShowResize] = useState(false);
-  const [newSize, setNewSize] = useState("");
+const ComputePanel = () => {
+  const data = useMemo(
+    () => ({
+      AWS: [
+        { id: 'i-0a1b2c3d4e5f', name: 'web-01', type: 't3.medium', state: 'stopped', region: 'us-east-1', os: 'Amazon Linux' },
+        { id: 'i-1234567890ab', name: 'api-01', type: 'm5.large', state: 'running', region: 'us-east-2', os: 'Ubuntu 22.04' },
+      ],
+      Azure: [
+        { id: 'vm-az-001', name: 'az-web-01', type: 'Standard_D2s_v5', state: 'running', region: 'eastus', os: 'Ubuntu 20.04' },
+        { id: 'vm-az-002', name: 'az-batch-01', type: 'Standard_F4s_v2', state: 'deallocated', region: 'westeurope', os: 'Windows' },
+      ],
+    }),
+    []
+  );
 
-  function updateStatus(id, status) {
-    setInstances(prev => prev.map(i => (i.id === id ? { ...i, status } : i)));
-  }
+  const [expanded, setExpanded] = useState({ AWS: true, Azure: true });
+  const [modal, setModal] = useState(null); // { title, content, onConfirm }
 
-  // PUBLIC_INTERFACE
-  async function handleAction(id, action) {
-    /**
-     * Stubs for instance lifecycle management.
-     * TODO: Integrate with Supabase Edge Functions for actual provider actions.
-     */
-    const inst = instances.find(i => i.id === id);
-    try {
-      switch (action) {
-        case "start":
-          updateStatus(id, "running");
-          showToast(`Started ${inst?.name}`, { type: "success" });
-          break;
-        case "stop":
-          updateStatus(id, "stopped");
-          showToast(`Stopped ${inst?.name}`, { type: "success" });
-          break;
-        case "restart":
-          updateStatus(id, "running");
-          showToast(`Restarted ${inst?.name}`, { type: "info" });
-          break;
-        case "terminate":
-          setInstances(prev => prev.filter(i => i.id !== id));
-          showToast(`Terminated ${inst?.name}`, { type: "error" });
-          break;
-        case "resize":
-          setSelected(inst);
-          setNewSize(inst?.type || "");
-          setShowResize(true);
-          break;
-        case "details":
-          setSelected(inst);
-          setShowDetails(true);
-          break;
-        default:
-          break;
-      }
-      // Example backend stub:
-      // await controlResource({ provider: inst.provider, resourceId: id, operation: action, params: {} });
-    } catch (err) {
-      showToast(err?.message || "Operation failed", { type: "error" });
+  const toggle = (key) => setExpanded((e) => ({ ...e, [key]: !e[key] }));
+
+  const openConfirm = (title, message, onConfirm) =>
+    setModal({
+      title,
+      content: (
+        <div style={{ color: '#6B7280', fontSize: 14, lineHeight: 1.5 }}>
+          <p style={{ marginTop: 0 }}>{message}</p>
+          <p>This is a demo flow. No real changes will be made.</p>
+        </div>
+      ),
+      onConfirm,
+    });
+
+  const handleAction = (action, row) => {
+    switch (action) {
+      case 'Start':
+        openConfirm('Start instance', `Start ${row.name} (${row.id})?`, () => closeModalWithToast('Start scheduled'));
+        break;
+      case 'Stop':
+        openConfirm('Stop instance', `Stop ${row.name} (${row.id})?`, () => closeModalWithToast('Stop scheduled'));
+        break;
+      case 'Restart':
+        openConfirm('Restart instance', `Restart ${row.name} (${row.id})?`, () => closeModalWithToast('Restart scheduled'));
+        break;
+      case 'Resize':
+        setModal({
+          title: 'Resize instance',
+          content: <ResizeForm instance={row} onSubmit={(sz) => closeModalWithToast(`Resize to ${sz} requested`)} />,
+        });
+        break;
+      case 'Terminate':
+        openConfirm(
+          'Terminate instance',
+          `This will permanently delete ${row.name} (${row.id}). Proceed?`,
+          () => closeModalWithToast('Terminate scheduled')
+        );
+        break;
+      default:
+        break;
     }
-  }
+  };
 
-  function commitResize() {
-    if (!selected || !newSize) return;
-    setInstances(prev => prev.map(i => (i.id === selected.id ? { ...i, type: newSize } : i)));
-    setShowResize(false);
-    showToast(`Resized ${selected.name} to ${newSize}`, { type: "success" });
-    // TODO: Backend integration for resize action via Edge Function
-  }
+  const closeModalWithToast = (msg) => {
+    setModal(null);
+    // Light-weight toast using alert for now (keeps dependencies minimal and aligns with minimalist style)
+    // Could be swapped with components/ui/Toast if needed.
+    setTimeout(() => window.alert(msg), 10);
+  };
 
-  const columns = useMemo(() => [
-    { key: "id", label: "ID" },
-    { key: "name", label: "Name" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "type", label: "Instance Type" },
-    { key: "region", label: "Region" },
-    { key: "status", label: "Status", cellClassName: (v) => v === "running" ? "text-success" : "" },
-    { key: "cpu", label: "CPU %" },
-    { key: "mem", label: "Mem %" },
+  const columns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'Instance ID', accessor: 'id' },
+    { header: 'Type', accessor: 'type' },
+    { header: 'State', accessor: 'state' },
+    { header: 'Region', accessor: 'region' },
+    { header: 'OS', accessor: 'os' },
     {
-      key: "actions",
-      label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn ghost" onClick={() => handleAction(r.id, "start")} disabled={r.status === "running"}>Start</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "stop")} disabled={r.status === "stopped"}>Stop</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "restart")} disabled={r.status !== "running"}>Restart</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "resize")}>Resize</button>
-          <button className="btn" style={{ borderColor: "var(--border)", color: "#EF4444" }} onClick={() => handleAction(r.id, "terminate")}>Terminate</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "details")}>Details</button>
+      header: 'Actions',
+      accessor: 'actions',
+      render: (row) => (
+        <div style={styles.actionRow}>
+          {['Start', 'Stop', 'Restart', 'Resize', 'Terminate'].map((a) => (
+            <button
+              key={a}
+              onClick={() => handleAction(a, row)}
+              style={a === 'Terminate' ? styles.actionBtnDanger : styles.actionBtn}
+            >
+              {a}
+            </button>
+          ))}
         </div>
       ),
     },
-  ], [instances]);
+  ];
 
   return (
-    <>
-      <DataTable
-        variant="transparent"
-        columns={columns}
-        rows={instances}
-        emptyMessage="No instances found."
-      />
+    <div>
+      {['AWS', 'Azure'].map((provider) => (
+        <section key={provider} style={styles.card}>
+          <header style={styles.cardHeader} onClick={() => toggle(provider)} role="button" tabIndex={0}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={styles.chevron(expanded[provider])}>▾</span>
+              <h3 style={styles.cardTitle}>
+                {provider} VMs
+                <span style={styles.countBadge}>{data[provider].length}</span>
+              </h3>
+            </div>
+            <span style={styles.hint}>{expanded[provider] ? 'Collapse' : 'Expand'}</span>
+          </header>
+          {expanded[provider] && (
+            <div style={styles.cardBody}>
+              <Table columns={columns} data={data[provider]} />
+            </div>
+          )}
+        </section>
+      ))}
 
-      <Modal
-        title={selected ? `Instance: ${selected.name}` : "Instance Details"}
-        open={showDetails}
-        onClose={() => setShowDetails(false)}
-      >
-        {selected && (
-          <div style={{ display: "grid", gap: 8 }}>
-            <Row k="ID" v={selected.id} />
-            <Row k="Provider" v={selected.provider.toUpperCase()} />
-            <Row k="Type" v={selected.type} />
-            <Row k="Region" v={selected.region} />
-            <Row k="Status" v={selected.status} />
-            <Row k="CPU" v={`${selected.cpu}%`} />
-            <Row k="Memory" v={`${selected.mem}%`} />
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        title={selected ? `Resize: ${selected.name}` : "Resize Instance"}
-        open={showResize}
-        onClose={() => setShowResize(false)}
-        footer={(
-          <>
-            <button className="btn ghost" onClick={() => setShowResize(false)}>Cancel</button>
-            <button className="btn primary" onClick={commitResize}>Apply</button>
-          </>
-        )}
-      >
-        <div style={{ display: "grid", gap: 8 }}>
-          <label className="text-sm" style={{ color: "var(--muted)" }}>New instance type/size</label>
-          <input className="input" placeholder="e.g., t3.large / Standard_D2s_v5" value={newSize} onChange={(e) => setNewSize(e.target.value)} />
-          <div className="text-xs" style={{ color: "var(--muted)" }}>
-            TODO: Validate allowed sizes per provider and region. This will be loaded from backend.
-          </div>
-        </div>
-      </Modal>
-    </>
-  );
-}
-
-function Row({ k, v }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 8 }}>
-      <div style={{ color: "var(--muted)", fontSize: 12 }}>{k}</div>
-      <div style={{ fontWeight: 600 }}>{v}</div>
+      {modal && (
+        <Modal title={modal.title} onClose={() => setModal(null)} onConfirm={modal.onConfirm}>
+          {modal.content}
+        </Modal>
+      )}
     </div>
   );
-}
+};
+
+const ResizeForm = ({ instance, onSubmit }) => {
+  const [size, setSize] = useState(instance?.type || 't3.medium');
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(size);
+      }}
+    >
+      <div style={{ marginBottom: 12 }}>
+        <label htmlFor="size" style={{ display: 'block', fontSize: 13, color: '#374151', marginBottom: 6 }}>
+          New size
+        </label>
+        <select
+          id="size"
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+          style={styles.select}
+        >
+          <option>t3.small</option>
+          <option>t3.medium</option>
+          <option>m5.large</option>
+          <option>m5.xlarge</option>
+          <option>Standard_D2s_v5</option>
+          <option>Standard_F4s_v2</option>
+        </select>
+      </div>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Request Resize</button>
+      </div>
+    </form>
+  );
+};
+
+const styles = {
+  card: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    padding: '12px 14px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
+  chevron: (open) => ({
+    display: 'inline-block',
+    transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    color: '#9CA3AF',
+    width: 16,
+  }),
+  cardTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#111827',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    fontSize: 12,
+    color: '#374151',
+    background: '#F3F4F6',
+    border: '1px solid #E5E7EB',
+    padding: '2px 6px',
+    borderRadius: 999,
+  },
+  cardBody: {
+    padding: 12,
+  },
+  actionRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  actionBtn: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#374151',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  actionBtnDanger: {
+    background: '#FFFFFF',
+    border: '1px solid #EF4444',
+    color: '#EF4444',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  primaryBtn: {
+    background: '#111827',
+    border: '1px solid #111827',
+    color: '#FFFFFF',
+    padding: '6px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  select: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+};
+
+export default ComputePanel;

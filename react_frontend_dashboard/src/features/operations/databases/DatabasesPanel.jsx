@@ -1,147 +1,238 @@
-import React, { useMemo, useState } from "react";
-import { DataTable } from "../../../components/ui/Table";
-import { Modal } from "../../../components/ui/Modal";
-import { useToast } from "../../../components/ui/Toast";
+import React, { useMemo, useState } from 'react';
+import Table from '../../../components/ui/Table';
+import Modal from '../../../components/ui/Modal';
 
 /**
  * PUBLIC_INTERFACE
+ * DatabasesPanel provides actions like Pause/Resume/Snapshot/Scale on mock RDS and Azure SQL.
  */
-export default function DatabasesPanel() {
-  /**
-   * Database operations: Pause/Resume, Create/Delete snapshots, Scale up/down, View endpoints.
-   */
-  const toast = useToast();
-  const [dbs, setDbs] = useState([
-    { id: "rds-orders", name: "orders-db", engine: "postgres", provider: "aws", type: "db.t3.medium", region: "us-west-2", status: "available", endpoint: "orders-db.xxx.usw2.rds.amazonaws.com:5432" },
-    { id: "azsql-app", name: "app-db", engine: "mssql", provider: "azure", type: "GP_S_Gen5_2", region: "eastus", status: "paused", endpoint: "app-db.database.windows.net:1433" },
-  ]);
-  const [selected, setSelected] = useState(null);
-  const [showScale, setShowScale] = useState(false);
-  const [newSize, setNewSize] = useState("");
-  const [showEndpoint, setShowEndpoint] = useState(false);
-
-  function setStatus(id, status) { setDbs(prev => prev.map(d => (d.id === id ? { ...d, status } : d))); }
-
-  // PUBLIC_INTERFACE
-  function handleAction(id, action) {
-    const db = dbs.find(d => d.id === id);
-    switch (action) {
-      case "pause":
-        setStatus(id, "paused");
-        toast.info(`Paused ${db?.name}`);
-        // TODO: Backend call to pause DB
-        break;
-      case "resume":
-        setStatus(id, "available");
-        toast.success(`Resumed ${db?.name}`);
-        // TODO: Backend call to resume DB
-        break;
-      case "snapshot":
-        toast.success(`Snapshot created for ${db?.name}`);
-        // TODO: Backend call to create snapshot
-        break;
-      case "delete-snapshot":
-        toast.info(`Deleted latest snapshot for ${db?.name}`);
-        // TODO: Backend call to delete snapshot
-        break;
-      case "scale":
-        setSelected(db);
-        setNewSize(db?.type || "");
-        setShowScale(true);
-        break;
-      case "endpoint":
-        setSelected(db);
-        setShowEndpoint(true);
-        break;
-      default:
-        break;
-    }
-  }
-
-  function commitScale() {
-    if (!selected || !newSize) return;
-    setDbs(prev => prev.map(d => (d.id === selected.id ? { ...d, type: newSize } : d)));
-    setShowScale(false);
-    toast.success(`Scaled ${selected.name} to ${newSize}`);
-    // TODO: Backend integration
-  }
-
-  const columns = useMemo(() => [
-    { key: "name", label: "Name" },
-    { key: "engine", label: "Engine" },
-    { key: "provider", label: "Provider", render: v => String(v || "").toUpperCase() },
-    { key: "type", label: "Tier/Size" },
-    { key: "region", label: "Region" },
-    { key: "status", label: "Status" },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (_v, r) => (
-        <div className="table__actions">
-          <button className="btn ghost" onClick={() => handleAction(r.id, "pause")} disabled={r.status === "paused"}>Pause</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "resume")} disabled={r.status !== "paused"}>Resume</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "snapshot")}>Snapshot</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "delete-snapshot")}>Delete Snapshot</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "scale")}>Scale</button>
-          <button className="btn ghost" onClick={() => handleAction(r.id, "endpoint")}>Endpoint</button>
-        </div>
-      ),
-    },
-  ], []);
-
-  return (
-    <>
-      <DataTable
-        variant="transparent"
-        columns={columns}
-        rows={dbs}
-        emptyMessage="No databases found."
-      />
-
-      <Modal
-        title={selected ? `Scale: ${selected.name}` : "Scale Database"}
-        open={showScale}
-        onClose={() => setShowScale(false)}
-        footer={(
-          <>
-            <button className="btn ghost" onClick={() => setShowScale(false)}>Cancel</button>
-            <button className="btn primary" onClick={commitScale}>Apply</button>
-          </>
-        )}
-      >
-        <div style={{ display: "grid", gap: 10 }}>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>New tier/size</div>
-          <input className="input" placeholder="e.g., db.m5.large / GP_S_Gen5_4" value={newSize} onChange={(e) => setNewSize(e.target.value)} />
-          <div className="text-xs" style={{ color: "var(--muted)" }}>TODO: Load allowed sizes per engine/provider.</div>
-        </div>
-      </Modal>
-
-      <Modal
-        title={selected ? `Endpoint: ${selected.name}` : "Endpoint"}
-        open={showEndpoint}
-        onClose={() => setShowEndpoint(false)}
-      >
-        {selected && (
-          <div style={{ display: "grid", gap: 10 }}>
-            <Row k="Endpoint" v={selected.endpoint} />
-            <Row k="Engine" v={selected.engine} />
-            <Row k="Provider" v={selected.provider.toUpperCase()} />
-            <Row k="Region" v={selected.region} />
-            <div className="text-xs" style={{ color: "var(--muted)" }}>
-              Use SSL and secure credentials. TODO: Fetch temporary creds/rotation via backend.
-            </div>
-          </div>
-        )}
-      </Modal>
-    </>
+const DatabasesPanel = () => {
+  const data = useMemo(
+    () => ({
+      'AWS RDS': [
+        { id: 'rds-001', name: 'orders-db', engine: 'postgres', size: 'db.m5.large', status: 'available', region: 'us-east-1' },
+        { id: 'rds-002', name: 'analytics-db', engine: 'mysql', size: 'db.r6g.large', status: 'modifying', region: 'us-west-2' },
+      ],
+      'Azure SQL': [
+        { id: 'azsql-001', name: 'crm-db', engine: 'mssql', size: 'GP_S_Gen5_2', status: 'online', region: 'eastus' },
+        { id: 'azsql-002', name: 'bi-warehouse', engine: 'mssql', size: 'BC_Gen5_4', status: 'paused', region: 'westeurope' },
+      ],
+    }),
+    []
   );
-}
 
-function Row({ k, v }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 8 }}>
-      <div style={{ color: "var(--muted)", fontSize: 12 }}>{k}</div>
-      <div style={{ fontWeight: 600 }}>{v}</div>
+  const [expanded, setExpanded] = useState({ 'AWS RDS': true, 'Azure SQL': true });
+  const [modal, setModal] = useState(null);
+
+  const toggle = (k) => setExpanded((e) => ({ ...e, [k]: !e[k] }));
+  const notify = (m) => setTimeout(() => window.alert(m), 10);
+
+  const openScale = (row) =>
+    setModal({
+      title: `Scale - ${row.name}`,
+      content: <ScaleForm current={row.size} onSubmit={(sz) => { setModal(null); notify(`Scale to ${sz} requested (mock)`); }} />,
+    });
+
+  const openSnapshot = (row) =>
+    setModal({
+      title: `Snapshot - ${row.name}`,
+      content: <SnapshotForm onSubmit={(name) => { setModal(null); notify(`Snapshot ${name} requested (mock)`); }} />,
+    });
+
+  const actionButtons = (row, types) => (
+    <div style={styles.actionRow}>
+      {types.includes('Pause') && <button style={styles.actionBtn} onClick={() => notify('Pause requested (mock)')}>Pause</button>}
+      {types.includes('Resume') && <button style={styles.actionBtn} onClick={() => notify('Resume requested (mock)')}>Resume</button>}
+      <button style={styles.actionBtn} onClick={() => openSnapshot(row)}>Snapshot</button>
+      <button style={styles.actionBtn} onClick={() => openScale(row)}>Scale</button>
+      <button style={styles.actionBtnDanger} onClick={() => notify('Delete requested (mock)')}>Delete</button>
     </div>
   );
-}
+
+  const rdsColumns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'DB ID', accessor: 'id' },
+    { header: 'Engine', accessor: 'engine' },
+    { header: 'Size', accessor: 'size' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Region', accessor: 'region' },
+    { header: 'Actions', accessor: 'actions', render: (row) => actionButtons(row, ['Pause', 'Resume']) },
+  ];
+
+  const azColumns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'DB ID', accessor: 'id' },
+    { header: 'Engine', accessor: 'engine' },
+    { header: 'Size', accessor: 'size' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Region', accessor: 'region' },
+    { header: 'Actions', accessor: 'actions', render: (row) => actionButtons(row, ['Pause', 'Resume']) },
+  ];
+
+  const cards = [
+    { key: 'AWS RDS', title: 'AWS RDS Instances', columns: rdsColumns, list: data['AWS RDS'] },
+    { key: 'Azure SQL', title: 'Azure SQL Databases', columns: azColumns, list: data['Azure SQL'] },
+  ];
+
+  return (
+    <div>
+      {cards.map((c) => (
+        <section key={c.key} style={styles.card}>
+          <header style={styles.cardHeader} onClick={() => toggle(c.key)} role="button" tabIndex={0}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={styles.chevron(expanded[c.key])}>▾</span>
+              <h3 style={styles.cardTitle}>
+                {c.title}
+                <span style={styles.countBadge}>{c.list.length}</span>
+              </h3>
+            </div>
+            <span style={styles.hint}>{expanded[c.key] ? 'Collapse' : 'Expand'}</span>
+          </header>
+          {expanded[c.key] && (
+            <div style={styles.cardBody}>
+              <Table columns={c.columns} data={c.list} />
+            </div>
+          )}
+        </section>
+      ))}
+      {modal && (
+        <Modal title={modal.title} onClose={() => setModal(null)}>
+          {modal.content}
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+const ScaleForm = ({ current, onSubmit }) => {
+  const [size, setSize] = useState(current || 'db.m5.large');
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(size); }}>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Instance size</label>
+        <select value={size} onChange={(e) => setSize(e.target.value)} style={styles.select}>
+          <option>db.t3.medium</option>
+          <option>db.m5.large</option>
+          <option>db.r6g.large</option>
+          <option>GP_S_Gen5_2</option>
+          <option>BC_Gen5_4</option>
+        </select>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Request Scale</button>
+      </div>
+    </form>
+  );
+};
+
+const SnapshotForm = ({ onSubmit }) => {
+  const [name, setName] = useState('snapshot-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-'));
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(name); }}>
+      <div style={styles.formRow}>
+        <label style={styles.smallLabel}>Snapshot name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" style={styles.primaryBtn}>Create Snapshot</button>
+      </div>
+    </form>
+  );
+};
+
+const styles = {
+  card: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    padding: '12px 14px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+  },
+  chevron: (open) => ({
+    display: 'inline-block',
+    transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    color: '#9CA3AF',
+    width: 16,
+  }),
+  cardTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 600,
+    color: '#111827',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countBadge: {
+    fontSize: 12,
+    color: '#374151',
+    background: '#F3F4F6',
+    border: '1px solid #E5E7EB',
+    padding: '2px 6px',
+    borderRadius: 999,
+  },
+  cardBody: {
+    padding: 12,
+  },
+  actionRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  actionBtn: {
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#374151',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  actionBtnDanger: {
+    background: '#FFFFFF',
+    border: '1px solid #EF4444',
+    color: '#EF4444',
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  primaryBtn: {
+    background: '#111827',
+    border: '1px solid #111827',
+    color: '#FFFFFF',
+    padding: '6px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+  },
+  select: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  input: {
+    width: '100%',
+    background: '#FFFFFF',
+    border: '1px solid #E5E7EB',
+    color: '#111827',
+    padding: '8px 10px',
+    borderRadius: 8,
+    fontSize: 13,
+  },
+  formRow: {
+    marginBottom: 12,
+  },
+  hint: { color: '#9CA3AF', fontSize: 12 },
+};
+
+export default DatabasesPanel;

@@ -142,7 +142,16 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   color: var(--color-text);
+  transition: box-shadow .2s ease, transform .05s ease, border-color .2s ease;
 }
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  border-color: #d1d5db;
+}
+.chip { cursor: pointer; user-select: none; }
+.chip:hover { filter: brightness(0.98); }
+.chip[aria-pressed="true"]:hover { filter: brightness(1.02); }
 .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border-color); }
 .panel-title { font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif; color: var(--color-text); }
 .panel-body { padding: 12px 14px; min-width: 0; }

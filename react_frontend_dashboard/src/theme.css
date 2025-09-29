@@ -87,14 +87,110 @@
 .select--compact { padding: 6px 8px; font-size: 13px; max-width: 100%; }
 .input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); min-width: 0; }
 
-/* Date input normalization and icon containment */
-.input--date {
-  /* Match base input styling while reserving space for the icon */
-  padding-right: 36px; /* ensure text does not run under the calendar icon */
-  height: 36px; /* consistent control height */
-  line-height: 20px;
+/* Cost & Billing Filters per assets/cost_billing_filters_design_notes.md */
+.cost-filters {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 12px; /* horizontal spacing between groups */
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* label-to-input gap */
+}
+
+.filter-label {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+/* Equalized control size */
+.filter-select,
+.filter-input-date {
+  width: 180px;       /* equal width for all */
+  height: 36px;       /* compact height */
+  padding: 0 12px;    /* horizontal padding */
+  border: 1px solid var(--border);
+  border-radius: 8px; /* rounded corners */
+  background: #FFFFFF;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 400;
+  outline: none;
   box-sizing: border-box;
-  width: 100%;
+}
+
+/* Hover and focus states per spec */
+.filter-select:hover,
+.filter-input-date:hover {
+  border-color: #D0D5DD; /* control-border-strong */
+}
+
+.filter-select:focus,
+.filter-input-date:focus,
+.filter-select[aria-expanded="true"] {
+  border-color: #98A2B3; /* control-focus-ring */
+  box-shadow: 0 0 0 3px rgba(152,162,179,0.25);
+}
+
+/* Date input normalization and icon containment (parity with selects) */
+.filter-input-date {
+  padding-right: 36px; /* ensure text does not underlap the icon */
+}
+
+/* Container to position icon inside the input area without overflow */
+.input-icon-wrap {
+  position: relative;
+  display: grid;
+}
+
+/* Calendar icon placeholder (SVG or emoji replacement) */
+.input-icon {
+  position: absolute;
+  right: 12px; /* chevron/menu icon alignment at 12px inset */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Native date tweaks */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Responsive behavior */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .cost-filters { flex-wrap: wrap; }
+}
+
+@media (max-width: 767px) {
+  .cost-filters { flex-direction: column; gap: 10px; }
+  .filter-select,
+  .filter-input-date { width: 100%; max-width: 360px; }
 }
 
 /* Container to position icon inside the input area without overflow */

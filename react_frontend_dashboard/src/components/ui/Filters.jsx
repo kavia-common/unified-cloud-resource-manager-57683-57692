@@ -32,10 +32,10 @@ export default function FilterBar({
   }
 
   const renderSelect = (label, name, options) => (
-    <label style={{ display: "grid", gap: 6, minWidth: 0 }}>
-      <div style={{ fontSize: 12, color: "var(--muted)" }}>{label}</div>
+    <label className="filter-group" style={{ minWidth: 0 }}>
+      <div className="filter-label">{label}</div>
       <select
-        className="select select--compact"
+        className="filter-select"
         value={v[name]}
         onChange={(e) => update({ [name]: e.target.value })}
       >
@@ -58,50 +58,32 @@ export default function FilterBar({
         background: "var(--surface)",
       }}
     >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-          gap: 12,
-          alignItems: "end",
-        }}
-      >
-        {/* Use compact spans for selects to reserve space for date fields */}
-        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-          {renderSelect("Provider", "provider", providerOptions)}
-        </div>
-        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-          {renderSelect("Account", "account", accountOptions)}
-        </div>
-        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-          {renderSelect("Region", "region", regionOptions)}
-        </div>
-        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-          {renderSelect("Service", "service", serviceOptions)}
-        </div>
-        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
-          {renderSelect("Tag", "tag", tagOptions)}
-        </div>
+      <div className="cost-filters">
+        {renderSelect("Provider", "provider", providerOptions)}
+        {renderSelect("Account", "account", accountOptions)}
+        {renderSelect("Region", "region", regionOptions)}
+        {renderSelect("Service", "service", serviceOptions)}
+        {renderSelect("Tag", "tag", tagOptions)}
         {showDateRange && (
           <>
-            <label style={{ gridColumn: "span 1", display: "grid", gap: 6, minWidth: 0 }}>
-              <div style={{ fontSize: 12, color: "var(--muted)" }}>From</div>
+            <label className="filter-group" style={{ minWidth: 0 }}>
+              <div className="filter-label">From</div>
               <div className="input-icon-wrap">
                 <input
                   type="date"
-                  className="input input--date"
+                  className="filter-input-date"
                   value={v.from}
                   onChange={(e) => update({ from: e.target.value })}
                 />
                 <span className="input-icon" aria-hidden="true">📅</span>
               </div>
             </label>
-            <label style={{ gridColumn: "span 1", display: "grid", gap: 6, minWidth: 0 }}>
-              <div style={{ fontSize: 12, color: "var(--muted)" }}>To</div>
+            <label className="filter-group" style={{ minWidth: 0 }}>
+              <div className="filter-label">To</div>
               <div className="input-icon-wrap">
                 <input
                   type="date"
-                  className="input input--date"
+                  className="filter-input-date"
                   value={v.to}
                   onChange={(e) => update({ to: e.target.value })}
                 />

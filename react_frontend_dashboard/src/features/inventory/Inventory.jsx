@@ -2,95 +2,23 @@ import React, { useMemo, useState } from "react";
 
 /**
  * PUBLIC_INTERFACE
- * Inventory (Card-based)
- * A responsive, minimalist card layout for cloud resources.
- * Each card shows: provider icon, resource type, name, key metadata, status badge, and quick actions.
- * Includes search, filter chips, and sorting controls. Uses mock data for initial implementation.
+ * Inventory (Table-based)
+ * Minimalist data table view for resources with search/filter controls.
+ * Columns: Resource Type, Provider (with icon), Resource Name, Key Metadata (CPU, RAM, Location),
+ * Status (with color badge), and Actions (Start, Stop, View Details).
  */
 export default function Inventory() {
   // Mock resources (initial implementation)
   const mockResources = useMemo(
     () => [
-      {
-        id: "aws-ec2-1",
-        provider: "AWS",
-        type: "VM",
-        name: "prod-web-01",
-        cpu: "4 vCPU",
-        ram: "16 GB",
-        region: "us-east-1",
-        status: "Active",
-      },
-      {
-        id: "aws-ec2-2",
-        provider: "AWS",
-        type: "VM",
-        name: "batch-worker-a",
-        cpu: "2 vCPU",
-        ram: "8 GB",
-        region: "us-west-2",
-        status: "Stopped",
-      },
-      {
-        id: "azure-vm-1",
-        provider: "Azure",
-        type: "VM",
-        name: "az-core-app-01",
-        cpu: "8 vCPU",
-        ram: "32 GB",
-        region: "eastus",
-        status: "Active",
-      },
-      {
-        id: "gcp-gce-1",
-        provider: "GCP",
-        type: "VM",
-        name: "gcp-analytics-1",
-        cpu: "16 vCPU",
-        ram: "64 GB",
-        region: "us-central1",
-        status: "Active",
-      },
-      {
-        id: "aws-s3-1",
-        provider: "AWS",
-        type: "Storage",
-        name: "logs-archive-bucket",
-        cpu: "-",
-        ram: "-",
-        region: "eu-west-1",
-        status: "Active",
-      },
-      {
-        id: "azure-sql-1",
-        provider: "Azure",
-        type: "Database",
-        name: "sales-db",
-        cpu: "2 vCore",
-        ram: "—",
-        region: "westeurope",
-        status: "Active",
-      },
-      {
-        id: "gcp-storage-1",
-        provider: "GCP",
-        type: "Storage",
-        name: "gcs-backups",
-        cpu: "-",
-        ram: "-",
-        region: "us-west1",
-        status: "Active",
-      },
-      {
-        id: "aws-ec2-3",
-        provider: "AWS",
-        type: "VM",
-        name: "dev-svc-02",
-        cpu: "2 vCPU",
-        ram: "4 GB",
-        region: "ap-southeast-1",
-        status: "Stopped",
-      },
+      { id: "aws-ec2-1", provider: "AWS", type: "VM", name: "prod-web-01", cpu: "4 vCPU", ram: "16 GB", region: "us-east-1", status: "Active" },
+      { id: "aws-ec2-2", provider: "AWS", type: "VM", name: "batch-worker-a", cpu: "2 vCPU", ram: "8 GB", region: "us-west-2", status: "Stopped" },
+      { id: "azure-vm-1", provider: "Azure", type: "VM", name: "az-core-app-01", cpu: "8 vCPU", ram: "32 GB", region: "eastus", status: "Active" },
+      { id: "gcp-gce-1", provider: "GCP", type: "VM", name: "gcp-analytics-1", cpu: "16 vCPU", ram: "64 GB", region: "us-central1", status: "Active" },
+      { id: "aws-s3-1", provider: "AWS", type: "Storage", name: "logs-archive-bucket", cpu: "-", ram: "-", region: "eu-west-1", status: "Active" },
+      { id: "azure-sql-1", provider: "Azure", type: "Database", name: "sales-db", cpu: "2 vCore", ram: "—", region: "westeurope", status: "Active" },
+      { id: "gcp-storage-1", provider: "GCP", type: "Storage", name: "gcs-backups", cpu: "-", ram: "-", region: "us-west1", status: "Active" },
+      { id: "aws-ec2-3", provider: "AWS", type: "VM", name: "dev-svc-02", cpu: "2 vCPU", ram: "4 GB", region: "ap-southeast-1", status: "Stopped" },
     ],
     []
   );
@@ -104,7 +32,6 @@ export default function Inventory() {
 
   // Helpers
   const providerIcon = (p) => {
-    // Minimalist brand tiles via inline SVG + color hints
     const baseStyle = {
       width: 28,
       height: 28,
@@ -117,8 +44,7 @@ export default function Inventory() {
     };
     if (p === "AWS")
       return (
-        <div style={{ ...baseStyle, background: "#FEF3C7", color: "#92400E" }} title="AWS">
-          {/* simple cube icon */}
+        <div style={{ ...baseStyle, background: "#FEF3C7", color: "#92400E" }} title="AWS" aria-label="AWS">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 3l8 4.5-8 4.5-8-4.5L12 3z" stroke="currentColor" strokeWidth="1.6" />
             <path d="M4 7.5V16l8 4.5V12" stroke="currentColor" strokeWidth="1.6" />
@@ -128,8 +54,7 @@ export default function Inventory() {
       );
     if (p === "Azure")
       return (
-        <div style={{ ...baseStyle, background: "#DBEAFE", color: "#1E3A8A" }} title="Azure">
-          {/* triangle logo-esque */}
+        <div style={{ ...baseStyle, background: "#DBEAFE", color: "#1E3A8A" }} title="Azure" aria-label="Azure">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M3 18l9-15 9 15H3z" stroke="currentColor" strokeWidth="1.6" />
             <path d="M12 3l3.5 6H8.5L12 3z" fill="currentColor" />
@@ -138,8 +63,7 @@ export default function Inventory() {
       );
     if (p === "GCP")
       return (
-        <div style={{ ...baseStyle, background: "#ECFEFF", color: "#155E75" }} title="GCP">
-          {/* hex ring */}
+        <div style={{ ...baseStyle, background: "#ECFEFF", color: "#155E75" }} title="GCP" aria-label="GCP">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 3l7 4v10l-7 4-7-4V7l7-4z" stroke="currentColor" strokeWidth="1.6" />
             <circle cx="12" cy="12" r="2" fill="currentColor" />
@@ -147,7 +71,7 @@ export default function Inventory() {
         </div>
       );
     return (
-      <div style={{ ...baseStyle, background: "#F3F4F6", color: "#374151" }} title={p}>
+      <div style={{ ...baseStyle, background: "#F3F4F6", color: "#374151" }} title={p} aria-label={p}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="1.6" />
         </svg>
@@ -171,6 +95,7 @@ export default function Inventory() {
           fontSize: 12,
           fontWeight: 700,
           padding: "4px 10px",
+          whiteSpace: "nowrap",
         }}
       >
         {s}
@@ -244,17 +169,9 @@ export default function Inventory() {
   }, [mockResources, query, activeProviders, activeTypes, statusFilter, sortKey]);
 
   // Actions (mock)
-  const handleStart = (id) => {
-    // In a real impl, call backend. For now, optimistic log.
-    console.log("Start resource", id);
-  };
-  const handleStop = (id) => {
-    console.log("Stop resource", id);
-  };
-  const handleView = (id) => {
-    console.log("View details for", id);
-    // Future: Navigate to detail page or open modal
-  };
+  const handleStart = (id) => console.log("Start resource", id);
+  const handleStop = (id) => console.log("Stop resource", id);
+  const handleView = (id) => console.log("View details for", id);
 
   return (
     <div className="panel" style={{ display: "grid", gap: 12 }}>
@@ -316,144 +233,108 @@ export default function Inventory() {
         </div>
       </div>
 
-      {/* Filter chips */}
+      {/* Filters as chips (minimalist) */}
       <div className="panel-body" style={{ display: "grid", gap: 12 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <span className="text-subtle" style={{ fontSize: 12, alignSelf: "center" }}>Providers:</span>
           {providerOptions.map((p) =>
-            chip(p, activeProviders.has(p), () =>
-              toggleInSet(activeProviders, p, setActiveProviders)
-            )
+            <span key={p}>
+              {chip(p, activeProviders.has(p), () => toggleInSet(activeProviders, p, setActiveProviders))}
+            </span>
           )}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <span className="text-subtle" style={{ fontSize: 12, alignSelf: "center" }}>Types:</span>
           {typeOptions.map((t) =>
-            chip(t, activeTypes.has(t), () => toggleInSet(activeTypes, t, setActiveTypes))
+            <span key={t}>
+              {chip(t, activeTypes.has(t), () => toggleInSet(activeTypes, t, setActiveTypes))}
+            </span>
           )}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <span className="text-subtle" style={{ fontSize: 12, alignSelf: "center" }}>Status:</span>
           {statusOptions.map((s) =>
-            chip(s, statusFilter.has(s), () => toggleInSet(statusFilter, s, setStatusFilter))
+            <span key={s}>
+              {chip(s, statusFilter.has(s), () => toggleInSet(statusFilter, s, setStatusFilter))}
+            </span>
           )}
         </div>
 
-        {/* Results */}
-        {filtered.length === 0 ? (
-          <div
-            className="surface"
-            style={{
-              padding: 24,
-              borderRadius: 12,
-              border: "1px solid var(--border-color)",
-              textAlign: "center",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            No resources match your filters.
-          </div>
-        ) : (
-          <div className="card-grid" style={{ marginTop: 4 }}>
-            {filtered.map((r) => (
-              <article
-                key={r.id}
-                className="card"
-                role="region"
-                aria-label={`${r.provider} ${r.type} ${r.name}`}
-                style={{
-                  display: "grid",
-                  gap: 10,
-                  padding: 12,
-                  borderRadius: "var(--radius-md)",
-                }}
-              >
-                {/* Header */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {providerIcon(r.provider)}
-                  <div style={{ display: "grid", minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: "var(--color-text)" }}>
-                        {r.name}
+        {/* Results Table */}
+        <div className="table-wrapper" role="region" aria-label="Resources table">
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 140 }}>Resource Type</th>
+                <th style={{ width: 160 }}>Provider</th>
+                <th>Resource Name</th>
+                <th style={{ width: 360 }}>Key Metadata</th>
+                <th style={{ width: 120 }}>Status</th>
+                <th style={{ width: 260, textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td className="table__cell--empty" colSpan={6}>No resources match your filters.</td>
+                </tr>
+              ) : (
+                filtered.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.type}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {providerIcon(r.provider)}
+                        <span style={{ fontWeight: 600 }}>{r.provider}</span>
                       </div>
-                      {statusBadge(r.status)}
-                    </div>
-                    <div className="text-subtle" style={{ fontSize: 12 }}>
-                      {r.provider} • {r.type}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Meta */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-                    gap: 8,
-                  }}
-                >
-                  <Meta label="CPU" value={r.cpu} />
-                  <Meta label="RAM" value={r.ram} />
-                  <Meta label="Region" value={r.region} />
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-                  <button
-                    className="btn secondary"
-                    onClick={() => handleStart(r.id)}
-                    aria-label={`Start ${r.name}`}
-                    disabled={r.status === "Active"}
-                    style={{ opacity: r.status === "Active" ? 0.6 : 1 }}
-                  >
-                    Start
-                  </button>
-                  <button
-                    className="btn secondary"
-                    onClick={() => handleStop(r.id)}
-                    aria-label={`Stop ${r.name}`}
-                    disabled={r.status === "Stopped"}
-                    style={{ opacity: r.status === "Stopped" ? 0.6 : 1 }}
-                  >
-                    Stop
-                  </button>
-                  <button
-                    className="btn primary"
-                    onClick={() => handleView(r.id)}
-                    aria-label={`View details for ${r.name}`}
-                    style={{ marginLeft: "auto" }}
-                  >
-                    View Details
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                    </td>
+                    <td style={{ fontWeight: 700, color: "var(--color-text)" }}>
+                      {r.name}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", color: "var(--color-text)" }}>
+                        <span><span className="text-subtle">CPU:</span> {r.cpu}</span>
+                        <span><span className="text-subtle">RAM:</span> {r.ram}</span>
+                        <span><span className="text-subtle">Location:</span> {r.region}</span>
+                      </div>
+                    </td>
+                    <td>{statusBadge(r.status)}</td>
+                    <td>
+                      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                        <button
+                          className="btn secondary"
+                          onClick={() => handleStart(r.id)}
+                          aria-label={`Start ${r.name}`}
+                          disabled={r.status === "Active"}
+                          style={{ opacity: r.status === "Active" ? 0.6 : 1 }}
+                        >
+                          Start
+                        </button>
+                        <button
+                          className="btn secondary"
+                          onClick={() => handleStop(r.id)}
+                          aria-label={`Stop ${r.name}`}
+                          disabled={r.status === "Stopped"}
+                          style={{ opacity: r.status === "Stopped" ? 0.6 : 1 }}
+                        >
+                          Stop
+                        </button>
+                        <button
+                          className="btn primary"
+                          onClick={() => handleView(r.id)}
+                          aria-label={`View details for ${r.name}`}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  );
-}
-
-/**
- * PUBLIC_INTERFACE
- * Meta
- * Small metadata block used in resource cards.
- */
-function Meta({ label, value }) {
-  return (
-    <div
-      className="surface"
-      style={{
-        padding: "8px 10px",
-        borderRadius: 10,
-        border: "1px solid var(--border-color)",
-        display: "grid",
-        gap: 4,
-      }}
-    >
-      <div className="text-subtle" style={{ fontSize: 11 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>{value}</div>
     </div>
   );
 }

@@ -5,20 +5,55 @@ import React from "react";
  * Renders a simple data table.
  */
 function Table({ columns = [], data = [] }) {
+  // Inline styles to ensure curved edges and pure-black header text
+  const wrapperStyle = {
+    borderRadius: "12px",
+    overflow: "hidden",
+    // keep minimalist look
+    boxShadow: "var(--shadow-sm)",
+  };
+
+  const tableStyle = {
+    width: "100%",
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    background: "var(--table-row-bg)",
+    color: "var(--color-text)",
+    border: "1px solid var(--table-border)",
+  };
+
+  const thStyle = {
+    background: "var(--table-header-bg)",
+    color: "#111827", // enforce pure black header text
+    fontWeight: 700,
+    borderBottom: "1px solid var(--table-border)",
+    textAlign: "left",
+    padding: "10px 12px",
+  };
+
   return (
-    <div className="table-wrapper surface" role="region" aria-label="Data table">
-      <table>
+    <div
+      className="table-wrapper surface"
+      role="region"
+      aria-label="Data table"
+      style={wrapperStyle}
+    >
+      <table style={tableStyle}>
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.accessor || c.header} scope="col">{c.header}</th>
+              <th key={c.accessor || c.header} scope="col" style={thStyle}>
+                {c.header}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="table__cell--empty">No data</td>
+              <td colSpan={columns.length} className="table__cell--empty">
+                No data
+              </td>
             </tr>
           ) : (
             data.map((row, i) => (

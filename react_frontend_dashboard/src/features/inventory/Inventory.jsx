@@ -6,6 +6,10 @@ import React, { useMemo, useState } from "react";
  * Minimalist data table view for resources with search/filter controls.
  * Columns: Resource Type, Provider (with icon), Resource Name, Key Metadata (CPU, RAM, Location),
  * Status (with color badge), and Actions (Start, Stop, View Details).
+ *
+ * This component renders Provider, Type, and Status filters above the content area as minimalist chips,
+ * with options generated from the in-memory resource list. Adjusting filters updates the list
+ * shown in the current view.
  */
 export default function Inventory() {
   // Mock resources (initial implementation)
@@ -115,7 +119,9 @@ export default function Inventory() {
         fontWeight: 600,
         background: active ? "#111827" : "var(--chip-bg)",
         color: active ? "#FFFFFF" : "var(--chip-text)",
+        border: "1px solid",
         borderColor: active ? "#0b1220" : "var(--border-color)",
+        borderRadius: 999,
         transition: "all .15s ease",
       }}
     >

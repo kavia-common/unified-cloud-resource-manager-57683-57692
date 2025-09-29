@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
 import { getLinkedAccounts, createLinkedAccount } from "../../services/api";
+import { useToast } from "../../components/ui/Toast";
 
 /**
  * PUBLIC_INTERFACE
@@ -16,15 +17,7 @@ export default function CloudConnections() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
-
-  function showToast(type, message, details) {
-    const text = details ? `${message} — ${details}` : message;
-    setToast({ type, message: text });
-    // Auto-dismiss after 5s
-    window.clearTimeout(showToast._t);
-    showToast._t = window.setTimeout(() => setToast(null), 5000);
-  }
+  const { show: showToast } = useToast();
 
   async function load() {
     setLoading(true);
@@ -32,7 +25,8 @@ export default function CloudConnections() {
       const rows = await getLinkedAccounts();
       setAccounts(rows || []);
     } catch (e) {
-      showToast("error", "Failed to load accounts", e?.message);
+      const reason = e?.message || "Failed to load accounts";
+      showToast(`Failed to load accounts — ${reason}`, { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -40,10 +34,8 @@ export default function CloudConnections() {
 
   useEffect(() => {
     load();
-    // Cleanup timer on unmount
-    return () => {
-      if (showToast._t) window.clearTimeout(showToast._t);
-    };
+    // No cleanup needed: ToastProvider manages its own timers
+    return () => {};
   }, []);
 
   function mapErrorToMessage(err) {
@@ -67,7 +59,7 @@ export default function CloudConnections() {
     setSaving(true);
     try {
       const result = await createLinkedAccount(payload);
-      showToast("success", "Account linked successfully");
+      showToast("Account linked successfully", { type: "success" });
       await load();
       setOpen(false);
     } catch (e) {
@@ -76,7 +68,8 @@ export default function CloudConnections() {
         e?.payload?.error ||
         (e?.status ? `HTTP ${e.status}` : null) ||
         (e?.url ? `URL: ${e.url}` : null);
-      showToast("error", "Failed to link account", extra ? `${reason} (${extra})` : reason);
+      const msg = extra ? `Failed to link account — ${reason} (${extra})` : `Failed to link account — ${reason}`;
+      showToast(msg, { type: "error", timeout: 5000 });
     } finally {
       setSaving(false);
     }
@@ -91,16 +84,7 @@ export default function CloudConnections() {
         </button>
       </div>
 
-      {toast && (
-        <div
-          className={`toast ${toast.type}`}
-          role="alert"
-          aria-live="assertive"
-          style={{ marginBottom: 12 }}
-        >
-          {toast.message}
-        </div>
-      )}
+
 
       {loading ? (
         <div>Loading…</div>

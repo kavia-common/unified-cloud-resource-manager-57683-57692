@@ -11,7 +11,7 @@ export default function ComputePanel() {
    * Minimalist table of instances with action dropdown via inline buttons.
    * Supports Start/Stop/Restart/Resize/Terminate, and a Details modal.
    */
-  const toast = useToast();
+  const { show: showToast } = useToast();
   const [instances, setInstances] = useState([
     { id: "i-001", name: "web-01", provider: "aws", type: "t3.medium", region: "us-east-1", status: "running", cpu: 22, mem: 58 },
     { id: "i-002", name: "web-02", provider: "aws", type: "t3.small", region: "us-east-1", status: "stopped", cpu: 0, mem: 0 },
@@ -37,19 +37,19 @@ export default function ComputePanel() {
       switch (action) {
         case "start":
           updateStatus(id, "running");
-          toast.success(`Started ${inst?.name}`);
+          showToast(`Started ${inst?.name}`, { type: "success" });
           break;
         case "stop":
           updateStatus(id, "stopped");
-          toast.success(`Stopped ${inst?.name}`);
+          showToast(`Stopped ${inst?.name}`, { type: "success" });
           break;
         case "restart":
           updateStatus(id, "running");
-          toast.info(`Restarted ${inst?.name}`);
+          showToast(`Restarted ${inst?.name}`, { type: "info" });
           break;
         case "terminate":
           setInstances(prev => prev.filter(i => i.id !== id));
-          toast.error(`Terminated ${inst?.name}`);
+          showToast(`Terminated ${inst?.name}`, { type: "error" });
           break;
         case "resize":
           setSelected(inst);
@@ -66,7 +66,7 @@ export default function ComputePanel() {
       // Example backend stub:
       // await controlResource({ provider: inst.provider, resourceId: id, operation: action, params: {} });
     } catch (err) {
-      toast.error(err?.message || "Operation failed");
+      showToast(err?.message || "Operation failed", { type: "error" });
     }
   }
 
@@ -74,7 +74,7 @@ export default function ComputePanel() {
     if (!selected || !newSize) return;
     setInstances(prev => prev.map(i => (i.id === selected.id ? { ...i, type: newSize } : i)));
     setShowResize(false);
-    toast.success(`Resized ${selected.name} to ${newSize}`);
+    showToast(`Resized ${selected.name} to ${newSize}`, { type: "success" });
     // TODO: Backend integration for resize action via Edge Function
   }
 

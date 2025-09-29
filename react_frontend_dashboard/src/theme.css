@@ -160,9 +160,17 @@ body { margin: 0; background: var(--background); }
   border-color: var(--border);
 }
 
+/* Tabs */
+.tabs { display: inline-flex; gap: 4px; background: transparent; border: 1px solid var(--border); padding: 4px; border-radius: 10px; }
+.tab { padding: 6px 10px; border: 1px solid transparent; border-radius: 8px; background: #fff; color: var(--text); cursor: pointer; font-size: 13px; }
+.tab.active { border-color: var(--primary); color: #fff; background: var(--primary); }
+
 /* Cells */
 .table__cell--empty { text-align: center; color: var(--muted); padding: 16px; }
 .table__cell--actions { text-align: right; }
+
+/* Utility */
+.text-success { color: #10B981; }
 
 /* Header modifier for Inventory if needed */
 .table__head--inventory { /* reserved for Inventory header customization if needed */ }

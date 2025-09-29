@@ -13,20 +13,7 @@ import CloudConnections from "./features/settings/CloudConnections";
 import Profile from "./features/profile/Profile";
 import "./App.css";
 import "./theme.css";
-
-// Lightweight placeholders to satisfy new routes with minimal style
-const ResourceOps = () => (
-  <div className="panel">
-    <div className="panel-header">
-      <div className="panel-title">Resource Ops</div>
-    </div>
-    <div className="panel-body">
-      <div className="text-sm" style={{ color: "var(--muted)" }}>
-        Perform start/stop/scale actions on discovered resources. (Coming soon)
-      </div>
-    </div>
-  </div>
-);
+import Operations from "./features/operations/Operations";
 
 const ReportsAnalytics = () => (
   <div className="panel">
@@ -71,7 +58,7 @@ function App() {
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
-              <Route path="/operations" element={<ResourceOps />} />
+              <Route path="/operations" element={<Operations />} />
               <Route path="/costs" element={<Costs />} />
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/automation" element={<Automation />} />

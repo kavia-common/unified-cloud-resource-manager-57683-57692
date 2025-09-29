@@ -32,10 +32,10 @@ export default function FilterBar({
   }
 
   const renderSelect = (label, name, options) => (
-    <label style={{ display: "grid", gap: 6 }}>
+    <label style={{ display: "grid", gap: 6, minWidth: 0 }}>
       <div style={{ fontSize: 12, color: "var(--muted)" }}>{label}</div>
       <select
-        className="select"
+        className="select select--compact"
         value={v[name]}
         onChange={(e) => update({ [name]: e.target.value })}
       >
@@ -66,24 +66,25 @@ export default function FilterBar({
           alignItems: "end",
         }}
       >
-        <div style={{ gridColumn: "span 2" }}>
+        {/* Use compact spans for selects to reserve space for date fields */}
+        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
           {renderSelect("Provider", "provider", providerOptions)}
         </div>
-        <div style={{ gridColumn: "span 2" }}>
+        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
           {renderSelect("Account", "account", accountOptions)}
         </div>
-        <div style={{ gridColumn: "span 2" }}>
+        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
           {renderSelect("Region", "region", regionOptions)}
         </div>
-        <div style={{ gridColumn: "span 2" }}>
+        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
           {renderSelect("Service", "service", serviceOptions)}
         </div>
-        <div style={{ gridColumn: "span 2" }}>
+        <div style={{ gridColumn: "span 2", minWidth: 0 }}>
           {renderSelect("Tag", "tag", tagOptions)}
         </div>
         {showDateRange && (
           <>
-            <label style={{ gridColumn: "span 1", display: "grid", gap: 6 }}>
+            <label style={{ gridColumn: "span 1", display: "grid", gap: 6, minWidth: 0 }}>
               <div style={{ fontSize: 12, color: "var(--muted)" }}>From</div>
               <div className="input-icon-wrap">
                 <input
@@ -95,7 +96,7 @@ export default function FilterBar({
                 <span className="input-icon" aria-hidden="true">📅</span>
               </div>
             </label>
-            <label style={{ gridColumn: "span 1", display: "grid", gap: 6 }}>
+            <label style={{ gridColumn: "span 1", display: "grid", gap: 6, minWidth: 0 }}>
               <div style={{ fontSize: 12, color: "var(--muted)" }}>To</div>
               <div className="input-icon-wrap">
                 <input

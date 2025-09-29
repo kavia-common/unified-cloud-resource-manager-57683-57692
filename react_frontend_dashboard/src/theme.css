@@ -83,8 +83,9 @@
 .stat-card:focus-visible { outline: 2px solid --primary; outline-offset: 2px; }
 
 /* Minimal inputs */
-.select { appearance: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
-.input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
+.select { appearance: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); min-width: 0; }
+.select--compact { padding: 6px 8px; font-size: 13px; max-width: 100%; }
+.input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); min-width: 0; }
 
 /* Date input normalization and icon containment */
 .input--date {
@@ -162,7 +163,17 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 html, body, #root { height: 100%; }
 body { margin: 0; background: var(--background); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-@media (max-width: 1024px) { .topbar .search input { min-width: 160px; } }
+@media (max-width: 1024px) { 
+  .topbar .search input { min-width: 160px; }
+  /* Compact controls globally on smaller screens for better fit */
+  .select { padding: 6px 8px; font-size: 13px; }
+  .input { padding: 6px 8px; font-size: 13px; }
+  .input--date { height: 34px; padding-right: 32px; }
+}
+@media (max-width: 768px) {
+  /* Encourage grid items to not overflow their cells */
+  label { min-width: 0; }
+}
 
 /* Minimalist semantic table styles for Pure White theme */
 .table-wrapper {

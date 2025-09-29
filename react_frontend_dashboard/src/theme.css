@@ -85,6 +85,74 @@
 /* Minimal inputs */
 .select { appearance: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
 .input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); }
+
+/* Date input normalization and icon containment */
+.input--date {
+  /* Match base input styling while reserving space for the icon */
+  padding-right: 36px; /* ensure text does not run under the calendar icon */
+  height: 36px; /* consistent control height */
+  line-height: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Container to position icon inside the input area without overflow */
+.input-icon-wrap {
+  position: relative;
+  display: grid;
+}
+
+/* Visually place an icon area on the right side of the input */
+.input-icon-wrap .input {
+  width: 100%;
+}
+
+/* Calendar icon placeholder (SVG or emoji replacement) */
+.input-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 16px;
+  pointer-events: none; /* do not block native picker button */
+  line-height: 1;
+}
+
+/* Normalize native date picker indicators across browsers to avoid overflow */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+}
+
+/* Hide the default icon chrome while keeping functionality (WebKit) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0; /* hide the default icon so our icon shows */
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Remove extra padding that can cause overflow in some browsers */
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+/* Placeholder alignment for when value is empty (some browsers show mm/dd/yyyy) */
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Firefox-specific tweaks */
+@-moz-document url-prefix() {
+  input[type="date"] {
+    /* Ensure the native drop-down button doesn't overflow the container */
+    padding-right: 36px;
+  }
+}
 .btn { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); cursor: pointer; }
 .btn:hover { background: #fff; border-color: #D1D5DB; }
 .btn.ghost { background: #fff; border-color: var(--border); }

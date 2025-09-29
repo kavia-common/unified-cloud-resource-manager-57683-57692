@@ -85,21 +85,27 @@ export default function FilterBar({
           <>
             <label style={{ gridColumn: "span 1", display: "grid", gap: 6 }}>
               <div style={{ fontSize: 12, color: "var(--muted)" }}>From</div>
-              <input
-                type="date"
-                className="input"
-                value={v.from}
-                onChange={(e) => update({ from: e.target.value })}
-              />
+              <div className="input-icon-wrap">
+                <input
+                  type="date"
+                  className="input input--date"
+                  value={v.from}
+                  onChange={(e) => update({ from: e.target.value })}
+                />
+                <span className="input-icon" aria-hidden="true">📅</span>
+              </div>
             </label>
             <label style={{ gridColumn: "span 1", display: "grid", gap: 6 }}>
               <div style={{ fontSize: 12, color: "var(--muted)" }}>To</div>
-              <input
-                type="date"
-                className="input"
-                value={v.to}
-                onChange={(e) => update({ to: e.target.value })}
-              />
+              <div className="input-icon-wrap">
+                <input
+                  type="date"
+                  className="input input--date"
+                  value={v.to}
+                  onChange={(e) => update({ to: e.target.value })}
+                />
+                <span className="input-icon" aria-hidden="true">📅</span>
+              </div>
             </label>
           </>
         )}

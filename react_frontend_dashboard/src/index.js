@@ -61,6 +61,7 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <DevConfigNotice />
+      {/* ToastProvider at app root provides useToast across the app */}
       <ToastProvider>
         <App />
       </ToastProvider>

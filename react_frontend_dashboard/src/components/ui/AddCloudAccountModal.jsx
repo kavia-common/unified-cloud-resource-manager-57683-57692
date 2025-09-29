@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef, memo, useCallback } from "react";
 import { Modal } from "./Modal";
 import { Tabs } from "./Tabs";
+import { useToast } from "./Toast";
 
 /**
  * PUBLIC_INTERFACE
@@ -61,6 +62,8 @@ export default function AddCloudAccountModal({
    * - onSubmit: function(payload) -> void; called with safe payload on valid submit; does not persist
    */
   const [activeTab, setActiveTab] = useState("add");
+  // Toast system from context
+  const { show: showToast } = useToast();
   const [provider, setProvider] = useState("AWS");
   const nameInputRef = useRef(null); // track Friendly Name input
   const [form, setForm] = useState({
@@ -191,6 +194,31 @@ export default function AddCloudAccountModal({
 
       // For UX, close and reset after submit
       handleClose();
+    } catch (err) {
+      // Display an error toast using the project's toast system
+      const mapErrorToMessage = (e) => {
+        if (!e) return "Unknown error";
+        if (e.code === "NETWORK_ERROR") {
+          return "Network error: could not reach Supabase Edge Function. Check connectivity, CORS, and URL.";
+        }
+        if (e.code === "UNAUTHORIZED" || e.status === 401) {
+          return "Unauthorized: please sign in again.";
+        }
+        if (e.code === "FORBIDDEN" || e.status === 403) {
+          return "Forbidden: you do not have access.";
+        }
+        if (e.code === "NOT_FOUND" || e.status === 404) {
+          return "Endpoint not found: ensure the Edge Function is deployed and enabled.";
+        }
+        return e?.message || "Request failed";
+      };
+      const reason = mapErrorToMessage(err);
+      const extra =
+        err?.payload?.error ||
+        (err?.status ? `HTTP ${err.status}` : null) ||
+        (err?.url ? `URL: ${err.url}` : null);
+      const message = extra ? `Failed to link account — ${reason} (${extra})` : `Failed to link account — ${reason}`;
+      showToast(message, { type: "error", timeout: 5000 });
     } finally {
       setSubmitting(false);
     }

@@ -9,7 +9,7 @@ export default function Topbar({ right }) {
     <div
       className="topbar"
       style={{
-        background: 'rgba(20,26,36,0.7)',
+        background: 'rgba(255,255,255,0.85)',
         borderBottom: '1px solid var(--border-color)',
         color: 'var(--color-text)',
         position: 'sticky',
@@ -21,7 +21,7 @@ export default function Topbar({ right }) {
         backdropFilter: 'blur(6px)',
       }}
     >
-      <div className="title" style={{ fontWeight: 600 }}>Cloud Manager</div>
+      <div className="title" style={{ fontWeight: 600, color: 'var(--color-text)' }}>Cloud Manager</div>
       <div className="right" style={{ marginLeft: 'auto' }}>{right}</div>
     </div>
   );

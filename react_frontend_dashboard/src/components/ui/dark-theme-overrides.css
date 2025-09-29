@@ -1,5 +1,5 @@
 :root .topbar, .Topbar, .top-bar {
-  background: rgba(20,26,36,0.7);
+  background: rgba(255,255,255,0.85);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--border-color);
   color: var(--color-text);
@@ -45,7 +45,7 @@
 }
 
 .banner, .Banner {
-  background: linear-gradient(90deg, rgba(79,156,255,0.12), rgba(35,199,138,0.10));
+  background: linear-gradient(90deg, rgba(37,99,235,0.08), rgba(16,185,129,0.07));
   border: 1px solid var(--border-color);
   color: var(--color-text);
 }

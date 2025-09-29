@@ -62,13 +62,26 @@
 .panel { background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
 .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
 .panel-title { font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif; color: var(--text); }
-.panel-body { padding: 12px 14px; }
+.panel-body { padding: 12px 14px; min-width: 0; }
+.card, .panel { max-width: 100%; }
 
 /* Card grid */
-.card-grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: clamp(10px, 2vw, 16px); align-items: stretch; align-content: start; }
+.card-grid { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: clamp(10px, 2vw, 16px); align-items: stretch; align-content: start; min-width: 0; }
 @media (max-width: 1280px) { .card-grid { grid-template-columns: repeat(3, minmax(220px, 1fr)); } }
 @media (max-width: 1024px) { .card-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
 @media (max-width: 640px) { .card-grid { grid-template-columns: 1fr; } }
+
+/* Dedicated responsive grid for costs charts row */
+.costs-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* 8/4 split */
+  gap: clamp(10px, 2vw, 16px);
+  align-items: stretch;
+  min-width: 0;
+}
+@media (max-width: 1024px) {
+  .costs-grid { grid-template-columns: 1fr; }
+}
 
 /* Card motion */
 @keyframes card-enter { from { opacity: 0; transform: translateY(6px) scale(0.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -90,9 +103,10 @@
 /* Cost & Billing Filters per assets/cost_billing_filters_design_notes.md */
 .cost-filters {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px; /* horizontal spacing between groups */
+  min-width: 0;
 }
 
 .filter-group {
@@ -112,7 +126,7 @@
 /* Equalized control size */
 .filter-select,
 .filter-input-date {
-  width: 180px;       /* equal width for all */
+  width: 160px;       /* equal width for all - compact to fit */
   height: 36px;       /* compact height */
   padding: 0 12px;    /* horizontal padding */
   border: 1px solid var(--border);
@@ -190,7 +204,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 @media (max-width: 767px) {
   .cost-filters { flex-direction: column; gap: 10px; }
   .filter-select,
-  .filter-input-date { width: 100%; max-width: 360px; }
+  .filter-input-date { width: 100%; max-width: 100%; }
 }
 
 /* Container to position icon inside the input area without overflow */
@@ -274,6 +288,7 @@ body { margin: 0; background: var(--background); }
 /* Minimalist semantic table styles for Pure White theme */
 .table-wrapper {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   /* Ensure rounded corners are preserved if the wrapper scrolls */
   -webkit-mask-image: -webkit-radial-gradient(white, black);

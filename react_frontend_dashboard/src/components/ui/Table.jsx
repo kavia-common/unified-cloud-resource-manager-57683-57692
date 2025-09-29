@@ -19,7 +19,7 @@ export function DataTable({
   const tableClass = ["table", variantClass, tableClassName].filter(Boolean).join(" ").trim();
 
   return (
-    <div className="table-wrapper" role="region" aria-label="Data table">
+    <div className="table-wrapper" role="region" aria-label="Data table" style={{ maxWidth: "100%" }}>
       <table className={tableClass}>
         <thead>
           <tr>

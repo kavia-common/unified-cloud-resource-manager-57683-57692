@@ -125,7 +125,7 @@ export default function Costs() {
   ];
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div style={{ display: "grid", gap: 16, minWidth: 0, width: "100%" }}>
       <div className="card-grid">
         <StatCard
           label="Daily Spend"
@@ -161,11 +161,10 @@ export default function Costs() {
       />
 
       <div
-        className="card-grid"
-        style={{ gridTemplateColumns: "repeat(12, minmax(0, 1fr))" }}
+        className="costs-grid"
       >
-        <div style={{ gridColumn: "span 8" }}>
-          <div className="panel">
+        <div style={{ minWidth: 0 }}>
+          <div className="panel" style={{ overflow: "hidden" }}>
             <div className="panel-header">
               <div className="panel-title">Daily Spend Trend</div>
               <div className="badge">Trend</div>
@@ -175,7 +174,7 @@ export default function Costs() {
             </div>
           </div>
         </div>
-        <div style={{ gridColumn: "span 4" }}>
+        <div style={{ minWidth: 0 }}>
           <div className="panel">
             <div className="panel-header">
               <div className="panel-title">Spend by Provider</div>
@@ -188,16 +187,18 @@ export default function Costs() {
         </div>
       </div>
 
-      <div className="panel">
+      <div className="panel" style={{ overflow: "hidden" }}>
         <div className="panel-header">
           <div className="panel-title">Cost Breakdown (tabular)</div>
         </div>
-        <div className="panel-body">
-          <DataTable
-            columns={breakdownColumns}
-            rows={filteredRows}
-            emptyMessage="No cost data for selected filters."
-          />
+        <div className="panel-body" style={{ minWidth: 0 }}>
+          <div style={{ width: "100%", minWidth: 0 }}>
+            <DataTable
+              columns={breakdownColumns}
+              rows={filteredRows}
+              emptyMessage="No cost data for selected filters."
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -37,7 +37,7 @@ export const CLOUD_COLORS = {
 export function TrendLineChart({ data, dataKey = "value", xKey = "date", color = "#374151", gradient = false, height = 220 }) {
   /** Minimal trend line chart. data: [{date, value}] */
   return (
-    <div className="card" style={{ padding: 8 }}>
+    <div className="card" style={{ padding: 8, minWidth: 0 }}>
       <ResponsiveContainer width="100%" height={height}>
         {gradient ? (
           <AreaChart data={data}>
@@ -160,7 +160,8 @@ export function MultiSeriesOverviewChart({
     alignContent: "start",
     gap: 8,
     padding: "4px 0 4px 0",
-    minWidth: 120,
+    minWidth: 0,
+    width: "min(140px, 35vw)"
   };
 
   const legendItemStyle = {

@@ -60,6 +60,7 @@ export default function FilterBar({
         padding: 12,
         border: "1px solid var(--border)",
         background: "var(--surface)",
+        overflow: "hidden",
       }}
     >
       <div className="cost-filters">

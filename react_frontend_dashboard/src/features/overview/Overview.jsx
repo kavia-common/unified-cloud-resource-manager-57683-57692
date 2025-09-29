@@ -235,27 +235,23 @@ export default function Overview() {
 
       <div className="card-grid" aria-label="Key metrics" style={{ marginTop: 4 }}>
         <StatCard
-          label="Linked Accounts"
+          title="Active Cloud Accounts"
           value={stats.accounts}
-          variant="violet"
           onClick={() => setShowAccounts(true)}
         />
         <StatCard
-          label="Discovered Resources"
+          title="Total Resources"
           value={stats.resources}
-          variant="violet"
           onClick={() => setShowResources(true)}
         />
         <StatCard
-          label="Daily Spend"
+          title="Daily Spend"
           value={`$${Number(stats.daily).toFixed(2)}`}
-          variant="violet"
           onClick={() => setShowDailySpend(true)}
         />
         <StatCard
-          label="Open Recommendations"
+          title="Open Recommendations"
           value={stats.recs}
-          variant="violet"
           onClick={() => setShowRecs(true)}
         />
       </div>

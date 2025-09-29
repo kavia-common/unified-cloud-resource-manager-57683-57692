@@ -10,6 +10,47 @@
 
 let _accounts = [];
 
+// LocalStorage keys for persistence
+const LS_KEY = "ccm.accounts.v1";
+const LS_BACKUP_KEY = "ccm.accounts.backup.v1";
+
+// Internal helper: read JSON from localStorage safely
+function readFromLS(key) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+// Internal helper: write JSON to localStorage safely
+function writeToLS(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore quota or opaque errors
+  }
+}
+
+// Attempt auto-hydration on module import so UI has continuity across reloads/theme changes.
+(function hydrateFromLocalStorage() {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  const saved = readFromLS(LS_KEY);
+  if (Array.isArray(saved)) {
+    _accounts = [...saved];
+  } else {
+    // If primary missing, attempt to restore from backup
+    const backup = readFromLS(LS_BACKUP_KEY);
+    if (Array.isArray(backup)) {
+      _accounts = [...backup];
+      // write back to primary for stability
+      writeToLS(LS_KEY, _accounts);
+    }
+  }
+})();
+
 /**
  * PUBLIC_INTERFACE
  */
@@ -28,6 +69,11 @@ export function setAccounts(list) {
    * { id?, provider: 'AWS'|'Azure'|'GCP', name, account_id?, created_at?, metadata? }
    */
   _accounts = Array.isArray(list) ? [...list] : [];
+  // persist and backup
+  if (typeof window !== "undefined" && window.localStorage) {
+    writeToLS(LS_KEY, _accounts);
+    writeToLS(LS_BACKUP_KEY, _accounts);
+  }
   return getAccounts();
 }
 
@@ -49,6 +95,10 @@ export function appendAccount(account) {
     created_at: account?.created_at || new Date().toISOString(),
   };
   _accounts = [..._accounts, normalized];
+  if (typeof window !== "undefined" && window.localStorage) {
+    writeToLS(LS_KEY, _accounts);
+    writeToLS(LS_BACKUP_KEY, _accounts);
+  }
   return getAccounts();
 }
 
@@ -96,4 +146,36 @@ export function computeStatsFromAccounts(existingStats = { resources: 0, daily: 
     daily: Number((dailySum || existingStats.daily || 0).toFixed(2)),
     recs: recsSum || existingStats.recs || 0,
   };
+}
+
+/**
+ * PUBLIC_INTERFACE
+ */
+export function exportAccountsBackup() {
+  /** Returns a JSON string backup of current accounts for manual export. */
+  return JSON.stringify(_accounts, null, 2);
+}
+
+/**
+ * PUBLIC_INTERFACE
+ */
+export function importAccountsBackup(jsonString) {
+  /**
+   * Restores accounts from a JSON string (array) and persists to localStorage.
+   * Returns { ok: boolean, error?: string }
+   */
+  try {
+    const arr = JSON.parse(jsonString);
+    if (!Array.isArray(arr)) {
+      return { ok: false, error: "Backup content is not an array." };
+    }
+    _accounts = [...arr];
+    if (typeof window !== "undefined" && window.localStorage) {
+      writeToLS(LS_KEY, _accounts);
+      writeToLS(LS_BACKUP_KEY, _accounts);
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e?.message || "Failed to parse backup." };
+  }
 }

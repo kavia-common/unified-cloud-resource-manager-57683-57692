@@ -49,9 +49,9 @@ export default function DevConfigNotice() {
       borderRadius: 8,
       margin: "12px",
     }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>Supabase configuration required</div>
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>Supabase configuration notice</div>
       <div className="text-sm" style={{ lineHeight: 1.4 }}>
-        To enable Optimization and other features, set and verify these environment variables:
+        The app is running with a local data model. To enable cloud-backed features, set and verify these environment variables:
         <pre style={{
           background: "#fff",
           border: "1px solid #F3F4F6",

@@ -62,7 +62,7 @@ root.render(
     <ErrorBoundary>
       <DevConfigNotice />
       <ToastProvider>
-        {hasSupabaseConfig ? <App /> : null}
+        <App />
       </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>

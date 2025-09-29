@@ -264,9 +264,40 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     padding-right: 36px;
   }
 }
-.btn { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font-size: 14px; color: var(--text); cursor: pointer; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Fixed height and consistent horizontal paddings */
+  height: 36px;
+  padding: 0 12px;
+
+  /* Consistent min/max width to normalize long/short labels */
+  min-width: 120px;
+  max-width: 220px;
+
+  /* Minimalist look per Pure White theme */
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+
+  /* Prevent layout shift with long text; gracefully truncate */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  box-sizing: border-box;
+}
 .btn:hover { background: #fff; border-color: #D1D5DB; }
-.btn.ghost { background: #fff; border-color: var(--border); }
+.btn:active { transform: translateY(0); }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Variant styles keep visual fill but inherit size constraints above */
+.btn.ghost { background: #fff; border-color: var(--border); color: var(--text); }
 .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 /* Security badges and chips baseline */
@@ -368,7 +399,11 @@ body { margin: 0; background: var(--background); }
 
 /* Cells */
 .table__cell--empty { text-align: center; color: var(--muted); padding: 16px; }
-.table__cell--actions { text-align: right; }
+.table__cell--actions {
+  text-align: right;
+  /* Allow multi-line wrap if needed, maintaining consistent spacing */
+  white-space: normal;
+}
 
 /* Utility */
 .text-success { color: #10B981; }
@@ -377,7 +412,12 @@ body { margin: 0; background: var(--background); }
 .table__head--inventory { /* reserved for Inventory header customization if needed */ }
 
 /* Utility for action group inside table cells */
-.table__actions { display: inline-flex; gap: 8px; align-items: center; }
+.table__actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap; /* enable wrapping for narrow cells/vertical arrays */
+}
 
 /* Example row highlight hook if needed:
 .inventory-row-black-border { outline: 1px solid #000; }

@@ -393,9 +393,9 @@ export default function AddCloudAccountModal({
                   className="badge"
                   aria-label={`Provider ${acc.provider || "unknown"}`}
                   style={{
-                    background: "#000000",
-                    color: "#FFFFFF",
-                    borderColor: "#000000"
+                    background: "#F9FAFB",
+                    color: "#111827",
+                    borderColor: "#E5E7EB"
                   }}
                 >
                   {acc.provider}

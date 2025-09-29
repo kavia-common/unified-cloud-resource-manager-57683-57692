@@ -27,6 +27,8 @@ export default function SidebarNav() {
     { to: "/costs", label: "Cost & Billing", Icon: FiDollarSign },
     { to: "/recommendations", label: "AI Recommendations", Icon: FiBarChart2 },
     { to: "/automation", label: "Automation Rules", Icon: FiZap },
+    // New minimalist Security tab for compliance features
+    { to: "/security", label: "Security", Icon: FiPieChart },
     { to: "/reports", label: "Reports & Analytics", Icon: FiPieChart },
   ];
 

@@ -269,6 +269,17 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 .btn.ghost { background: #fff; border-color: var(--border); }
 .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+/* Security badges and chips baseline */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 /* Global sizing */
 html, body, #root { height: 100%; }
 body { margin: 0; background: var(--background); }

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { DataTable } from "../../components/ui/Table";
 import StatCard from "../../components/ui/StatCard";
 import FilterBar from "../../components/ui/Filters";
 import { TrendLineChart, PieBreakdownChart } from "../../components/ui/Charts";
+import EmptyState from "../../components/ui/EmptyState";
 
-/** Costs analytics panel with stats, filters, trends and breakdown tables/charts. */
+/** Costs analytics panel with stats, filters, trends and breakdown (non-table). */
 export default function Costs() {
   // Central filter state: all filter changes re-compute visualizations
   const [filters, setFilters] = useState({
@@ -111,18 +111,14 @@ export default function Costs() {
     }));
   }, [filteredRows]);
 
-  const breakdownColumns = [
-    { key: "provider", label: "Provider" },
-    { key: "account_name", label: "Account" },
-    { key: "region", label: "Region" },
-    { key: "service", label: "Service" },
-    {
-      key: "amount",
-      label: "Monthly ($)",
-      render: (v) => (v ? Number(v).toFixed(2) : 0),
-    },
-    { key: "date", label: "Date" },
-  ];
+  // Build a simple non-table breakdown list
+  const breakdownItems = useMemo(() => {
+    return filteredRows.map((r, idx) => ({
+      id: `${r.provider}-${r.account_name}-${r.region}-${r.service}-${r.date}-${idx}`,
+      left: `${r.provider.toUpperCase()} • ${r.account_name} • ${r.region} • ${r.service}`,
+      right: `$${Number(r.amount).toFixed(2)} • ${r.date}`,
+    }));
+  }, [filteredRows]);
 
   return (
     <div style={{ display: "grid", gap: 16, minWidth: 0, width: "100%" }}>
@@ -160,9 +156,7 @@ export default function Costs() {
         tagOptions={tagOptions}
       />
 
-      <div
-        className="costs-grid"
-      >
+      <div className="costs-grid">
         <div style={{ minWidth: 0 }}>
           <div className="panel" style={{ overflow: "hidden" }}>
             <div className="panel-header">
@@ -189,16 +183,35 @@ export default function Costs() {
 
       <div className="panel" style={{ overflow: "hidden" }}>
         <div className="panel-header">
-          <div className="panel-title">Cost Breakdown (tabular)</div>
+          <div className="panel-title">Cost Breakdown</div>
         </div>
         <div className="panel-body" style={{ minWidth: 0 }}>
-          <div style={{ width: "100%", minWidth: 0 }}>
-            <DataTable
-              columns={breakdownColumns}
-              rows={filteredRows}
-              emptyMessage="No cost data for selected filters."
+          {breakdownItems.length === 0 ? (
+            <EmptyState
+              title="No cost data for selected filters"
+              description="Try adjusting the filters above to broaden your selection."
             />
-          </div>
+          ) : (
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>
+              {breakdownItems.map((item) => (
+                <li
+                  key={item.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    border: "1px solid var(--border)",
+                    background: "#fff",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                  }}
+                >
+                  <div style={{ fontWeight: 600, color: "var(--text)" }}>{item.left}</div>
+                  <div style={{ fontWeight: 700 }}>{item.right}</div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

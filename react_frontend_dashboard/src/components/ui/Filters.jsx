@@ -16,7 +16,11 @@ export default function FilterBar({
   onChange,
   showDateRange = true,
 }) {
-  /** Filter bar that emits a consolidated filter state on any change. */
+  /** Filter bar that emits a consolidated filter state on any change.
+   * PUBLIC_INTERFACE: onChange receives the complete merged filter object:
+   * { provider, account, region, service, tag, from, to }
+   * Any change to a select or date input triggers immediate propagation.
+   */
   const v = {
     provider: values.provider || "",
     account: values.account || "",

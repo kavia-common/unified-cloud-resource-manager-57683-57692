@@ -95,7 +95,8 @@ export default function Overview() {
   }
 
   // Initialize with Monthly mock data and fetch linked accounts
-  const toast = useToast();
+  // Toast handler using context API
+  const { show: showToast } = useToast();
 
   useEffect(() => {
     setChartData(buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`));
@@ -121,7 +122,7 @@ export default function Overview() {
       } catch (err) {
         console.warn("Failed to load linked accounts:", err?.message || err);
         // Only show toast for real errors when authenticated; info level to avoid alarming users.
-        toast.info("Could not load linked accounts.", 2500);
+        showToast("Could not load linked accounts.", { type: "info", timeout: 2500 });
         // Fall back to in-memory
         const all = getAccounts();
         setExistingAccounts(all);
@@ -660,7 +661,7 @@ export default function Overview() {
             }));
 
             // Success toast
-            toast.success("Account has been created successfully", 3500);
+            showToast("Account has been created successfully", { type: "success", timeout: 3500 });
           } catch (err) {
             console.error("Create account failed:", err);
             // Keep in-memory append as ultimate fallback if backend fails
@@ -681,10 +682,10 @@ export default function Overview() {
                 ...prev,
                 ...computeStatsFromAccounts(prev),
               }));
-              toast.info("Saved locally (offline mode).", 3500);
+              showToast("Saved locally (offline mode).", { type: "info", timeout: 3500 });
             } catch (_) {
               // Error toast
-              toast.error("Invalid Credentials, try again.", 4000);
+              showToast("Invalid Credentials, try again.", { type: "error", timeout: 4000 });
               throw err; // preserve rejection for modal if needed
             }
           }

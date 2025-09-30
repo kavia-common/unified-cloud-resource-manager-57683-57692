@@ -14,19 +14,68 @@ export default function ResourceOps() {
   const [scaleModalOpen, setScaleModalOpen] = useState(false);
   const [selectedResourceForScale, setSelectedResourceForScale] = useState(null);
 
-  // Mock function for resource operations
+  // Local table state to allow immediate UI updates for status changes
+  const [allResources, setAllResources] = useState(() => [
+    { id: "i-0a1b2c3", name: "web-01", type: "VM", provider: "AWS", region: "us-east-1", status: "running", size: "t2.micro" },
+    { id: "vm-az-001", name: "az-web-01", type: "VM", provider: "Azure", region: "eastus", status: "running", size: "Standard_B1s" },
+    { id: "s3-prod-logs", name: "prod-logs", type: "Storage", provider: "AWS", region: "us-east-1", status: "active", size: "500GB" },
+    { id: "rds-001", name: "orders-db", type: "Database", provider: "AWS", region: "us-east-1", status: "available", size: "db.t3.medium" },
+    { id: "azsql-002", name: "bi-warehouse", type: "Database", provider: "Azure", region: "eastus", status: "stopped", size: "GP_Gen5_2" },
+    { id: "alb-123", name: "public-alb", type: "Networking", provider: "AWS", region: "us-west-2", status: "active", size: "n/a" },
+  ]);
+
+  // Map an action to a new status for immediate UI feedback
+  const mapActionToStatus = (action, currentStatus) => {
+    switch (action) {
+      case "Start":
+        return "running";
+      case "Stop":
+        return "stopped";
+      case "Restart":
+        // Briefly mark as unknown to emulate transition, then set back to running
+        return "running";
+      case "Terminate":
+        // You could also remove the row; here we mark a neutral 'unknown' status
+        return "unknown";
+      default:
+        return currentStatus;
+    }
+  };
+
+  // PUBLIC_INTERFACE
   const handleResourceOperation = (operation, resourceIds) => {
+    /** Optimistically update resource status in the table when an action is selected. */
     console.log(`Performing ${operation} on resources:`, resourceIds);
-    // Show success message
+
+    setAllResources(prev =>
+      prev.map(r =>
+        resourceIds.includes(r.id)
+          ? { ...r, status: mapActionToStatus(operation, r.status) }
+          : r
+      )
+    );
+
+    // TODO: If backend integration for operations exists, call it here and reconcile on success/failure.
+    // For now, UI-only feedback:
     alert(`${operation} operation initiated for selected resources`);
   };
 
   // Mock function for scaling
   const handleScaleResource = (resource, newSize) => {
     console.log(`Scaling resource ${resource.id} to ${newSize}`);
+    // Optimistically update size locally for immediate feedback
+    setAllResources(prev =>
+      prev.map(r => (r.id === resource.id ? { ...r, size: newSize } : r))
+    );
     setScaleModalOpen(false);
     alert(`Scaling operation initiated for ${resource.name}`);
   };
+
+  // Filter resources for current tab
+  const filtered = useMemo(() => {
+    if (activeTab === "All") return allResources;
+    return allResources.filter(r => r.type.toLowerCase() === activeTab.toLowerCase());
+  }, [activeTab, allResources]);
 
   return (
     <div className="panel" style={{ overflow: "hidden" }}>
@@ -41,11 +90,9 @@ export default function ResourceOps() {
           onChange={setActiveTab}
         />
 
-
-
         <section aria-live="polite">
           <ResourceTable
-            activeTab={activeTab}
+            resources={filtered}
             onScaleResource={(resource) => {
               setSelectedResourceForScale(resource);
               setScaleModalOpen(true);
@@ -72,29 +119,10 @@ export default function ResourceOps() {
 }
 
 function ResourceTable({ 
-  activeTab,
+  resources,
   onScaleResource,
   onResourceOperation 
 }) {
-  // Mock data - in real app this would come from an API
-  const allResources = useMemo(
-    () => [
-      { id: "i-0a1b2c3", name: "web-01", type: "VM", provider: "AWS", region: "us-east-1", status: "running", size: "t2.micro" },
-      { id: "vm-az-001", name: "az-web-01", type: "VM", provider: "Azure", region: "eastus", status: "running", size: "Standard_B1s" },
-      { id: "s3-prod-logs", name: "prod-logs", type: "Storage", provider: "AWS", region: "us-east-1", status: "active", size: "500GB" },
-      { id: "rds-001", name: "orders-db", type: "Database", provider: "AWS", region: "us-east-1", status: "available", size: "db.t3.medium" },
-      { id: "azsql-002", name: "bi-warehouse", type: "Database", provider: "Azure", region: "eastus", status: "stopped", size: "GP_Gen5_2" },
-      { id: "alb-123", name: "public-alb", type: "Networking", provider: "AWS", region: "us-west-2", status: "active", size: "n/a" },
-    ],
-    []
-  );
-
-  // Filter resources based on active tab
-  const resources = useMemo(() => {
-    if (activeTab === "All") return allResources;
-    return allResources.filter(r => r.type.toLowerCase() === activeTab.toLowerCase());
-  }, [activeTab, allResources]);
-
   return (
     <div className="table-wrapper">
       <table role="table" aria-label="Resource operations table">

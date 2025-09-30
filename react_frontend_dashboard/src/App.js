@@ -14,6 +14,7 @@ import Profile from "./features/profile/Profile";
 import "./App.css";
 import "./theme.css";
 import Security from "./features/security/Security";
+import ResourceOps from "./features/operations/ResourceOps";
 
 const ReportsAnalytics = () => (
   <div className="panel">
@@ -63,6 +64,7 @@ function App() {
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/automation" element={<Automation />} />
               <Route path="/security" element={<Security />} />
+          <Route path="/resource-ops" element={<ResourceOps />} />
               <Route path="/reports" element={<ReportsAnalytics />} />
               {/* Legacy/unrelated routes retained but not linked in nav */}
               <Route path="/activity" element={<Activity />} />

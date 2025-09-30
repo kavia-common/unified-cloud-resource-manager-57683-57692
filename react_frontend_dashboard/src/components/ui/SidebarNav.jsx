@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   FiGrid,        // Dashboard
   FiLayers,      // Inventory
+  FiServer,      // Resource Ops
   FiDollarSign,  // Cost & Billing
   FiBarChart2,   // AI Recommendations
   FiZap,         // Automation Rules
@@ -23,6 +24,7 @@ export default function SidebarNav() {
   const navItems = [
     { to: "/overview", label: "Dashboard", Icon: FiGrid },
     { to: "/inventory", label: "Inventory", Icon: FiLayers },
+    { to: "/resource-ops", label: "Resource Ops", Icon: FiServer },
     { to: "/costs", label: "Cost & Billing", Icon: FiDollarSign },
     { to: "/recommendations", label: "AI Recommendations", Icon: FiBarChart2 },
     { to: "/automation", label: "Automation Rules", Icon: FiZap },

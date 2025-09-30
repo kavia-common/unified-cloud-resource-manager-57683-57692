@@ -129,51 +129,42 @@ function ResourceTable({
               <td><StatusBadge status={r.status} /></td>
               <td>{r.size}</td>
               <td>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {r.status !== "running" && (
-                    <button
-                      className="btn"
-                      onClick={() => onResourceOperation("Start", [r.id])}
-                      aria-label={`Start ${r.name}`}
-                    >
-                      Start
-                    </button>
-                  )}
-                  {r.status === "running" && (
-                    <>
-                      <button
-                        className="btn"
-                        onClick={() => onResourceOperation("Stop", [r.id])}
-                        aria-label={`Stop ${r.name}`}
-                      >
-                        Stop
-                      </button>
-                      <button
-                        className="btn"
-                        onClick={() => onResourceOperation("Restart", [r.id])}
-                        aria-label={`Restart ${r.name}`}
-                      >
-                        Restart
-                      </button>
-                    </>
-                  )}
-                  {r.type !== "Networking" && (
-                    <button
-                      className="btn"
-                      onClick={() => onScaleResource(r)}
-                      aria-label={`Scale ${r.name}`}
-                    >
-                      Scale
-                    </button>
-                  )}
-                  <button
-                    className="btn"
-                    onClick={() => onResourceOperation("Terminate", [r.id])}
-                    aria-label={`Terminate ${r.name}`}
-                    style={{ color: "#EF4444" }}
+                <div>
+                  <label className="sr-only" htmlFor={`actions-${r.id}`}>Actions for {r.name}</label>
+                  <select
+                    id={`actions-${r.id}`}
+                    className="input"
+                    aria-label={`Actions for ${r.name}`}
+                    defaultValue=""
+                    onChange={(e) => {
+                      const action = e.target.value;
+                      if (!action) return;
+                      if (action === "Scale") {
+                        onScaleResource(r);
+                      } else {
+                        onResourceOperation(action, [r.id]);
+                      }
+                      // reset to placeholder to allow re-trigger
+                      e.target.value = "";
+                    }}
+                    style={{ minWidth: 160 }}
                   >
-                    Terminate
-                  </button>
+                    <option value="" disabled>Choose action…</option>
+                    {/* Context-aware options */}
+                    {r.status !== "running" && (
+                      <option value="Start">Start</option>
+                    )}
+                    {r.status === "running" && (
+                      <>
+                        <option value="Stop">Stop</option>
+                        <option value="Restart">Restart</option>
+                      </>
+                    )}
+                    {r.type !== "Networking" && (
+                      <option value="Scale">Scale</option>
+                    )}
+                    <option value="Terminate">Terminate</option>
+                  </select>
                 </div>
               </td>
             </tr>

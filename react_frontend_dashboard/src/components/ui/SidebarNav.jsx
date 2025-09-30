@@ -3,10 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import {
   FiGrid,        // Dashboard
   FiLayers,      // Inventory
-  FiTool,        // Resource Ops
   FiDollarSign,  // Cost & Billing
   FiBarChart2,   // AI Recommendations
   FiZap,         // Automation Rules
+  FiShield,      // Security
   FiPieChart,    // Reports & Analytics
 } from "react-icons/fi";
 
@@ -23,12 +23,10 @@ export default function SidebarNav() {
   const navItems = [
     { to: "/overview", label: "Dashboard", Icon: FiGrid },
     { to: "/inventory", label: "Inventory", Icon: FiLayers },
-    { to: "/operations", label: "Resource Ops", Icon: FiTool },
     { to: "/costs", label: "Cost & Billing", Icon: FiDollarSign },
     { to: "/recommendations", label: "AI Recommendations", Icon: FiBarChart2 },
     { to: "/automation", label: "Automation Rules", Icon: FiZap },
-    // New minimalist Security tab for compliance features
-    { to: "/security", label: "Security", Icon: FiPieChart },
+    { to: "/security", label: "Security", Icon: FiShield },
     { to: "/reports", label: "Reports & Analytics", Icon: FiPieChart },
   ];
 

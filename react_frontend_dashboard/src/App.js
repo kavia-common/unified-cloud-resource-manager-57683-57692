@@ -13,7 +13,6 @@ import CloudConnections from "./features/settings/CloudConnections";
 import Profile from "./features/profile/Profile";
 import "./App.css";
 import "./theme.css";
-import Operations from "./features/operations/Operations";
 import Security from "./features/security/Security";
 
 const ReportsAnalytics = () => (
@@ -38,7 +37,7 @@ const ReportsAnalytics = () => (
  * - A BrowserRouter-wrapped application shell containing:
  *    - SidebarNav: left navigation
  *    - Topbar: top header
- *    - Routes: overview, inventory, operations, costs, recommendations, automation, reports, plus legacy routes
+ *    - Routes: overview, inventory, costs, recommendations, automation, security, reports, plus legacy routes
  * Notes:
  * - Providers (e.g., ToastProvider, AuthContext) are expected to be applied at src/index.js.
  * - Authentication screens are intentionally omitted to meet the current product requirements.
@@ -59,7 +58,7 @@ function App() {
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
-              <Route path="/operations" element={<Operations />} />
+
               <Route path="/costs" element={<Costs />} />
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/automation" element={<Automation />} />

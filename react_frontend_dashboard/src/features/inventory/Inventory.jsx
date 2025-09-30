@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from "react";
 import Tabs from "../../components/ui/Tabs";
-import Modal from "../../components/ui/Modal";
 
 /**
  * PUBLIC_INTERFACE
  * Inventory
  * Presents cloud resources in a minimalist, responsive tabular layout with typical columns:
- * Resource Name, Type, Cloud Provider, Region, Status, Cost, Actions.
+ * Resource Name, Type, Cloud Provider, Region, Status, Cost.
  */
 export default function Inventory() {
   const [activeTab, setActiveTab] = useState("All");
@@ -66,28 +65,6 @@ function StatusBadge({ status }) {
   );
 }
 
-function ActionButtons({ onAction }) {
-  const btn = {
-    background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
-    color: "#374151",
-    padding: "6px 10px",
-    borderRadius: 8,
-    fontSize: 12,
-  };
-  const danger = { ...btn, border: "1px solid #EF4444", color: "#EF4444" };
-
-  return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-      <button style={btn} onClick={() => onAction("Details")}>Details</button>
-      <button style={btn} onClick={() => onAction("Start")}>Start</button>
-      <button style={btn} onClick={() => onAction("Stop")}>Stop</button>
-      <button style={btn} onClick={() => onAction("Resize")}>Resize</button>
-      <button style={danger} onClick={() => onAction("Delete")}>Delete</button>
-    </div>
-  );
-}
-
 /**
  * All resources combined table
  */
@@ -104,64 +81,43 @@ function AllResourcesTable() {
     []
   );
 
-  const onAction = (action, row) => {
-    if (action === "Resize") setResizeTarget(row);
-    else window.alert(`${action} requested (mock) for ${row.name}`);
-  };
-
-  const [resizeTarget, setResizeTarget] = useState(null);
-
   return (
-    <>
-      <TableWrapper>
-        <table role="table" aria-label="All resources inventory">
-          <thead>
+    <TableWrapper>
+      <table role="table" aria-label="All resources inventory">
+        <thead>
+          <tr>
+            <th>Resource Name</th>
+            <th>Type</th>
+            <th>Cloud Provider</th>
+            <th>Region</th>
+            <th>Status</th>
+            <th style={{ textAlign: "right" }}>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
             <tr>
-              <th>Resource Name</th>
-              <th>Type</th>
-              <th>Cloud Provider</th>
-              <th>Region</th>
-              <th>Status</th>
-              <th style={{ textAlign: "right" }}>Cost</th>
-              <th>Actions</th>
+              <td className="table__cell--empty" colSpan={6}>No resources found</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td className="table__cell--empty" colSpan={7}>No resources found</td>
-              </tr>
-            )}
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <td>
-                  <div style={{ display: "grid", gap: 2 }}>
-                    <strong>{r.name}</strong>
-                    <span className="text-subtle" style={{ fontSize: 12 }}>{r.id}</span>
-                  </div>
-                </td>
-                <td>{r.type}</td>
-                <td>{r.provider}</td>
-                <td>{r.region}</td>
-                <td><StatusBadge status={r.status} /></td>
-                <td style={{ textAlign: "right" }}>${r.cost.toFixed(2)}</td>
-                <td><ActionButtons onAction={(a) => onAction(a, r)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableWrapper>
-
-      <Modal open={!!resizeTarget} onClose={() => setResizeTarget(null)} title={`Resize - ${resizeTarget?.name || ""}`}>
-        <ResizeForm
-          current={"t3.medium"}
-          onSubmit={(sz) => {
-            setResizeTarget(null);
-            window.alert(`Resize to ${sz} requested (mock)`);
-          }}
-        />
-      </Modal>
-    </>
+          )}
+          {rows.map((r) => (
+            <tr key={r.id}>
+              <td>
+                <div style={{ display: "grid", gap: 2 }}>
+                  <strong>{r.name}</strong>
+                  <span className="text-subtle" style={{ fontSize: 12 }}>{r.id}</span>
+                </div>
+              </td>
+              <td>{r.type}</td>
+              <td>{r.provider}</td>
+              <td>{r.region}</td>
+              <td><StatusBadge status={r.status} /></td>
+              <td style={{ textAlign: "right" }}>${r.cost.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </TableWrapper>
   );
 }
 
@@ -213,101 +169,45 @@ function NetworkingTableOnly() {
 /**
  * PUBLIC_INTERFACE
  * GenericTable
- * Renders a minimalist table for the inventory with standard columns and mock actions.
+ * Renders a minimalist table for the inventory with standard columns.
  */
 function GenericTable({ rows = [] }) {
-  const [resizeTarget, setResizeTarget] = useState(null);
-
-  const onAction = (action, row) => {
-    if (action === "Resize") setResizeTarget(row);
-    else window.alert(`${action} requested (mock) for ${row.name}`);
-  };
-
   return (
-    <>
-      <TableWrapper>
-        <table role="table" aria-label="Inventory table">
-          <thead>
+    <TableWrapper>
+      <table role="table" aria-label="Inventory table">
+        <thead>
+          <tr>
+            <th>Resource Name</th>
+            <th>Type</th>
+            <th>Cloud Provider</th>
+            <th>Region</th>
+            <th>Status</th>
+            <th style={{ textAlign: "right" }}>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
             <tr>
-              <th>Resource Name</th>
-              <th>Type</th>
-              <th>Cloud Provider</th>
-              <th>Region</th>
-              <th>Status</th>
-              <th style={{ textAlign: "right" }}>Cost</th>
-              <th>Actions</th>
+              <td className="table__cell--empty" colSpan={6}>No resources found</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td className="table__cell--empty" colSpan={7}>No resources found</td>
-              </tr>
-            )}
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <td>
-                  <div style={{ display: "grid", gap: 2 }}>
-                    <strong>{r.name}</strong>
-                    <span className="text-subtle" style={{ fontSize: 12 }}>{r.id}</span>
-                  </div>
-                </td>
-                <td>{r.type}</td>
-                <td>{r.provider}</td>
-                <td>{r.region}</td>
-                <td><StatusBadge status={r.status} /></td>
-                <td style={{ textAlign: "right" }}>${(r.cost ?? 0).toFixed(2)}</td>
-                <td><ActionButtons onAction={(a) => onAction(a, r)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableWrapper>
-
-      <Modal open={!!resizeTarget} onClose={() => setResizeTarget(null)} title={`Resize - ${resizeTarget?.name || ""}`}>
-        <ResizeForm
-          current={"t3.medium"}
-          onSubmit={(sz) => {
-            setResizeTarget(null);
-            window.alert(`Resize to ${sz} requested (mock)`);
-          }}
-        />
-      </Modal>
-    </>
+          )}
+          {rows.map((r) => (
+            <tr key={r.id}>
+              <td>
+                <div style={{ display: "grid", gap: 2 }}>
+                  <strong>{r.name}</strong>
+                  <span className="text-subtle" style={{ fontSize: 12 }}>{r.id}</span>
+                </div>
+              </td>
+              <td>{r.type}</td>
+              <td>{r.provider}</td>
+              <td>{r.region}</td>
+              <td><StatusBadge status={r.status} /></td>
+              <td style={{ textAlign: "right" }}>${(r.cost ?? 0).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </TableWrapper>
   );
 }
-
-/**
- * Resize form reused by tables
- */
-function ResizeForm({ current = "t3.medium", onSubmit }) {
-  const [size, setSize] = useState(current);
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit?.(size);
-      }}
-    >
-      <div style={{ marginBottom: 10 }}>
-        <label style={smallLabel}>New size</label>
-        <select value={size} onChange={(e) => setSize(e.target.value)} style={selectStyle}>
-          <option>t3.small</option>
-          <option>t3.medium</option>
-          <option>m5.large</option>
-          <option>m5.xlarge</option>
-          <option>Standard_D2s_v5</option>
-          <option>Standard_F4s_v2</option>
-        </select>
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button type="submit" style={primaryBtn}>Request Resize</button>
-      </div>
-    </form>
-  );
-}
-
-/* Shared minimalist styles (use theme tokens) */
-const smallLabel = { display: "block", color: "#374151", fontSize: 13, marginBottom: 6 };
-const selectStyle = { width: "100%", background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#111827", padding: "8px 10px", borderRadius: 8, fontSize: 13 };
-const primaryBtn = { background: "#111827", border: "1px solid #111827", color: "#FFFFFF", padding: "6px 12px", borderRadius: 8, fontSize: 12 };

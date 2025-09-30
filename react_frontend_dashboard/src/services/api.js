@@ -192,14 +192,6 @@ export async function fetchCosts({ range = '30d', groupBy = 'service' }, signal)
   return callEdgeFunction('mock-azure', 'POST', { action: 'costs', range, groupBy }, signal);
 }
 
-// PUBLIC_INTERFACE
-export async function controlResource({ provider, resourceId, operation, params = {} }, signal) {
-  /**
-   * Performs lifecycle operations: start | stop | scale on a resource.
-   * Returns the operation result and enqueues audit trail.
-   */
-  return callEdgeFunction('queue-processor', 'POST', { provider, resourceId, operation, params }, signal);
-}
 
 // PUBLIC_INTERFACE
 export async function fetchRecommendations({ scope = 'all' }, signal) {

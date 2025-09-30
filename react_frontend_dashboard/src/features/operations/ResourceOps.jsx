@@ -10,7 +10,7 @@ import Tabs from "../../components/ui/Tabs";
  */
 export default function ResourceOps() {
   const [activeTab, setActiveTab] = useState("All");
-  const [selectedResources, setSelectedResources] = useState([]);
+  // Selection state removed as checkbox column is no longer used
   const [scaleModalOpen, setScaleModalOpen] = useState(false);
   const [selectedResourceForScale, setSelectedResourceForScale] = useState(null);
 
@@ -41,43 +41,11 @@ export default function ResourceOps() {
           onChange={setActiveTab}
         />
 
-        {selectedResources.length > 0 && (
-          <div className="bulk-actions" style={{ 
-            padding: "8px 12px",
-            background: "#F9FAFB",
-            borderRadius: "8px",
-            display: "flex",
-            gap: "8px",
-            alignItems: "center"
-          }}>
-            <span>{selectedResources.length} resources selected</span>
-            <button 
-              className="btn"
-              onClick={() => handleResourceOperation("Start", selectedResources)}
-            >
-              Start All
-            </button>
-            <button 
-              className="btn"
-              onClick={() => handleResourceOperation("Stop", selectedResources)}
-            >
-              Stop All
-            </button>
-            <button 
-              className="btn"
-              onClick={() => handleResourceOperation("Terminate", selectedResources)}
-              style={{ color: "#EF4444" }}
-            >
-              Terminate All
-            </button>
-          </div>
-        )}
+
 
         <section aria-live="polite">
           <ResourceTable
             activeTab={activeTab}
-            selectedResources={selectedResources}
-            onSelectionChange={setSelectedResources}
             onScaleResource={(resource) => {
               setSelectedResourceForScale(resource);
               setScaleModalOpen(true);
@@ -104,9 +72,7 @@ export default function ResourceOps() {
 }
 
 function ResourceTable({ 
-  activeTab, 
-  selectedResources, 
-  onSelectionChange,
+  activeTab,
   onScaleResource,
   onResourceOperation 
 }) {
@@ -134,19 +100,6 @@ function ResourceTable({
       <table role="table" aria-label="Resource operations table">
         <thead>
           <tr>
-            <th>
-              <input
-                type="checkbox"
-                checked={selectedResources.length === resources.length}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    onSelectionChange(resources.map(r => r.id));
-                  } else {
-                    onSelectionChange([]);
-                  }
-                }}
-              />
-            </th>
             <th>Resource Name</th>
             <th>Type</th>
             <th>Provider</th>
@@ -159,24 +112,11 @@ function ResourceTable({
         <tbody>
           {resources.length === 0 && (
             <tr>
-              <td className="table__cell--empty" colSpan={8}>No resources found</td>
+              <td className="table__cell--empty" colSpan={7}>No resources found</td>
             </tr>
           )}
           {resources.map((r) => (
             <tr key={r.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedResources.includes(r.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      onSelectionChange([...selectedResources, r.id]);
-                    } else {
-                      onSelectionChange(selectedResources.filter(id => id !== r.id));
-                    }
-                  }}
-                />
-              </td>
               <td>
                 <div style={{ display: "grid", gap: 2 }}>
                   <strong>{r.name}</strong>

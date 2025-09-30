@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { DataTable } from "../../components/ui/Table";
 
 /** Activity stream of operations, recommendations, and automation rule runs. */
 export default function Activity() {
@@ -31,7 +30,34 @@ export default function Activity() {
         </div>
       </div>
       <div className="panel-body">
-        <DataTable columns={columns} rows={rows} emptyMessage="No recent activity." />
+        <div className="table-wrapper">
+          <table role="table" aria-label="Activity stream">
+            <thead>
+              <tr>
+                {columns.map((c) => (
+                  <th key={c.key}>{c.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr>
+                  <td className="table__cell--empty" colSpan={columns.length}>No recent activity.</td>
+                </tr>
+              ) : (
+                rows.map((r, idx) => (
+                  <tr key={idx}>
+                    {columns.map((c) => (
+                      <td key={c.key}>
+                        {typeof c.render === "function" ? c.render(r[c.key], r) : r[c.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

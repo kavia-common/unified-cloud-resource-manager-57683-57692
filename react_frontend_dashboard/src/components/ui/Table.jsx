@@ -2,13 +2,16 @@ import React from "react";
 
 /**
  * PUBLIC_INTERFACE
- * DataTable shim — the inventory tables were removed from the app.
- * Any attempt to render this component will throw to signal developers to refactor.
+ * Table
+ * Minimal wrapper which applies the app's table styles.
+ * Prefer the Inventory page's local table implementations for structure and actions.
  */
-export function DataTable() {
-  throw new Error("DataTable has been removed from the UI. Please refactor to a non-table view.");
-}
-
-export default function Table() {
-  return null;
+export default function Table({ children, ariaLabel = "data table" }) {
+  return (
+    <div className="table-wrapper">
+      <table role="table" aria-label={ariaLabel}>
+        {children}
+      </table>
+    </div>
+  );
 }

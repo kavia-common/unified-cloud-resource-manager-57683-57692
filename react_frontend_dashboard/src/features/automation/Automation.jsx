@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { DataTable } from "../../components/ui/Table";
 import { Modal } from "../../components/ui/Modal";
 
 /** Rule-based automation: create rules for start/stop or scale on schedule. */
@@ -71,7 +70,34 @@ export default function Automation() {
         </div>
       </div>
       <div className="panel-body">
-        <DataTable columns={columns} rows={rules} emptyMessage="No rules created yet." />
+        <div className="table-wrapper">
+          <table role="table" aria-label="Automation rules">
+            <thead>
+              <tr>
+                {columns.map((c) => (
+                  <th key={c.key}>{c.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rules.length === 0 ? (
+                <tr>
+                  <td className="table__cell--empty" colSpan={columns.length}>No rules created yet.</td>
+                </tr>
+              ) : (
+                rules.map((r) => (
+                  <tr key={r.id}>
+                    {columns.map((c) => (
+                      <td key={c.key}>
+                        {typeof c.render === "function" ? c.render(r[c.key], r) : r[c.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <Modal

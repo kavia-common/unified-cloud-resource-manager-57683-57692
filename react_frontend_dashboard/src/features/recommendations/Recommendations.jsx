@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { DataTable } from "../../components/ui/Table";
 import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 
@@ -415,14 +414,37 @@ export default function Recommendations() {
           />
         </div>
 
-        {/* Unified actionable list */}
-        <DataTable
-          variant="transparent"
-          columns={columns}
-          rows={filteredRows}
-          emptyMessage="No recommendations available."
-          headerClassName="table__head--inventory"
-        />
+        {/* Unified actionable list rendered as minimalist table */}
+        <div className="table-wrapper">
+          <table role="table" aria-label="Recommendations">
+            <thead>
+              <tr>
+                {columns.map((c) => (
+                  <th key={c.key}>{c.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.length === 0 ? (
+                <tr>
+                  <td className="table__cell--empty" colSpan={columns.length}>
+                    No recommendations available.
+                  </td>
+                </tr>
+              ) : (
+                filteredRows.map((r) => (
+                  <tr key={r.id}>
+                    {columns.map((c) => (
+                      <td key={c.key}>
+                        {typeof c.render === "function" ? c.render(r[c.key], r) : r[c.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <div className="text-xs" style={{ color: "var(--muted)" }}>
           Note: Recommendations are generated from mock data with heuristic thresholds. TODO: Integrate real usage and cost signals via Supabase Edge Function and provider APIs. ENV required: REACT_APP_SUPABASE_URL, REACT_APP_SUPABASE_KEY.

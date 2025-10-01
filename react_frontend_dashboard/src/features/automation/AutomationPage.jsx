@@ -43,7 +43,7 @@ export default function AutomationPage() {
           Automation
         </h2>
         <div style={{ color: colors.secondary, fontSize: 13, marginTop: 6 }}>
-          Create rules to automatically manage your resources using schedules and thresholds.
+          Follow the guided steps below to create automation rules using schedules or thresholds.
         </div>
       </div>
 

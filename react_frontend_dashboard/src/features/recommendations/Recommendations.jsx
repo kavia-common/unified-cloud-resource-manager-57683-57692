@@ -385,32 +385,24 @@ export default function Recommendations() {
         {/* Stat overview */}
         <div className="card-grid">
           <StatCard
-            label="Potential Monthly Savings"
+            title="Potential Monthly Savings"
             value={`$${totalMonthlySave.toFixed(2)}`}
-            deltaLabel={`${filteredRows.length} recs`}
-            deltaType="up"
-            variant="violet"
+            subtitle={`${filteredRows.length} recs`}
           />
           <StatCard
-            label="Underutilized"
+            title="Underutilized"
             value={recs.underutilized.filter((r) => visibleIds.includes(r.id)).length}
-            deltaLabel="Compute/Storage"
-            deltaType="up"
-            variant="neutral"
+            subtitle="Compute/Storage"
           />
           <StatCard
-            label="Right-Sizing"
+            title="Right-Sizing"
             value={recs.rightsizing.filter((r) => visibleIds.includes(r.id)).length}
-            deltaLabel="Instances & DBs"
-            deltaType="up"
-            variant="neutral"
+            subtitle="Instances & DBs"
           />
           <StatCard
-            label="Unused Assets"
+            title="Unused Assets"
             value={recs.unusedAssets.filter((r) => visibleIds.includes(r.id)).length}
-            deltaLabel="Snapshots/IPs/Volumes"
-            deltaType="up"
-            variant="neutral"
+            subtitle="Snapshots/IPs/Volumes"
           />
         </div>
 

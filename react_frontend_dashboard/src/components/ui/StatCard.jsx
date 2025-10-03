@@ -7,7 +7,7 @@ import React from 'react';
 export default function StatCard({ title, value, icon, subtitle }) {
   // Prefer a theme variable for light blue if provided; otherwise fallback to a soft blue.
   const lightBlueBg =
-    'var(--card-blue-bg, #E0F2FE)'; // #E0F2FE (light sky blue) aligns with minimalist palette
+    'var(--card-blue-bg, #BAE6FD)'; // slightly darker light blue for minimalist palette
 
   return (
     <div

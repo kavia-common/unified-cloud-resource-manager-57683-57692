@@ -8,7 +8,7 @@
   --color-overlay: rgba(17, 24, 39, 0.45);
 
   /* Dashboard card accent background */
-  --card-blue-bg: #E0F2FE;           /* soft light blue for stat cards */
+  --card-blue-bg: #BAE6FD;           /* slightly darker light blue for stat cards */
 
   /* Text */
   --color-text: #111827;             /* gray-900 */

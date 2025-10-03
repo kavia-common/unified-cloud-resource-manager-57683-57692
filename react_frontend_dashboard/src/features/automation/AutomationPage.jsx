@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AutomationWizard } from './index';
+import { AutomationWizard, AutomationWelcomeWizard } from './index';
 
 /**
  * PUBLIC_INTERFACE
@@ -11,6 +11,8 @@ import { AutomationWizard } from './index';
 export default function AutomationPage() {
   const [createdRules, setCreatedRules] = useState([]);
   const [banner, setBanner] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [welcomeChoice, setWelcomeChoice] = useState(null);
 
   const colors = {
     background: '#FFFFFF',
@@ -63,6 +65,26 @@ export default function AutomationPage() {
         </div>
       ) : null}
 
+      {/* Welcome onboarding card */}
+      {showWelcome && (
+        <div style={{ marginBottom: 16 }}>
+          <AutomationWelcomeWizard
+            onFinish={({ requirement }) => {
+              setWelcomeChoice(requirement);
+              setShowWelcome(false);
+              setBanner({
+                type: 'success',
+                message:
+                  requirement
+                    ? `Welcome complete. Selected requirement: ${requirement}.`
+                    : 'Welcome complete.',
+              });
+              setTimeout(() => setBanner(null), 2000);
+            }}
+          />
+        </div>
+      )}
+
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr' }}>
         <section
           aria-label="Create Automation Rule"
@@ -77,6 +99,12 @@ export default function AutomationPage() {
             Create Automation Rule
           </div>
           <AutomationWizard onSubmit={handleSubmit} onCancel={handleCancel} />
+          {welcomeChoice && (
+            <div style={{ marginTop: 10, color: colors.secondary, fontSize: 12 }}>
+              You selected “{welcomeChoice}” during onboarding. Use the advanced wizard above to
+              configure the details now.
+            </div>
+          )}
         </section>
 
         <section
@@ -126,7 +154,7 @@ export default function AutomationPage() {
                   <div style={{ marginTop: 6, color: colors.text, fontSize: 14 }}>
                     {r.trigger?.type === 'time' ? (
                       <span>
-                        Cron: <strong>{r.trigger?.time?.cron}</strong> — TZ:{' '}
+                        Cron: <strong>{r.trigger?.time?.cron}</strong> — TZ{' '}
                         <strong>{r.trigger?.time?.timezone}</strong>
                       </span>
                     ) : (

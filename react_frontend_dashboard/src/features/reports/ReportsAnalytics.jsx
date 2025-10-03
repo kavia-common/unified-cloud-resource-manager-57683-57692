@@ -148,7 +148,7 @@ export default function ReportsAnalytics() {
 
   return (
     <div className="reports-page">
-      <h1 className="page-title">Reports & Analytics</h1>
+      <h1 className="page-title" aria-label="Reports and Analytics page">Reports & Analytics</h1>
 
       <section className="cards">
         <div className="card">

@@ -36,12 +36,12 @@ export default function SidebarNav() {
 
   return (
     <aside className="sidebarNav" aria-label="Sidebar Navigation">
-      <a href="/overview" className="sidebarNav__brand" aria-label="Go to dashboard">
+      <Link to="/overview" className="sidebarNav__brand" aria-label="Go to dashboard">
         <div className="sidebarNav__brandMark" aria-hidden="true">
           <span className="sidebarNav__brandLetter">C</span>
         </div>
         <div className="sidebarNav__brandName">Cross-Cloud Manager</div>
-      </a>
+      </Link>
 
       <nav className="sidebarNav__groups" role="navigation">
         <div className="sidebarNav__group">

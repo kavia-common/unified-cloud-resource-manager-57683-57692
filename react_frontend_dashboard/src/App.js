@@ -15,19 +15,7 @@ import "./App.css";
 import "./theme.css";
 import Security from "./features/security/Security";
 import ResourceOps from "./features/operations/ResourceOps";
-
-const ReportsAnalytics = () => (
-  <div className="panel">
-    <div className="panel-header">
-      <div className="panel-title">Reports & Analytics</div>
-    </div>
-    <div className="panel-body">
-      <div className="text-sm" style={{ color: "var(--muted)" }}>
-        Generate and view consolidated cross-cloud reports. (Coming soon)
-      </div>
-    </div>
-  </div>
-);
+import ReportsAnalytics from "./features/reports/ReportsAnalytics";
 
 /**
  * PUBLIC_INTERFACE

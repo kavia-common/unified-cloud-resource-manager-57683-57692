@@ -8,8 +8,12 @@
   --color-overlay: rgba(17, 24, 39, 0.45);
 
   /* Dashboard card accent background */
-  --card-blue-bg: #BAE6FD;           /* slightly darker light blue for stat cards */
-  --card-blue-gradient: linear-gradient(90deg, #E0F2FE 0%, #BAE6FD 100%); /* minimalist on-brand gradient */
+  --blue-light: #E0F2FE;             /* light sky blue */
+  --blue-mid: #60A5FA;               /* utility: soft mid blue for smoother blend */
+  --blue-dark: #2563EB;              /* dark blue (brand-aligned) */
+  --card-blue-bg: var(--blue-light); /* retained for backward compat */
+  /* Minimalist horizontal gradient: subtle start, smooth mid, confident dark end */
+  --card-blue-gradient: linear-gradient(90deg, var(--blue-light) 0%, var(--blue-mid) 45%, var(--blue-dark) 100%);
 
   /* Text */
   --color-text: #111827;             /* gray-900 */

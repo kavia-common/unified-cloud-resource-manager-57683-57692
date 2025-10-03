@@ -7,7 +7,7 @@ import React from 'react';
 export default function StatCard({ title, value, icon, subtitle }) {
   // Use theme gradient var, falling back to a gentle horizontal gradient.
   const gradientBg =
-    'var(--card-blue-gradient, linear-gradient(90deg, #E0F2FE 0%, #BAE6FD 100%))';
+    'var(--card-blue-gradient, linear-gradient(90deg, #E0F2FE 0%, #60A5FA 45%, #2563EB 100%))';
 
   return (
     <div

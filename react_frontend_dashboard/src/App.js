@@ -16,6 +16,7 @@ import "./theme.css";
 import Security from "./features/security/Security";
 import ResourceOps from "./features/operations/ResourceOps";
 import ReportsAnalytics from "./features/reports/ReportsAnalytics";
+import ClickSpark from "./components/ui/ClickSpark";
 
 /**
  * PUBLIC_INTERFACE
@@ -37,6 +38,7 @@ function App() {
    */
   return (
     <BrowserRouter>
+      <ClickSpark />
       {/* App shell layout: [SidebarNav | Main] */}
       <div className="app-shell" role="application" aria-label="Cross-Cloud Manager App Shell">
         <SidebarNav />

@@ -1,0 +1,44 @@
+.click-spark-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.click-spark {
+  --spark-size: 3px;
+  --spark-duration: 450ms;
+  --spark-rotate: 0deg;
+  --spark-tx: 0px;
+  --spark-ty: 0px;
+
+  position: absolute;
+  width: var(--spark-size);
+  height: var(--spark-size);
+  background: #111827; /* text color from theme (near-black) */
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  opacity: 0.9;
+  animation: click-spark-move var(--spark-duration) ease-out forwards;
+}
+
+@media (prefers-color-scheme: dark) {
+  .click-spark {
+    background: #F9FAFB; /* surface in dark contexts */
+  }
+}
+
+@keyframes click-spark-move {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(var(--spark-rotate)) translate(0, 0) scale(1);
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--spark-rotate))
+      translate(var(--spark-tx), var(--spark-ty)) scale(0.8);
+  }
+}

@@ -6,7 +6,7 @@
 }
 
 .stat-card, .StatCard, .stats-card {
-  background: var(--color-surface);
+  /* Preserve component-provided gradient background */
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);

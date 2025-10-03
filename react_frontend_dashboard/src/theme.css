@@ -7,13 +7,13 @@
   --color-surface-2: #f3f4f6;        /* subtle alt rows */
   --color-overlay: rgba(17, 24, 39, 0.45);
 
-  /* Dashboard card accent background */
-  --blue-light: #E0F2FE;             /* light sky blue */
-  --blue-mid: #60A5FA;               /* utility: soft mid blue for smoother blend */
+  /* Dashboard card accent background (updated to Dark Blue → Violet) */
   --blue-dark: #2563EB;              /* dark blue (brand-aligned) */
-  --card-blue-bg: var(--blue-light); /* retained for backward compat */
-  /* Minimalist horizontal gradient: subtle start, smooth mid, confident dark end */
-  --card-blue-gradient: linear-gradient(90deg, var(--blue-light) 0%, var(--blue-mid) 45%, var(--blue-dark) 100%);
+  --violet: #7C3AED;                 /* violet (harmonious accent) */
+  --indigo-600: #4F46E5;             /* optional mid hue for smoother blend */
+  --card-blue-bg: #1e3a8a;           /* legacy compat, unused for stat cards */
+  /* Minimalist diagonal gradient: richer depth with subtle angle */
+  --card-accent-gradient: linear-gradient(135deg, var(--blue-dark) 0%, var(--indigo-600) 48%, var(--violet) 100%);
 
   /* Text */
   --color-text: #111827;             /* gray-900 */

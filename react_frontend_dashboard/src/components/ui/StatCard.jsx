@@ -2,14 +2,18 @@ import React from 'react';
 
 /**
  * PUBLIC_INTERFACE
- * Metric card styled for dark theme.
+ * Metric card styled for minimalist light theme with light blue background.
  */
 export default function StatCard({ title, value, icon, subtitle }) {
+  // Prefer a theme variable for light blue if provided; otherwise fallback to a soft blue.
+  const lightBlueBg =
+    'var(--card-blue-bg, #E0F2FE)'; // #E0F2FE (light sky blue) aligns with minimalist palette
+
   return (
     <div
       className="stat-card"
       style={{
-        background: 'var(--color-surface)',
+        background: lightBlueBg,
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-md)',
         padding: 16,

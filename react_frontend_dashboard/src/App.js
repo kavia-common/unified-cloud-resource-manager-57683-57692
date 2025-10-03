@@ -33,14 +33,17 @@ import ClickSpark from "./components/ui/ClickSpark";
  * - Authentication screens are intentionally omitted to meet the current product requirements.
  */
 function App() {
-  /**
-   * This is the public root shell for the dashboard UI.
-   */
   return (
     <BrowserRouter>
+      {/* 🔥 Enable click sparks globally */}
       <ClickSpark />
+
       {/* App shell layout: [SidebarNav | Main] */}
-      <div className="app-shell" role="application" aria-label="Cross-Cloud Manager App Shell">
+      <div
+        className="app-shell"
+        role="application"
+        aria-label="Cross-Cloud Manager App Shell"
+      >
         <SidebarNav />
         <main className="main" role="main">
           <Topbar />
@@ -49,21 +52,25 @@ function App() {
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
-
               <Route path="/costs" element={<Costs />} />
               <Route path="/recommendations" element={<Recommendations />} />
               <Route path="/automation" element={<Automation />} />
               <Route path="/security" element={<Security />} />
-          <Route path="/resource-ops" element={<ResourceOps />} />
+              <Route path="/resource-ops" element={<ResourceOps />} />
               <Route path="/reports" element={<ReportsAnalytics />} />
+
               {/* Legacy/unrelated routes retained but not linked in nav */}
               <Route path="/activity" element={<Activity />} />
               <Route path="/settings" element={<CloudConnections />} />
               <Route path="/profile" element={<Profile />} />
+
               {/* Remove or redirect any legacy auth paths */}
               <Route path="/login" element={<Navigate to="/overview" replace />} />
               <Route path="/signin" element={<Navigate to="/overview" replace />} />
-              <Route path="/help" element={<div style={{padding:20}}>Help coming soon.</div>} />
+              <Route
+                path="/help"
+                element={<div style={{ padding: 20 }}>Help coming soon.</div>}
+              />
               <Route path="/logout" element={<Navigate to="/overview" replace />} />
               <Route path="*" element={<Navigate to="/overview" replace />} />
             </Routes>

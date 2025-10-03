@@ -9,6 +9,7 @@
 
   /* Dashboard card accent background */
   --card-blue-bg: #BAE6FD;           /* slightly darker light blue for stat cards */
+  --card-blue-gradient: linear-gradient(90deg, #E0F2FE 0%, #BAE6FD 100%); /* minimalist on-brand gradient */
 
   /* Text */
   --color-text: #111827;             /* gray-900 */

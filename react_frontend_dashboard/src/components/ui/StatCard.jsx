@@ -2,18 +2,18 @@ import React from 'react';
 
 /**
  * PUBLIC_INTERFACE
- * Metric card styled for minimalist light theme with light blue background.
+ * Metric card styled for minimalist light theme with a subtle on-brand blue gradient background.
  */
 export default function StatCard({ title, value, icon, subtitle }) {
-  // Prefer a theme variable for light blue if provided; otherwise fallback to a soft blue.
-  const lightBlueBg =
-    'var(--card-blue-bg, #BAE6FD)'; // slightly darker light blue for minimalist palette
+  // Use theme gradient var, falling back to a gentle horizontal gradient.
+  const gradientBg =
+    'var(--card-blue-gradient, linear-gradient(90deg, #E0F2FE 0%, #BAE6FD 100%))';
 
   return (
     <div
       className="stat-card"
       style={{
-        background: lightBlueBg,
+        background: gradientBg,
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-md)',
         padding: 16,

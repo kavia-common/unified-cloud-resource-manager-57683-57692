@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import "./reports.css";
+import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 
 /**
  * Reports & Analytics page aggregates multiple operational insights.
@@ -146,9 +147,106 @@ export default function ReportsAnalytics() {
     };
   }, []);
 
+  // Local state for Cost Overview chart controls and data (moved from Dashboard)
+  const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
+
+  const hours = useMemo(() => Array.from({ length: 24 }, (_, h) => h), []);
+  const daysInMonth = useMemo(() => Array.from({ length: 31 }, (_, d) => d + 1), []);
+  const months = useMemo(() => ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], []);
+
+  function rand(min, max) {
+    return Math.round(min + Math.random() * (max - min));
+  }
+
+  function buildSeriesFor(xValues, ranges, nameFormatter = (x) => String(x)) {
+    return xValues.map((x) => ({
+      name: nameFormatter(x),
+      series1: rand(ranges.s1[0], ranges.s1[1]),
+      series2: rand(ranges.s2[0], ranges.s2[1]),
+      series3: rand(ranges.s3[0], ranges.s3[1]),
+    }));
+  }
+
+  function computeAxisConfig(selectedMode) {
+    if (selectedMode === "Daily") {
+      return {
+        xTickFormatter: (v) => `${v}:00`,
+        xLabel: "Hour of Day",
+        yLabel: "Spend ($)",
+        yDomain: [0, 25],
+        yTicks: [0, 5, 10, 15, 20, 25],
+      };
+    }
+    if (selectedMode === "Monthly") {
+      return {
+        xTickFormatter: (v) => `${v}`,
+        xLabel: "Day of Month",
+        yLabel: "Spend ($)",
+        yDomain: [0, 60],
+        yTicks: [0, 10, 20, 30, 40, 50, 60],
+      };
+    }
+    return {
+      xTickFormatter: (v) => v,
+      xLabel: "Month",
+      yLabel: "Spend ($)",
+      yDomain: [0, 120],
+      yTicks: [0, 20, 40, 60, 80, 100, 120],
+    };
+  }
+
+  const axis = computeAxisConfig(mode);
+
+  const chartData = useMemo(() => {
+    if (mode === "Daily") {
+      return buildSeriesFor(hours, { s1: [2, 16], s2: [1, 14], s3: [3, 20] }, (h) => `${h}`);
+    } else if (mode === "Monthly") {
+      return buildSeriesFor(daysInMonth, { s1: [8, 40], s2: [6, 35], s3: [10, 50] }, (d) => `${d}`);
+    } else {
+      return buildSeriesFor(months, { s1: [25, 90], s2: [20, 80], s3: [30, 100] }, (m) => m);
+    }
+  }, [mode, hours, daysInMonth, months]);
+
   return (
     <div className="reports-page">
       <h1 className="page-title" aria-label="Reports and Analytics page">Reports & Analytics</h1>
+
+      {/* Cost Overview (moved from Dashboard) */}
+      <section className="card" style={{ marginBottom: 16 }}>
+        <div className="card-header">
+          <h2>Cost Overview</h2>
+          <div>
+            <select
+              className="select"
+              aria-label="Select time interval for overview chart"
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              style={{ minWidth: 140 }}
+            >
+              <option value="Daily">Daily</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <MultiSeriesOverviewChart
+            data={chartData}
+            xKey="name"
+            seriesOrder={[
+              { key: "series2", label: "AWS", color: "#000000" },
+              { key: "series1", label: "Azure", color: "#1a237e" },
+              { key: "series3", label: "GCP", color: "var(--series-3)" },
+            ]}
+            height={260}
+            xTickFormatter={axis.xTickFormatter}
+            xAxisLabel={axis.xLabel}
+            yAxisLabel={axis.yLabel}
+            yDomain={axis.yDomain}
+            yTicks={axis.yTicks}
+          />
+        </div>
+      </section>
 
       <section className="cards">
         <div className="card">

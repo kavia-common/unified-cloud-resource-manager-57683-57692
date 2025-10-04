@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
-import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
 import Banner from "../../components/ui/Banner";
 import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
@@ -374,42 +373,7 @@ export default function Overview() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="panel-header">
-          <div className="panel-title">Cost Overview</div>
-          <div style={selectStyles}>
-            <select
-              id="overview-mode"
-              className="select"
-              value={mode}
-              onChange={(e) => setMode(e.target.value)}
-              aria-label="Select time interval for overview chart"
-              style={{ minWidth: 140 }}
-            >
-              <option value="Daily">Daily</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Yearly">Yearly</option>
-            </select>
-          </div>
-        </div>
-        <div className="panel-body">
-          <MultiSeriesOverviewChart
-            data={chartData}
-            xKey="name"
-            seriesOrder={[
-              { key: "series2", label: "AWS", color: "#000000" },         // AWS bar black
-              { key: "series1", label: "Azure", color: "#1a237e" },       // Azure dark blue
-              { key: "series3", label: "GCP", color: "var(--series-3)" }, // GCP original color token
-            ]}
-            height={260}
-            xTickFormatter={axis.xTickFormatter}
-            xAxisLabel={axis.xLabel}
-            yAxisLabel={axis.yLabel}
-            yDomain={axis.yDomain}
-            yTicks={axis.yTicks}
-          />
-        </div>
-      </div>
+
 
       {/* Spend share chart with right-aligned vertical actions per design notes */}
       <div className="panel" style={{ marginTop: 8 }}>

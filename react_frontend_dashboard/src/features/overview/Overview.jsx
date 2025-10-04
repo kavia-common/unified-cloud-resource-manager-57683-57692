@@ -10,6 +10,9 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/ui/Toast";
 import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
 import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } from "../../services/accountStore";
+// TEMP DEV: Healthcheck banner to verify preview visibility.
+// TODO: Remove HealthcheckBanner import and usage once preview is confirmed.
+import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -205,6 +208,10 @@ export default function Overview() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      {/* TEMP DEV Healthcheck - visible banner to confirm render and routing.
+          Follows Pure White theme with minimal styling. */}
+      <HealthcheckBanner />
+
       <Banner
         title="Welcome back!"
         subtitle="Manage, monitor, and optimize your cloud with ease"

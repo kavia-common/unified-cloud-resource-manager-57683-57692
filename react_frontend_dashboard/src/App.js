@@ -49,6 +49,8 @@ function App() {
           <Topbar />
           <div className="content">
             <Routes>
+            {/* Redirect legacy /reports path to the current Reports & Analytics page */}
+            <Route path="/reports" element={<Navigate to="/reports-analytics" replace />} />
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
@@ -57,7 +59,7 @@ function App() {
               <Route path="/automation" element={<Automation />} />
               <Route path="/security" element={<Security />} />
               <Route path="/resource-ops" element={<ResourceOps />} />
-              <Route path="/reports" element={<ReportsAnalytics />} />
+
               <Route path="/reports-analytics" element={<ReportsAnalytics />} />
 
               {/* Legacy/unrelated routes retained but not linked in nav */}

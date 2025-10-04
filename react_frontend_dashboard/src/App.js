@@ -58,6 +58,7 @@ function App() {
               <Route path="/security" element={<Security />} />
               <Route path="/resource-ops" element={<ResourceOps />} />
               <Route path="/reports" element={<ReportsAnalytics />} />
+              <Route path="/reports-analytics" element={<ReportsAnalytics />} />
 
               {/* Legacy/unrelated routes retained but not linked in nav */}
               <Route path="/activity" element={<Activity />} />

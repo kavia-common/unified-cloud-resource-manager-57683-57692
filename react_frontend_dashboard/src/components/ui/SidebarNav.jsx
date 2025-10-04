@@ -29,7 +29,7 @@ export default function SidebarNav() {
     { to: "/recommendations", label: "AI Recommendations", Icon: FiBarChart2 },
     { to: "/automation", label: "Automation Rules", Icon: FiZap },
     { to: "/security", label: "Security", Icon: FiShield },
-    { to: "/reports", label: "Reports & Analytics", Icon: FiPieChart },
+    { to: "/reports-analytics", label: "Reports & Analytics", Icon: FiPieChart },
   ];
 
   const isActive = (to) => pathname === to;

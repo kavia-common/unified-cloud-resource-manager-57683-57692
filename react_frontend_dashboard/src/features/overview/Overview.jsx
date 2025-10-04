@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import Banner from "../../components/ui/Banner";
-import PieChart from "../../components/ui/PieChart";
 import { CLOUD_COLORS } from "../../components/ui/Charts";
 
 import { Modal } from "../../components/ui/Modal";
@@ -202,24 +201,7 @@ export default function Overview() {
     color: "var(--text-secondary)",
   };
 
-  // Mock spend totals for pie chart by interval
-  const pieTotals = useMemo(() => {
-    switch (mode) {
-      case "Daily":
-        return { AWS: 420, Azure: 350, GCP: 230 };
-      case "Yearly":
-        return { AWS: 42000, Azure: 36000, GCP: 26000 };
-      case "Monthly":
-      default:
-        return { AWS: 8200, Azure: 6900, GCP: 5200 };
-    }
-  }, [mode]);
 
-  const pieData = useMemo(() => ([
-    { label: "AWS", value: pieTotals.AWS, color: CLOUD_COLORS.AWS },
-    { label: "Azure", value: pieTotals.Azure, color: CLOUD_COLORS.Azure },
-    { label: "GCP", value: pieTotals.GCP, color: CLOUD_COLORS.GCP },
-  ]), [pieTotals]);
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -375,124 +357,7 @@ export default function Overview() {
 
 
 
-      {/* Spend share chart with right-aligned vertical actions per design notes */}
-      <div className="panel" style={{ marginTop: 8 }}>
-        <div className="panel-header">
-          <div className="panel-title">Spend Share</div>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>Interval: {mode}</div>
-        </div>
-        <div className="panel-body">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(280px, 1fr) minmax(280px, 360px)",
-              gap: 16,
-              alignItems: "start",
-            }}
-          >
-            {/* Left column: Pie chart container */}
-            <div
-              style={{
-                background: "var(--surface, #FFFFFF)",
-                border: "1px solid var(--border, #E5E7EB)",
-                borderRadius: 12,
-                padding: 12,
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <PieChart data={pieData} size={300} ringThickness={64} />
-            </div>
 
-            {/* Right column: Actions stack */}
-            <div
-              className="actionsStack"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                width: "100%",
-              }}
-            >
-              {/* Add Cloud Account */}
-              <button
-                type="button"
-                className="actionBtn pop-hover"
-                aria-label="Add Cloud Account"
-                style={actionBtnStyle}
-                onClick={() => setShowAddCloudModal(true)}
-              >
-                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#22C55E" }}>
-                  {/* cloud-plus icon */}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-                    <path d="M7 17h8a4 4 0 0 0 0-8 5 5 0 0 0-9.58 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 11v6M9 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <span className="label" style={actionLabelStyle}>Add Cloud Account</span>
-                {/* chevron-right (consistent with other buttons) */}
-                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
-                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-
-              {/* Discover Resources */}
-              <button
-                type="button"
-                className="actionBtn pop-hover"
-                aria-label="Discover Resources"
-                style={actionBtnStyle}
-                onClick={() => setShowDiscoverModal(true)}
-              >
-                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#A78BFA" }}>
-                  {/* magnifier icon */}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-                    <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.8"/>
-                    <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <span className="label" style={actionLabelStyle}>Discover Resources</span>
-                {/* chevron-right */}
-                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
-                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-
-              {/* View Recommendations (replaces Run Optimization) */}
-              <button
-                type="button"
-                className="actionBtn pop-hover"
-                aria-label="View Recommendations"
-                style={actionBtnStyle}
-                onClick={() => navigate("/recommendations")}
-              >
-                <div className="iconTile" aria-hidden="true" style={{ ...iconTileBase, color: "#60A5FA" }}>
-                  {/* bar chart icon */}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-                    <path d="M4 20V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                    <path d="M10 20V10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                    <path d="M16 20v-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                    <path d="M22 20V4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <span className="label" style={actionLabelStyle}>View Recommendations</span>
-                <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true" style={{ color: "var(--icon-muted, #8C939A)" }}>
-                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Responsive stacking for mobile: buttons below chart */}
-          <style>{`
-            @media (max-width: 860px) {
-              .panel-body > div {
-                grid-template-columns: 1fr;
-              }
-            }
-          `}</style>
-        </div>
-      </div>
 
       {/* Modals for each stat card with placeholder content */}
       <Modal

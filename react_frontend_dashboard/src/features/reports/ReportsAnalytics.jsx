@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import "./reports.css";
-import { MultiSeriesOverviewChart } from "../../components/ui/Charts";
+import { MultiSeriesOverviewChart, CLOUD_COLORS } from "../../components/ui/Charts";
+import PieChart from "../../components/ui/PieChart";
 
 /**
  * Reports & Analytics page aggregates multiple operational insights.
@@ -197,6 +198,28 @@ export default function ReportsAnalytics() {
 
   const axis = computeAxisConfig(mode);
 
+  // Spend share donut data (moved from Dashboard)
+  const spendShareTotals = useMemo(() => {
+    switch (mode) {
+      case "Daily":
+        return { AWS: 420, Azure: 350, GCP: 230 };
+      case "Yearly":
+        return { AWS: 42000, Azure: 36000, GCP: 26000 };
+      case "Monthly":
+      default:
+        return { AWS: 8200, Azure: 6900, GCP: 5200 };
+    }
+  }, [mode]);
+
+  const spendShareData = useMemo(
+    () => [
+      { label: "AWS", value: spendShareTotals.AWS, color: CLOUD_COLORS.AWS },
+      { label: "Azure", value: spendShareTotals.Azure, color: CLOUD_COLORS.Azure },
+      { label: "GCP", value: spendShareTotals.GCP, color: CLOUD_COLORS.GCP },
+    ],
+    [spendShareTotals]
+  );
+
   const chartData = useMemo(() => {
     if (mode === "Daily") {
       return buildSeriesFor(hours, { s1: [2, 16], s2: [1, 14], s3: [3, 20] }, (h) => `${h}`);
@@ -210,6 +233,45 @@ export default function ReportsAnalytics() {
   return (
     <div className="reports-page">
       <h1 className="page-title" aria-label="Reports and Analytics page">Reports & Analytics</h1>
+
+      {/* Spend Share (moved from Dashboard) */}
+      <section className="card" style={{ marginBottom: 16 }}>
+        <div className="card-header">
+          <h2>Spend Share</h2>
+          <div className="subtle">Interval: {mode}</div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 1fr) minmax(280px, 360px)", gap: 16, alignItems: "start" }}>
+          <div
+            style={{
+              background: "var(--color-surface, #FFFFFF)",
+              border: "1px solid var(--border-color, #E5E7EB)",
+              borderRadius: 12,
+              padding: 12,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {/* PUBLIC_INTERFACE: relocated pie chart */}
+            <PieChart data={spendShareData} size={300} ringThickness={64} />
+          </div>
+
+          {/* Action buttons preserved for usability */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
+            <button type="button" className="btn secondary" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" }}>
+              <span style={{ fontWeight: 600, color: "#374151" }}>Add Cloud Account</span>
+              <span aria-hidden>›</span>
+            </button>
+            <button type="button" className="btn secondary" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" }}>
+              <span style={{ fontWeight: 600, color: "#374151" }}>Discover Resources</span>
+              <span aria-hidden>›</span>
+            </button>
+            <button type="button" className="btn secondary" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" }}>
+              <span style={{ fontWeight: 600, color: "#374151" }}>View Recommendations</span>
+              <span aria-hidden>›</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Cost Overview (moved from Dashboard) */}
       <section className="card" style={{ marginBottom: 16 }}>

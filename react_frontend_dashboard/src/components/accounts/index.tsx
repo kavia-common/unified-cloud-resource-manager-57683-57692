@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AddAccountModal from './AddAccountModal';
+import AddAccountModal from './AddAccountModal.tsx';
 
 /**
  * PUBLIC_INTERFACE

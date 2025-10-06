@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import "./theme.css";
 import "./components/ui/dark-theme-overrides.css";
-import App from "./App";
+import App from "./AppEntry.js";
 import { hasSupabaseConfig } from "./services/supabaseClient";
 import { ToastProvider } from "./components/ui/Toast";
 import DevConfigNotice from "./components/ui/DevConfigNotice";

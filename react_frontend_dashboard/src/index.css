@@ -17,10 +17,14 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .text-gray-700{ color:#374151; }
 .text-gray-600{ color:#4B5563; }
 .text-gray-400{ color:#9CA3AF; }
+.text-red-600{ color:#DC2626; }
 .bg-gray-800{ background:#374151; }
 .hover\:bg-gray-900:hover{ background:#111827; }
 .border{ border-width:1px; }
+.border-b{ border-bottom-width:1px; }
 .border-gray-200{ border-color:#E5E7EB; }
+.border-gray-300{ border-color:#D1D5DB; }
+.border-red-400{ border-color:#F87171; }
 .rounded-md{ border-radius:0.375rem; }
 .rounded-lg{ border-radius:0.5rem; }
 .p-4{ padding:1rem; }
@@ -46,5 +50,4 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .max-w-xl{ max-width:36rem; }
 .mx-4{ margin-left:1rem; margin-right:1rem; }
 .min-h-screen{ min-height:100vh; }
-.border-b{ border-bottom-width:1px; }
 .bg-gray-900\/40{ background:rgba(17,24,39,0.4); }

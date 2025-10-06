@@ -1,10 +1,9 @@
 import React from 'react';
-import ActionsBar from '../../components/common/ActionsBar.tsx';
 
 /**
  * PUBLIC_INTERFACE
  * Top navigation bar styled for dark theme.
- * Renders a right-aligned ActionsBar by default.
+ * No longer renders ActionsBar in the header; ActionsBar is placed within page content.
  */
 export default function Topbar({ right }) {
   return (
@@ -25,7 +24,7 @@ export default function Topbar({ right }) {
     >
       <div className="title" style={{ fontWeight: 600, color: 'var(--color-text)' }}>Cloud Manager</div>
       <div className="right" style={{ marginLeft: 'auto' }}>
-        {right || <ActionsBar />}
+        {right || null}
       </div>
     </div>
   );

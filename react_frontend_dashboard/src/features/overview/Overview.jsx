@@ -13,6 +13,7 @@ import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } fro
 // TEMP DEV: Healthcheck banner to verify preview visibility.
 // TODO: Remove HealthcheckBanner import and usage once preview is confirmed.
 import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
+import ActionsBar from "../../components/common/ActionsBar.tsx";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -362,9 +363,43 @@ export default function Overview() {
         </div>
       </div>
 
+      {/* Actions placed directly below Top Recommendations per requirement */}
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          justifyContent: "flex-start",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 640,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <ActionsBar />
+        </div>
+      </div>
 
-
-
+      {/* Responsive adjustments for very small devices: stack buttons */}
+      <style>{`
+        @media (max-width: 480px) {
+          [data-testid="actions-bar"] {
+            width: 100%;
+            display: grid !important;
+            grid-template-columns: 1fr;
+            gap: 8px !important;
+          }
+          [data-testid="actions-bar"] > button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
 
       {/* Modals for each stat card with placeholder content */}
       <Modal

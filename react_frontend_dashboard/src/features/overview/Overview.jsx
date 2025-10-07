@@ -273,7 +273,7 @@ export default function Overview() {
                 padding: "12px 12px",
                 border: "1px solid var(--border)",
                 borderRadius: 12,
-                background: "#FFFFFF",
+                background: "var(--color-surface)",
                 boxShadow: "var(--shadow)",
               }}
             >

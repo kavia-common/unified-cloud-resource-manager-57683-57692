@@ -99,7 +99,8 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-elevated) 100%);
+  /* Remove gradient; use solid dark/background token */
+  background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -125,7 +126,7 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-elevated) 100%);
+  background: var(--color-bg);
   color: var(--color-text);
 }
 .main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }

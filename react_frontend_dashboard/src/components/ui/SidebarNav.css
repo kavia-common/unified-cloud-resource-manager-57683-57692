@@ -94,6 +94,6 @@
 
 .sidebarNav__accent {
   height: 24px;
-  background: linear-gradient(90deg, rgba(37,99,235,0.12), rgba(16,185,129,0.10));
+  background: var(--sidebar-surface-2, var(--color-surface-2));
   border-top: 1px solid var(--sidebar-border, var(--color-border));
 }

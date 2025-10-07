@@ -223,7 +223,8 @@ html.theme-dark {
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
+  /* Remove gradient; use solid dark/background token */
+  background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

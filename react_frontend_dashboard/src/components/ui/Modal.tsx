@@ -67,19 +67,20 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-gray-900/40" onClick={onClose} />
+      <div className="absolute inset-0" style={{ background: 'var(--color-overlay)' }} onClick={onClose} />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={`relative w-full ${widthClassName} mx-4 rounded-lg bg-white shadow-xl`}
+        className={`relative w-full ${widthClassName} mx-4 rounded-lg shadow-xl`}
+        style={{ background: 'var(--color-surface)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-          <h3 id={titleId} className="text-sm font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
+          <h3 id={titleId} className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="btn btn--ghost btn--sm"
             aria-label="Close"
             title="Close"
           >

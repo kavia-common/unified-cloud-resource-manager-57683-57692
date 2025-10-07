@@ -2,16 +2,16 @@ import React from 'react';
 
 /**
  * PUBLIC_INTERFACE
- * Top navigation bar styled for dark theme.
- * No longer renders ActionsBar in the header; ActionsBar is placed within page content.
+ * Top navigation bar styled to use theme tokens.
+ * Accepts optional "right" node for custom actions.
  */
 export default function Topbar({ right }) {
   return (
     <div
       className="topbar"
       style={{
-        background: 'rgba(255,255,255,0.85)',
-        borderBottom: '1px solid var(--border-color)',
+        background: 'var(--color-surface)',
+        borderBottom: '1px solid var(--color-border)',
         color: 'var(--color-text)',
         position: 'sticky',
         top: 0,
@@ -23,7 +23,7 @@ export default function Topbar({ right }) {
       }}
     >
       <div className="title" style={{ fontWeight: 600, color: 'var(--color-text)' }}>Cloud Manager</div>
-      <div className="right" style={{ marginLeft: 'auto' }}>
+      <div className="right" style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
         {right || null}
       </div>
     </div>

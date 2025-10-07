@@ -286,18 +286,8 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
             onClick={handleCancel}
             aria-label="Close"
             title="Close"
-            className="btn ghost"
-            style={{
-              marginLeft: "auto",
-              background: "transparent",
-              border: `1px solid ${TOKENS.border}`,
-              color: TOKENS.text,
-              padding: "6px 10px",
-              borderRadius: 8,
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
-            onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+            className="btn btn--ghost btn--sm"
+            style={{ marginLeft: "auto" }}
           >
             ✕
           </button>
@@ -411,7 +401,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               />
               <button
                 type="button"
-                className="btn secondary"
+                className="btn btn--secondary btn--sm"
                 onClick={() => setShowSecret((s) => !s)}
                 aria-label={showSecret ? "Hide secret" : "Show secret"}
                 aria-pressed={showSecret}
@@ -421,14 +411,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
                   top: "50%",
                   transform: "translateY(-50%)",
                   padding: "6px 8px",
-                  background: TOKENS.btnBg,
-                  border: `1px solid ${TOKENS.border}`,
-                  color: TOKENS.btnText,
-                  borderRadius: 8,
-                  cursor: "pointer",
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
-                onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.btnBg)}
               >
                 {showSecret ? "Hide" : "Show"}
               </button>
@@ -449,38 +432,19 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingTop: 4 }}>
             <button
               type="button"
-              className="btn secondary"
+              className="btn btn--secondary"
               onClick={handleCancel}
               aria-label="Cancel"
-              style={{
-                background: TOKENS.btnBg,
-                color: TOKENS.btnText,
-                border: `1px solid ${TOKENS.border}`,
-                padding: "8px 12px",
-                borderRadius: 8,
-                cursor: "pointer",
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
-              onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.btnBg)}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn primary"
+              className="btn btn--primary"
               disabled={hasErrors || submitting}
               aria-disabled={hasErrors || submitting}
               aria-label="Add account"
               title={hasErrors ? "Please fix validation errors" : "Add Account"}
-              style={{
-                background: hasErrors || submitting ? "#9CA3AF" : TOKENS.btnPrimaryBg,
-                color: TOKENS.btnPrimaryText,
-                border: `1px solid ${TOKENS.btnPrimaryBg}`,
-                padding: "8px 12px",
-                borderRadius: 8,
-                cursor: hasErrors || submitting ? "not-allowed" : "pointer",
-                opacity: hasErrors || submitting ? 0.8 : 1,
-              }}
             >
               {submitting ? "Adding…" : "Add Account"}
             </button>

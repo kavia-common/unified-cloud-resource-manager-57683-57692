@@ -1,55 +1,66 @@
 :root {
-  /* Light theme semantic tokens (Pure White minimalist) */
-  /* Background and surfaces */
+  /* Base tokens */
   --color-bg: #ffffff;
-  --color-bg-elevated: #f9fafb;      /* surface */
-  --color-surface: #ffffff;          /* panels/cards */
-  --color-surface-2: #f3f4f6;        /* subtle alt rows */
+  --color-bg-elevated: #f9fafb;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f4f6;
   --color-overlay: rgba(17, 24, 39, 0.45);
 
-  /* Dashboard card accent background (updated to Dark Blue → Violet) */
-  --blue-dark: #2563EB;              /* dark blue (brand-aligned) */
-  --violet: #7C3AED;                 /* violet (harmonious accent) */
-  --indigo-600: #4F46E5;             /* optional mid hue for smoother blend */
-  --card-blue-bg: #1e3a8a;           /* legacy compat, unused for stat cards */
-  /* Minimalist diagonal gradient: richer depth with subtle angle */
+  --blue-dark: #2563EB;
+  --violet: #7C3AED;
+  --indigo-600: #4F46E5;
+  --card-blue-bg: #1e3a8a;
   --card-accent-gradient: linear-gradient(135deg, var(--blue-dark) 0%, var(--indigo-600) 48%, var(--violet) 100%);
 
-  /* Text */
-  --color-text: #111827;             /* gray-900 */
-  --color-text-muted: #6b7280;       /* gray-500 */
-  --color-text-subtle: #9ca3af;      /* gray-400 */
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+  --color-text-subtle: #9ca3af;
 
-  /* Accents and status (from style guide) */
-  --color-primary: #374151;          /* primary text/button bg for emphasis */
-  --color-primary-contrast: #ffffff; /* text on primary */
+  --color-primary: #374151;
+  --color-primary-contrast: #ffffff;
   --color-secondary: #9CA3AF;
   --color-success: #10B981;
   --color-error: #EF4444;
   --color-warning: #F59E0B;
   --color-info: #3B82F6;
+  --color-on-accent: #ffffff;
 
-  /* Borders and shadows */
-  --border-color: #e5e7eb;           /* gray-200 */
+  --border-color: #e5e7eb;
   --border-color-muted: #eceff3;
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 12px 24px rgba(0,0,0,0.12);
 
-  /* Radii */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
 
-  /* Layout */
   --nav-width: 264px;
 
   /* Buttons */
-  --btn-bg: #111827;                 /* strong emphasis button */
+  --btn-bg: #111827;
   --btn-text: #ffffff;
-  --btn-bg-hover: #1f2937;           /* gray-800 */
+  --btn-bg-hover: #1f2937;
   --btn-outline: #e5e7eb;
+
+  /* Variant button tokens used by shared .btn classes */
+  --btn-primary-bg: var(--color-info);
+  --btn-primary-text: var(--color-on-accent);
+  --btn-primary-bg-hover: #316dd0;
+  --btn-primary-bg-active: #2a5fb6;
+
+  --btn-secondary-bg: var(--color-surface-2);
+  --btn-secondary-text: var(--color-text);
+  --btn-secondary-border: var(--border-color);
+  --btn-secondary-bg-hover: #eef2f7;
+  --btn-secondary-bg-active: #e7ecf4;
+
+  --btn-ghost-text: var(--color-text);
+  --btn-ghost-bg-hover: var(--color-surface-2);
+  --btn-ghost-bg-active: #e7ecf4;
+
+  --focus-ring: rgba(59,130,246,0.6);
 
   /* Inputs */
   --input-bg: #ffffff;
@@ -74,9 +85,9 @@
   --axis-text: #6b7280;
   --gridline: #e5e7eb;
   --legend-text: #6b7280;
-  --series-1: #3B82F6; /* Azure */
-  --series-2: #F59E0B; /* AWS alt */
-  --series-3: #10B981; /* GCP */
+  --series-1: #3B82F6;
+  --series-2: #F59E0B;
+  --series-3: #10B981;
 
   /* Scrollbars */
   --scrollbar-track: #f3f4f6;

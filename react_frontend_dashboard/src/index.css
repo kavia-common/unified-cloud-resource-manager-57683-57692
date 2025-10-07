@@ -1,15 +1,70 @@
-/* Minimalist Pure White theme foundation */
+/* Minimalist theme base variables (light by default; dark via html.theme-dark in styles/theme.css) */
 :root{
-  --color-text:#111827; /* text */
-  --color-bg:#FFFFFF; /* background */
-  --color-surface:#F9FAFB; /* surface */
-  --color-primary:#374151; /* primary */
-  --color-secondary:#9CA3AF; /* secondary */
-  --color-success:#10B981; /* success */
-  --color-error:#EF4444; /* error */
+  --color-text:#111827;
+  --color-bg:#FFFFFF;
+  --color-surface:#F9FAFB;
+  --color-accent:#3b82f6;
+  --color-muted:#6B7280;
+  --color-border:#E5E7EB;
 }
 
 html, body, #root { height: 100%; background: var(--color-bg); color: var(--color-text); }
+
+/* Shared Button System */
+.btn {
+  --btn-bg: var(--btn-secondary-bg, transparent);
+  --btn-text: var(--btn-secondary-text, var(--color-text));
+  --btn-border: var(--btn-secondary-border, var(--color-border));
+  --btn-bg-hover: var(--btn-secondary-bg-hover, rgba(0,0,0,0.04));
+  --btn-bg-active: var(--btn-secondary-bg-active, rgba(0,0,0,0.06));
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn:hover { background: var(--btn-bg-hover); }
+.btn:active { background: var(--btn-bg-active); }
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6);
+}
+.btn--primary {
+  --btn-bg: var(--btn-primary-bg, var(--color-accent));
+  --btn-text: var(--btn-primary-text, #ffffff);
+  --btn-border: transparent;
+  --btn-bg-hover: var(--btn-primary-bg-hover, #316dd0);
+  --btn-bg-active: var(--btn-primary-bg-active, #2a5fb6);
+}
+.btn--secondary {
+  --btn-bg: var(--btn-secondary-bg, var(--color-surface-2, #eef2f7));
+  --btn-text: var(--btn-secondary-text, var(--color-text));
+  --btn-border: var(--btn-secondary-border, var(--color-border));
+  --btn-bg-hover: var(--btn-secondary-bg-hover, #e7eaf0);
+  --btn-bg-active: var(--btn-secondary-bg-active, #dde2ea);
+}
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-text: var(--btn-ghost-text, var(--color-text));
+  --btn-border: transparent;
+  --btn-bg-hover: var(--btn-ghost-bg-hover, rgba(0,0,0,0.06));
+  --btn-bg-active: var(--btn-ghost-bg-active, rgba(0,0,0,0.1));
+}
+.btn--sm { padding: 6px 12px; font-size: 13px; }
+.btn--lg { padding: 10px 16px; font-size: 15px; }
 
 /* Utility classes if Tailwind not configured */
 .bg-white{ background:#fff; }

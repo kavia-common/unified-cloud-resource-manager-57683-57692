@@ -1,7 +1,7 @@
 .sidebarNav {
   width: var(--nav-width);
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
-  border-right: 1px solid var(--border-color);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
   color: var(--color-text);
   display: flex;
   flex-direction: column;
@@ -14,7 +14,7 @@
   gap: 10px;
   text-decoration: none;
   padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
 }
 
@@ -22,8 +22,8 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: #eef2ff;
-  border: 1px solid var(--border-color);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-sm);
@@ -31,7 +31,7 @@
 
 .sidebarNav__brandLetter {
   font-weight: 800;
-  color: #1f2937;
+  color: var(--color-text);
   font-size: 12px;
 }
 
@@ -61,22 +61,28 @@
   text-decoration: none;
   border: 1px solid transparent;
   border-radius: 10px;
-  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  background: transparent;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .sidebarNav__item:hover {
-  background: var(--color-surface-2);
-  border-color: var(--border-color);
+  background: var(--navitem-hover-bg);
+  border-color: var(--color-border);
+}
+.sidebarNav__item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 .sidebarNav__item.active {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-  color: #111827;
+  background: var(--navitem-active-bg);
+  border-color: var(--navitem-active-border);
+  color: var(--color-text);
 }
 
 .sidebarNav__icon {
   width: 18px;
   height: 18px;
-  color: #6b7280;
+  color: currentColor;
 }
 
 .sidebarNav__label {
@@ -88,5 +94,5 @@
 .sidebarNav__accent {
   height: 24px;
   background: linear-gradient(90deg, rgba(37,99,235,0.12), rgba(16,185,129,0.10));
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--color-border);
 }

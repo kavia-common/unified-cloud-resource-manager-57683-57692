@@ -383,13 +383,14 @@ export default function Overview() {
           }}
         >
           <ActionsBar />
-          {/* Wire Add Account CTA to open the minimal portal modal. 
-              We keep layout intact by not changing ActionsBar; this is an additional CTA slot if needed. */}
+          {/* Wire Add Account CTA (below recommendations) to open the minimal portal modal.
+              Maintain layout by inheriting existing classes and spacing. */}
           <button
-            className="btn btn primary"
+            className="btn primary"
             onClick={() => setIsAddOpen(true)}
             aria-label="Add Account"
-            style={{ display: "none" }}
+            data-testid="overview-add-account-below-recs"
+            style={{ marginLeft: 8 }}
           >
             Add Account
           </button>

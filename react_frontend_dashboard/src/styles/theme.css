@@ -99,6 +99,12 @@
   --navitem-active-border: var(--color-accent);
   --navitem-active-bg: rgba(59, 130, 246, 0.12);
 
+  /* Layering indices */
+  --z-modal: 1000;
+  --z-popover: 900;
+  --z-dropdown: 800;
+  --z-nav: 200;
+
   /* Sidebar background token */
   --sidebar-bg: var(--color-surface);
   /* Dedicated Sidebar surface variables to control backgrounds and states consistently */

@@ -32,8 +32,9 @@ function Modal({ open, onClose, title, children, footer, disableBackdropClose = 
         background: 'var(--color-overlay)',
         display: 'grid',
         placeItems: 'center',
-        zIndex: 50,
+        zIndex: 1000,
         padding: 16,
+        backdropFilter: 'blur(2px)',
       }}
     >
       <div
@@ -51,6 +52,7 @@ function Modal({ open, onClose, title, children, footer, disableBackdropClose = 
           borderRadius: 14,
           boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
           overflow: 'hidden',
+          pointerEvents: 'auto',
         }}
       >
         {(title || headerActions) && (

@@ -265,6 +265,7 @@ export default function Overview() {
               gap: 10,
             }}
           >
+            {/* Recommendation 1 (no buttons) */}
             <li
               className="rec-item"
               style={{
@@ -298,7 +299,7 @@ export default function Overview() {
                   <path d="M6.5 6.5a7 7 0 1 0 11 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </div>
-              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
+              <div style={{ display: "grid", gap: 4, minWidth: 0, flex: 1 }}>
                 <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
                   3 idle VMs detected
                 </div>
@@ -308,6 +309,7 @@ export default function Overview() {
               </div>
             </li>
 
+            {/* Recommendation 2 (no buttons) */}
             <li
               className="rec-item"
               style={{
@@ -342,7 +344,7 @@ export default function Overview() {
                   <path d="M20 4l-7 7" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </div>
-              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
+              <div style={{ display: "grid", gap: 4, minWidth: 0, flex: 1 }}>
                 <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
                   Resize Azure VM
                 </div>
@@ -351,8 +353,6 @@ export default function Overview() {
                 </div>
               </div>
             </li>
-
-
           </ul>
 
           {/* Responsive: tighten spacing on very small screens */}

@@ -47,7 +47,13 @@ export default function CloudConnections() {
     <div className="panel" style={{ padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h2 style={{ margin: 0 }}>Cloud Connections</h2>
-        <button className="btn btn--primary" onClick={() => setOpen(true)} aria-label="Add Cloud Account">
+        <button
+          className="btn btn--primary"
+          onClick={() => setOpen(true)}
+          aria-label="Add Cloud Account"
+          aria-haspopup="dialog"
+          aria-expanded={open}
+        >
           Add Account
         </button>
       </div>

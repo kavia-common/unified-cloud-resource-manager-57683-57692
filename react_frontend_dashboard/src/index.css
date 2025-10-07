@@ -135,9 +135,12 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
   padding: 16px;
   backdrop-filter: blur(2px);
   pointer-events: auto; /* allow clicks for backdrop-close */
+  visibility: visible;
+  opacity: 1;
 }
 .modal{
   pointer-events: auto; /* ensure content gets clicks */
+  isolation: isolate; /* ensure stacking context within modal is contained */
 }
 .modal-content{
   background: var(--color-surface);
@@ -146,4 +149,5 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
   border-radius: 14px;
   box-shadow: var(--shadow-lg, 0 10px 30px rgba(0,0,0,0.35));
   overflow: hidden;
+  transform: translateZ(0); /* prevent GPU/composited ancestor clipping issues */
 }

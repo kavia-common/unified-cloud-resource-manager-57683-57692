@@ -239,15 +239,10 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
       className="modal-overlay"
       role="presentation"
       onClick={handleCancel}
+      // Use CSS tokens via classes; keep minimal inline to avoid conflicts with global modal styles.
       style={{
-        position: "fixed",
-        inset: 0,
-        background: TOKENS.overlay,
-        display: "grid",
-        placeItems: "center",
-        zIndex: 1000,
-        padding: 16,
-        backdropFilter: "blur(2px)",
+        // Only override background to match local token if global not set
+        background: "var(--color-overlay, rgba(17,24,39,0.45))",
       }}
     >
       <div
@@ -258,14 +253,9 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         className="modal modal-content"
         onClick={(e) => e.stopPropagation()}
         style={{
+          // Constrain width; rest handled by .modal-content styles
           width: "100%",
           maxWidth: 520,
-          background: TOKENS.surface,
-          color: TOKENS.text,
-          border: `1px solid ${TOKENS.border}`,
-          borderRadius: 14,
-          boxShadow: TOKENS.shadow,
-          overflow: "hidden",
         }}
       >
         {/* Header */}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import ReactDOM from "react-dom";
 import { useToast } from "./Toast";
 
 /**
@@ -135,42 +136,8 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
     /**
      * Placeholder async submission prepared for Supabase integration.
      * TODO: Wire to Supabase via Edge Function or direct insert with proper RLS policies.
-     * 
-     * Example (Edge Function):
-     * 
-     *   import { supabase } from "../../services/supabaseClient";
-     *   try {
-     *     const baseUrl = process.env.REACT_APP_SUPABASE_URL;
-     *     const res = await fetch(`${baseUrl}/functions/v1/save-account`, {
-     *       method: "POST",
-     *       headers: { "Content-Type": "application/json" },
-     *       body: JSON.stringify({ accountType, clientName, accountId, secretKey }),
-     *     });
-     *     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-     *     return await res.json();
-     *   } catch (e) {
-     *     throw e;
-     *   }
-     * 
-     * Example (PostgREST insert if table exists):
-     * 
-     *   // NOTE: Only enable if 'cloud_accounts' table exists and RLS allows inserts.
-     *   const { data, error } = await supabase
-     *     .from("cloud_accounts")
-     *     .insert({
-     *       provider: accountType,
-     *       name: clientName,
-     *       account_id: accountId,
-     *       metadata: { via: "ui-minimal" },
-     *     })
-     *     .select("*")
-     *     .single();
-     *   if (error) throw error;
-     *   return data;
      */
-    // Simulate network latency for user feedback
     await new Promise((r) => setTimeout(r, 500));
-    // For now, just resolve; caller will handle local state update
     return { ok: true };
   }
 
@@ -197,7 +164,6 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
       };
       await saveAccount(payload);
 
-      // Inform via toast, call onSaved for local state update, then close
       showToast("Account added successfully.", { type: "success" });
       onSaved?.({
         provider: payload.accountType,
@@ -234,15 +200,24 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
     error: "#EF4444",
   };
 
-  return (
+  // Modal content
+  const modalContent = (
     <div
       className="modal-overlay"
       role="presentation"
       onClick={handleCancel}
-      // Use CSS tokens via classes; keep minimal inline to avoid conflicts with global modal styles.
+      // Robust overlay styles to avoid invisible modal due to parent CSS
       style={{
-        // Only override background to match local token if global not set
+        position: "fixed",
+        inset: 0,
         background: "var(--color-overlay, rgba(17,24,39,0.45))",
+        display: "grid",
+        placeItems: "center",
+        zIndex: 1000,
+        padding: 16,
+        backdropFilter: "blur(2px)",
+        opacity: 1,
+        visibility: "visible",
       }}
     >
       <div
@@ -253,9 +228,13 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         className="modal modal-content"
         onClick={(e) => e.stopPropagation()}
         style={{
-          // Constrain width; rest handled by .modal-content styles
           width: "100%",
           maxWidth: 520,
+          background: TOKENS.surface,
+          color: TOKENS.text,
+          border: `1px solid ${TOKENS.border}`,
+          borderRadius: 12,
+          boxShadow: TOKENS.shadow,
         }}
       >
         {/* Header */}
@@ -381,7 +360,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
                 className="input"
                 style={{ width: "100%", padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 8, background: TOKENS.surface, color: TOKENS.text, outline: "none" }}
                 type={showSecret ? "text" : "password"}
-                placeholder="••••••••••••••••••••"
+                placeholder="•••••••••••••••••••••"
                 value={form.secretKey}
                 onChange={(e) => update("secretKey", e.target.value)}
                 onBlur={() => markTouched("secretKey")}
@@ -443,4 +422,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
       </div>
     </div>
   );
+
+  // Render the modal via a portal to avoid stacking/overflow issues in parents
+  return ReactDOM.createPortal(modalContent, document.body);
 }

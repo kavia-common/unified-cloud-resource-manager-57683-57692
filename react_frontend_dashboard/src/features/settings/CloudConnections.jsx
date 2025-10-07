@@ -58,8 +58,6 @@ export default function CloudConnections() {
         </button>
       </div>
 
-
-
       {loading ? (
         <div>Loading…</div>
       ) : accounts.length === 0 ? (
@@ -80,11 +78,14 @@ export default function CloudConnections() {
         </div>
       )}
 
-      <AddAccountMinimalModal
-        open={open}
-        onClose={() => setOpen(false)}
-        onSaved={handleSaved}
-      />
+      {/* Ensure conditional render is correct: only mount when open */}
+      {open && (
+        <AddAccountMinimalModal
+          open={open}
+          onClose={() => setOpen(false)}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   );
 }

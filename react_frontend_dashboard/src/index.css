@@ -11,12 +11,6 @@ html.theme-dark, html:not(.theme-light) {
 /* Ensure height and base colors come from tokens */
 html, body, #root { height: 100%; background: var(--bg); color: var(--text); }
 
-/* App shell layout enforcement to prevent stacking due to overrides */
-.app-shell { display: flex; flex-direction: row; min-height: 100vh; width: 100%; }
-.app-shell > .sidebarNav { flex: 0 0 var(--nav-width); min-height: 100vh; }
-.app-shell > .main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; min-height: 100vh; overflow: hidden; }
-.app-shell > .main > .content { flex: 1 1 auto; min-height: 0; overflow: auto; }
-
 /* Utility classes remapped to tokens to preserve layout without restyling components */
 .bg-white{ background: var(--surface); }
 .text-gray-900{ color: var(--text); }

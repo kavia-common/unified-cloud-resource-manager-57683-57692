@@ -113,14 +113,12 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 /* App shell */
 .app-shell {
   display: flex;
-  flex-direction: row; /* ensure horizontal split */
   min-height: 100vh;
-  width: 100%;
   background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-elevated) 100%);
   color: var(--color-text);
 }
-.main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; min-height: 100vh; overflow: hidden; }
-.content { padding: 16px; min-height: 0; overflow: auto; flex: 1 1 auto; }
+.main { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.content { padding: 16px; min-height: 0; }
 
 /* Topbar */
 .topbar {

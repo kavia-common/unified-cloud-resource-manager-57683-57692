@@ -5,8 +5,14 @@ import AccountsPage from "./components/accounts/index.tsx";
 // This is the runtime App entry that renders the AccountsPage so the Add Account modal is available.
 function AppEntry() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <header className="border-b border-gray-200 p-4">
+    <div
+      className="min-h-screen"
+      style={{ minHeight: '100vh', background: 'var(--color-bg)', color: 'var(--color-text)' }}
+    >
+      <header
+        className="border-b p-4"
+        style={{ borderBottom: '1px solid var(--color-border)', padding: '1rem' }}
+      >
         <h1 className="text-xl font-semibold">Unified Cloud Resource Manager</h1>
       </header>
       <main>

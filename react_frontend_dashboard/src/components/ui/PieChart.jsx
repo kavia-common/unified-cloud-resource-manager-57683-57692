@@ -183,7 +183,7 @@ export default function PieChart({
         width: size,
         height: size,
         padding: Math.round(size * 0.06), // scale padding with size to avoid clipping
-        background: "var(--chart-bg, #FFFFFF)",
+        background: "var(--chart-bg, var(--color-surface))",
         overflow: "visible", // allow labels to extend
       }}
       role="img"

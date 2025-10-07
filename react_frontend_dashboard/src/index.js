@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import "./theme.css";
+import "./styles/theme.css";
 import "./components/ui/dark-theme-overrides.css";
 import App from "./App";
 import { hasSupabaseConfig } from "./services/supabaseClient";
@@ -53,9 +53,17 @@ if (process.env.NODE_ENV === 'development') {
 
 const root = ReactDOM.createRoot(rootEl);
 
+// Ensure dark theme class is present so tokens from styles/theme.css resolve to dark by default
+if (typeof document !== 'undefined') {
+  const html = document.documentElement;
+  if (!html.classList.contains('theme-dark')) {
+    html.classList.add('theme-dark');
+  }
+}
+
 // Basic boot fallback UI while React mounts, then replaced on first paint.
 // This is defensive and ensures something visible appears immediately.
-rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111">App booting…</div>';
+rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--color-text);background:transparent">App booting…</div>';
 
 root.render(
   <React.StrictMode>

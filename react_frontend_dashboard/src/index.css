@@ -6,6 +6,9 @@
   --color-accent:#3b82f6;
   --color-muted:#6B7280;
   --color-border:#E5E7EB;
+
+  /* Provide a default sidebar background that themes can override */
+  --sidebar-bg: var(--color-surface);
 }
 
 html, body, #root { height: 100%; background: var(--color-bg); color: var(--color-text); }

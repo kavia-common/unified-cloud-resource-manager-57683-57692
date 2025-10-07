@@ -98,6 +98,9 @@
   --navitem-hover-bg: var(--color-surface-2);
   --navitem-active-border: var(--color-accent);
   --navitem-active-bg: rgba(59, 130, 246, 0.12);
+
+  /* Sidebar background token */
+  --sidebar-bg: var(--color-surface);
 }
 
 /* Dark theme defaults: app loads with .theme-dark on html by default */
@@ -192,6 +195,9 @@ html.theme-dark {
   --navitem-hover-bg: var(--color-surface-2);
   --navitem-active-border: var(--color-accent);
   --navitem-active-bg: rgba(59, 130, 246, 0.12);
+
+  /* Sidebar background token for dark mode */
+  --sidebar-bg: var(--surface, #111827);
 }
 
 /* Global application base */

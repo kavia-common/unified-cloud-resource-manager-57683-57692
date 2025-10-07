@@ -86,22 +86,9 @@ export default function ActionsBar(): JSX.Element {
       aria-label="Dashboard primary actions"
       data-testid="actions-bar"
     >
-      <button
-        type="button"
-        aria-label="Add Account"
-        data-testid="btn-add-account"
-        onClick={handleAddAccount}
-        style={primaryBtn}
-        onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLButtonElement).style, hoverStyle(true))}
-        onMouseLeave={(e) => {
-          Object.assign((e.currentTarget as HTMLButtonElement).style, primaryBtn);
-        }}
-        onFocus={(e) => Object.assign((e.currentTarget as HTMLButtonElement).style, { ...primaryBtn, ...focusRing })}
-        onBlur={(e) => Object.assign((e.currentTarget as HTMLButtonElement).style, primaryBtn)}
-      >
-        Add Account
-      </button>
-
+      {/* Intentionally removed 'Add Account' button from this actions bar to avoid duplication.
+          Keep only 'Run Optimization' here; the remaining 'Add Account' below the recommendations
+          continues to open AddAccountMinimalModal. */}
       <button
         type="button"
         aria-label="Run Optimization"

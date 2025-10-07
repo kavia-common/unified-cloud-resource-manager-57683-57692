@@ -218,6 +218,22 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
   const errorFor = (id) => (touched[id] && errors[id] ? errors[id] : "");
 
+  // Fallback theme tokens in case global styles are not present
+  const TOKENS = {
+    overlay: "rgba(17, 24, 39, 0.35)",
+    surface: "#FFFFFF",
+    text: "#111827",
+    textMuted: "#6B7280",
+    border: "#E5E7EB",
+    shadow: "0 10px 30px rgba(0,0,0,0.15)",
+    btnBg: "#F3F4F6",
+    btnBgHover: "#E5E7EB",
+    btnText: "#111827",
+    btnPrimaryBg: "#111827",
+    btnPrimaryText: "#FFFFFF",
+    error: "#EF4444",
+  };
+
   return (
     <div
       className="modal-overlay"
@@ -226,10 +242,10 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "var(--color-overlay)",
+        background: TOKENS.overlay,
         display: "grid",
         placeItems: "center",
-        zIndex: 50,
+        zIndex: 1000,
         padding: 16,
         backdropFilter: "blur(2px)",
       }}
@@ -244,11 +260,11 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         style={{
           width: "100%",
           maxWidth: 520,
-          background: "var(--color-surface)",
-          color: "var(--color-text)",
-          border: "1px solid var(--border-color)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-lg)",
+          background: TOKENS.surface,
+          color: TOKENS.text,
+          border: `1px solid ${TOKENS.border}`,
+          borderRadius: 14,
+          boxShadow: TOKENS.shadow,
           overflow: "hidden",
         }}
       >
@@ -257,9 +273,9 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
           style={{
             display: "flex",
             alignItems: "center",
-            borderBottom: "1px solid var(--border-color)",
+            borderBottom: `1px solid ${TOKENS.border}`,
             padding: "12px 16px",
-            background: "var(--color-surface)",
+            background: TOKENS.surface,
           }}
         >
           <div id="add-account-title" style={{ fontWeight: 700, fontSize: 16 }}>
@@ -271,7 +287,17 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
             aria-label="Close"
             title="Close"
             className="btn ghost"
-            style={{ marginLeft: "auto" }}
+            style={{
+              marginLeft: "auto",
+              background: "transparent",
+              border: `1px solid ${TOKENS.border}`,
+              color: TOKENS.text,
+              padding: "6px 10px",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
+            onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
           >
             ✕
           </button>
@@ -281,12 +307,13 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         <form onSubmit={handleSubmit} style={{ padding: 16, display: "grid", gap: 12 }}>
           {/* Account Type */}
           <div>
-            <label htmlFor="accountType" style={{ display: "block", fontSize: 12, color: "var(--color-text-muted)", marginBottom: 6 }}>
+            <label htmlFor="accountType" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
               Account Type
             </label>
             <select
               id="accountType"
               className="input"
+              style={{ width: "100%", padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 8, background: TOKENS.surface, color: TOKENS.text, outline: "none" }}
               value={form.accountType}
               onChange={(e) => update("accountType", e.target.value)}
               onBlur={() => markTouched("accountType")}
@@ -298,7 +325,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               <option value="GCP">GCP</option>
             </select>
             {!!errorFor("accountType") && (
-              <div id="accountType-error" role="alert" style={{ color: "var(--color-error)", fontSize: 12, marginTop: 6 }}>
+              <div id="accountType-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
                 {errorFor("accountType")}
               </div>
             )}
@@ -306,7 +333,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Client Name */}
           <div>
-            <label htmlFor="clientName" style={{ display: "block", fontSize: 12, color: "var(--color-text-muted)", marginBottom: 6 }}>
+            <label htmlFor="clientName" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
               Client Name
             </label>
             <input
@@ -322,12 +349,12 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               autoComplete="off"
             />
             {!errorFor("clientName") && (
-              <div id="clientName-help" className="text-xs" style={{ color: "var(--color-text-muted)", marginTop: 6 }}>
+              <div id="clientName-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
                 Friendly label for the account.
               </div>
             )}
             {!!errorFor("clientName") && (
-              <div id="clientName-error" role="alert" style={{ color: "var(--color-error)", fontSize: 12, marginTop: 6 }}>
+              <div id="clientName-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
                 {errorFor("clientName")}
               </div>
             )}
@@ -335,7 +362,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Account ID */}
           <div>
-            <label htmlFor="accountId" style={{ display: "block", fontSize: 12, color: "var(--color-text-muted)", marginBottom: 6 }}>
+            <label htmlFor="accountId" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
               Account ID
             </label>
             <input
@@ -352,12 +379,12 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               pattern="[A-Za-z0-9_-]+"
             />
             {!errorFor("accountId") && (
-              <div id="accountId-help" className="text-xs" style={{ color: "var(--color-text-muted)", marginTop: 6 }}>
+              <div id="accountId-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
                 Use a stable identifier (e.g., AWS account id, Azure subscription id, or GCP project id).
               </div>
             )}
             {!!errorFor("accountId") && (
-              <div id="accountId-error" role="alert" style={{ color: "var(--color-error)", fontSize: 12, marginTop: 6 }}>
+              <div id="accountId-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
                 {errorFor("accountId")}
               </div>
             )}
@@ -365,13 +392,14 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Secret Key with show/hide toggle */}
           <div>
-            <label htmlFor="secretKey" style={{ display: "block", fontSize: 12, color: "var(--color-text-muted)", marginBottom: 6 }}>
+            <label htmlFor="secretKey" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
               Secret Key
             </label>
             <div style={{ position: "relative" }}>
               <input
                 id="secretKey"
                 className="input"
+                style={{ width: "100%", padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 8, background: TOKENS.surface, color: TOKENS.text, outline: "none" }}
                 type={showSecret ? "text" : "password"}
                 placeholder="••••••••••••••••••••"
                 value={form.secretKey}
@@ -393,18 +421,25 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
                   top: "50%",
                   transform: "translateY(-50%)",
                   padding: "6px 8px",
+                  background: TOKENS.btnBg,
+                  border: `1px solid ${TOKENS.border}`,
+                  color: TOKENS.btnText,
+                  borderRadius: 8,
+                  cursor: "pointer",
                 }}
+                onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
+                onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.btnBg)}
               >
                 {showSecret ? "Hide" : "Show"}
               </button>
             </div>
             {!errorFor("secretKey") && (
-              <div id="secretKey-help" className="text-xs" style={{ color: "var(--color-text-muted)", marginTop: 6 }}>
+              <div id="secretKey-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
                 Stored securely — never shared. You can rotate keys later.
               </div>
             )}
             {!!errorFor("secretKey") && (
-              <div id="secretKey-error" role="alert" style={{ color: "var(--color-error)", fontSize: 12, marginTop: 6 }}>
+              <div id="secretKey-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
                 {errorFor("secretKey")}
               </div>
             )}
@@ -412,7 +447,22 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Footer actions */}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingTop: 4 }}>
-            <button type="button" className="btn secondary" onClick={handleCancel} aria-label="Cancel">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={handleCancel}
+              aria-label="Cancel"
+              style={{
+                background: TOKENS.btnBg,
+                color: TOKENS.btnText,
+                border: `1px solid ${TOKENS.border}`,
+                padding: "8px 12px",
+                borderRadius: 8,
+                cursor: "pointer",
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = TOKENS.btnBgHover)}
+              onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.btnBg)}
+            >
               Cancel
             </button>
             <button
@@ -422,6 +472,15 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               aria-disabled={hasErrors || submitting}
               aria-label="Add account"
               title={hasErrors ? "Please fix validation errors" : "Add Account"}
+              style={{
+                background: hasErrors || submitting ? "#9CA3AF" : TOKENS.btnPrimaryBg,
+                color: TOKENS.btnPrimaryText,
+                border: `1px solid ${TOKENS.btnPrimaryBg}`,
+                padding: "8px 12px",
+                borderRadius: 8,
+                cursor: hasErrors || submitting ? "not-allowed" : "pointer",
+                opacity: hasErrors || submitting ? 0.8 : 1,
+              }}
             >
               {submitting ? "Adding…" : "Add Account"}
             </button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
-import { getLinkedAccounts, createLinkedAccount } from "../../services/api";
+import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal";
+import { getLinkedAccounts } from "../../services/api";
 import { useToast } from "../../components/ui/Toast";
 
 /**
@@ -16,7 +16,6 @@ export default function CloudConnections() {
   const [open, setOpen] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const { show: showToast } = useToast();
 
   async function load() {
@@ -38,41 +37,10 @@ export default function CloudConnections() {
     return () => {};
   }, []);
 
-  function mapErrorToMessage(err) {
-    if (!err) return "Unknown error";
-    if (err.code === "NETWORK_ERROR") {
-      return "Network error: could not reach Supabase Edge Function. Check connectivity, CORS, and URL.";
-    }
-    if (err.code === "UNAUTHORIZED" || err.status === 401) {
-      return "Unauthorized: please sign in again.";
-    }
-    if (err.code === "FORBIDDEN" || err.status === 403) {
-      return "Forbidden: you do not have access.";
-    }
-    if (err.code === "NOT_FOUND" || err.status === 404) {
-      return "Endpoint not found: ensure the Edge Function is deployed and enabled.";
-    }
-    return err?.message || "Request failed";
-  }
-
-  async function handleSubmit(payload) {
-    setSaving(true);
-    try {
-      const result = await createLinkedAccount(payload);
-      showToast("Account linked successfully", { type: "success" });
-      await load();
-      setOpen(false);
-    } catch (e) {
-      const reason = mapErrorToMessage(e);
-      const extra =
-        e?.payload?.error ||
-        (e?.status ? `HTTP ${e.status}` : null) ||
-        (e?.url ? `URL: ${e.url}` : null);
-      const msg = extra ? `Failed to link account — ${reason} (${extra})` : `Failed to link account — ${reason}`;
-      showToast(msg, { type: "error", timeout: 5000 });
-    } finally {
-      setSaving(false);
-    }
+  function handleSaved(acc) {
+    // Optimistically update local view; backend persistence can be added later.
+    setAccounts((prev) => [acc, ...(prev || [])]);
+    showToast("Account added locally. TODO: persist to Supabase.", { type: "success" });
   }
 
   return (
@@ -106,11 +74,10 @@ export default function CloudConnections() {
         </div>
       )}
 
-      <AddCloudAccountModal
+      <AddAccountMinimalModal
         open={open}
         onClose={() => setOpen(false)}
-        existingAccounts={accounts}
-        onSubmit={handleSubmit}
+        onSaved={handleSaved}
       />
     </div>
   );

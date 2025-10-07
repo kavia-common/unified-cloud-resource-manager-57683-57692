@@ -184,20 +184,9 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
   const errorFor = (id) => (touched[id] && errors[id] ? errors[id] : "");
 
-  // Fallback theme tokens in case global styles are not present
+  // Use CSS variables from theme; keep a minimal fallback only for shadow
   const TOKENS = {
-    overlay: "rgba(17, 24, 39, 0.35)",
-    surface: "#FFFFFF",
-    text: "#111827",
-    textMuted: "#6B7280",
-    border: "#E5E7EB",
-    shadow: "0 10px 30px rgba(0,0,0,0.15)",
-    btnBg: "#F3F4F6",
-    btnBgHover: "#E5E7EB",
-    btnText: "#111827",
-    btnPrimaryBg: "#111827",
-    btnPrimaryText: "#FFFFFF",
-    error: "#EF4444",
+    shadow: "var(--shadow-lg, 0 10px 30px rgba(0,0,0,0.35))",
   };
 
   // Modal content
@@ -206,18 +195,19 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
       className="modal-overlay"
       role="presentation"
       onClick={handleCancel}
-      // Robust overlay styles to avoid invisible modal due to parent CSS
+      // Overlay adopts tokenized dark overlay color and existing z-index
       style={{
         position: "fixed",
         inset: 0,
         background: "var(--color-overlay, rgba(17,24,39,0.45))",
         display: "grid",
         placeItems: "center",
-        zIndex: 1000,
+        zIndex: "var(--z-modal, 1000)",
         padding: 16,
         backdropFilter: "blur(2px)",
         opacity: 1,
         visibility: "visible",
+        pointerEvents: "auto",
       }}
     >
       <div
@@ -230,9 +220,9 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         style={{
           width: "100%",
           maxWidth: 520,
-          background: TOKENS.surface,
-          color: TOKENS.text,
-          border: `1px solid ${TOKENS.border}`,
+          background: "var(--color-surface)",
+          color: "var(--color-text)",
+          border: "1px solid var(--color-border)",
           borderRadius: 12,
           boxShadow: TOKENS.shadow,
         }}
@@ -242,12 +232,12 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
           style={{
             display: "flex",
             alignItems: "center",
-            borderBottom: `1px solid ${TOKENS.border}`,
+            borderBottom: "1px solid var(--color-border)",
             padding: "12px 16px",
-            background: TOKENS.surface,
+            background: "var(--color-surface)",
           }}
         >
-          <div id="add-account-title" style={{ fontWeight: 700, fontSize: 16 }}>
+          <div id="add-account-title" style={{ fontWeight: 700, fontSize: 16, color: "var(--color-text)" }}>
             Add Account
           </div>
           <button
@@ -266,13 +256,21 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
         <form onSubmit={handleSubmit} style={{ padding: 16, display: "grid", gap: 12 }}>
           {/* Account Type */}
           <div>
-            <label htmlFor="accountType" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
+            <label htmlFor="accountType" style={{ display: "block", fontSize: 12, color: "var(--text-muted, var(--color-muted))", marginBottom: 6 }}>
               Account Type
             </label>
             <select
               id="accountType"
               className="input"
-              style={{ width: "100%", padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 8, background: TOKENS.surface, color: TOKENS.text, outline: "none" }}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                border: "1px solid var(--input-border, var(--color-border))",
+                borderRadius: 8,
+                background: "var(--input-bg, var(--color-surface))",
+                color: "var(--input-text, var(--color-text))",
+                outline: "none",
+              }}
               value={form.accountType}
               onChange={(e) => update("accountType", e.target.value)}
               onBlur={() => markTouched("accountType")}
@@ -284,7 +282,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               <option value="GCP">GCP</option>
             </select>
             {!!errorFor("accountType") && (
-              <div id="accountType-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
+              <div id="accountType-error" role="alert" style={{ color: "var(--error, #f87171)", fontSize: 12, marginTop: 6 }}>
                 {errorFor("accountType")}
               </div>
             )}
@@ -292,7 +290,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Client Name */}
           <div>
-            <label htmlFor="clientName" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
+            <label htmlFor="clientName" style={{ display: "block", fontSize: 12, color: "var(--text-muted, var(--color-muted))", marginBottom: 6 }}>
               Client Name
             </label>
             <input
@@ -306,14 +304,23 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               aria-invalid={!!errorFor("clientName")}
               aria-describedby={errorFor("clientName") ? "clientName-error" : "clientName-help"}
               autoComplete="off"
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                border: "1px solid var(--input-border, var(--color-border))",
+                borderRadius: 8,
+                background: "var(--input-bg, var(--color-surface))",
+                color: "var(--input-text, var(--color-text))",
+                outline: "none",
+              }}
             />
             {!errorFor("clientName") && (
-              <div id="clientName-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
+              <div id="clientName-help" className="text-xs" style={{ color: "var(--text-muted, var(--color-muted))", marginTop: 6 }}>
                 Friendly label for the account.
               </div>
             )}
             {!!errorFor("clientName") && (
-              <div id="clientName-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
+              <div id="clientName-error" role="alert" style={{ color: "var(--error, #f87171)", fontSize: 12, marginTop: 6 }}>
                 {errorFor("clientName")}
               </div>
             )}
@@ -321,7 +328,7 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Account ID */}
           <div>
-            <label htmlFor="accountId" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
+            <label htmlFor="accountId" style={{ display: "block", fontSize: 12, color: "var(--text-muted, var(--color-muted))", marginBottom: 6 }}>
               Account ID
             </label>
             <input
@@ -336,14 +343,23 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               aria-describedby={errorFor("accountId") ? "accountId-error" : "accountId-help"}
               autoComplete="off"
               pattern="[A-Za-z0-9_-]+"
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                border: "1px solid var(--input-border, var(--color-border))",
+                borderRadius: 8,
+                background: "var(--input-bg, var(--color-surface))",
+                color: "var(--input-text, var(--color-text))",
+                outline: "none",
+              }}
             />
             {!errorFor("accountId") && (
-              <div id="accountId-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
+              <div id="accountId-help" className="text-xs" style={{ color: "var(--text-muted, var(--color-muted))", marginTop: 6 }}>
                 Use a stable identifier (e.g., AWS account id, Azure subscription id, or GCP project id).
               </div>
             )}
             {!!errorFor("accountId") && (
-              <div id="accountId-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
+              <div id="accountId-error" role="alert" style={{ color: "var(--error, #f87171)", fontSize: 12, marginTop: 6 }}>
                 {errorFor("accountId")}
               </div>
             )}
@@ -351,14 +367,22 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
 
           {/* Secret Key with show/hide toggle */}
           <div>
-            <label htmlFor="secretKey" style={{ display: "block", fontSize: 12, color: TOKENS.textMuted, marginBottom: 6 }}>
+            <label htmlFor="secretKey" style={{ display: "block", fontSize: 12, color: "var(--text-muted, var(--color-muted))", marginBottom: 6 }}>
               Secret Key
             </label>
             <div style={{ position: "relative" }}>
               <input
                 id="secretKey"
                 className="input"
-                style={{ width: "100%", padding: "10px 12px", border: `1px solid ${TOKENS.border}`, borderRadius: 8, background: TOKENS.surface, color: TOKENS.text, outline: "none" }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "1px solid var(--input-border, var(--color-border))",
+                  borderRadius: 8,
+                  background: "var(--input-bg, var(--color-surface))",
+                  color: "var(--input-text, var(--color-text))",
+                  outline: "none",
+                }}
                 type={showSecret ? "text" : "password"}
                 placeholder="•••••••••••••••••••••"
                 value={form.secretKey}
@@ -386,12 +410,12 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
               </button>
             </div>
             {!errorFor("secretKey") && (
-              <div id="secretKey-help" className="text-xs" style={{ color: TOKENS.textMuted, marginTop: 6 }}>
+              <div id="secretKey-help" className="text-xs" style={{ color: "var(--text-muted, var(--color-muted))", marginTop: 6 }}>
                 Stored securely — never shared. You can rotate keys later.
               </div>
             )}
             {!!errorFor("secretKey") && (
-              <div id="secretKey-error" role="alert" style={{ color: TOKENS.error, fontSize: 12, marginTop: 6 }}>
+              <div id="secretKey-error" role="alert" style={{ color: "var(--error, #f87171)", fontSize: 12, marginTop: 6 }}>
                 {errorFor("secretKey")}
               </div>
             )}

@@ -35,7 +35,7 @@ export default function SidebarNav() {
   const isActive = (to) => pathname === to;
 
   return (
-    <aside className="sidebarNav" aria-label="Sidebar Navigation">
+    <aside className="sidebarNav" aria-label="Sidebar Navigation" style={{ color: 'var(--text)' }}>
       <Link to="/overview" className="sidebarNav__brand" aria-label="Go to dashboard">
         <div className="sidebarNav__brandMark" aria-hidden="true">
           <span className="sidebarNav__brandLetter">C</span>

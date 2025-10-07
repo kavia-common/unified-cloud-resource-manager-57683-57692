@@ -1,12 +1,37 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import "./theme.css";
+import "./styles/theme.css";
 import "./components/ui/dark-theme-overrides.css";
 import App from "./App";
 import { hasSupabaseConfig } from "./services/supabaseClient";
 import { ToastProvider } from "./components/ui/Toast";
 import DevConfigNotice from "./components/ui/DevConfigNotice";
+
+(function initTheme() {
+  const html = document.documentElement;
+  const stored = localStorage.getItem("theme");
+  const desired = stored || "dark";
+  if (desired === "dark") {
+    html.classList.add("theme-dark");
+    html.classList.remove("theme-light");
+  } else {
+    html.classList.add("theme-light");
+    html.classList.remove("theme-dark");
+  }
+  window.__toggleTheme = function () {
+    const isDark = html.classList.contains("theme-dark");
+    if (isDark) {
+      html.classList.remove("theme-dark");
+      html.classList.add("theme-light");
+      localStorage.setItem("theme", "light");
+    } else {
+      html.classList.add("theme-dark");
+      html.classList.remove("theme-light");
+      localStorage.setItem("theme", "dark");
+    }
+  };
+})();
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -54,8 +79,7 @@ if (process.env.NODE_ENV === 'development') {
 const root = ReactDOM.createRoot(rootEl);
 
 // Basic boot fallback UI while React mounts, then replaced on first paint.
-// This is defensive and ensures something visible appears immediately.
-rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111">App booting…</div>';
+rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#e5e7eb;background:#0b0f1a">App booting…</div>';
 
 root.render(
   <React.StrictMode>

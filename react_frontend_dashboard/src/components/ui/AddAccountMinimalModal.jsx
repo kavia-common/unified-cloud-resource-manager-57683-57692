@@ -219,19 +219,20 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
   const errorFor = (id) => (touched[id] && errors[id] ? errors[id] : "");
 
   // Fallback theme tokens in case global styles are not present
+  const css = getComputedStyle(document.documentElement);
   const TOKENS = {
-    overlay: "rgba(17, 24, 39, 0.35)",
-    surface: "#FFFFFF",
-    text: "#111827",
-    textMuted: "#6B7280",
-    border: "#E5E7EB",
-    shadow: "0 10px 30px rgba(0,0,0,0.15)",
-    btnBg: "#F3F4F6",
-    btnBgHover: "#E5E7EB",
-    btnText: "#111827",
-    btnPrimaryBg: "#111827",
-    btnPrimaryText: "#FFFFFF",
-    error: "#EF4444",
+    overlay: css.getPropertyValue('--overlay')?.trim() || "rgba(17, 24, 39, 0.35)",
+    surface: css.getPropertyValue('--surface')?.trim() || "#111827",
+    text: css.getPropertyValue('--text')?.trim() || "#e5e7eb",
+    textMuted: css.getPropertyValue('--text-muted')?.trim() || "#a1a9b8",
+    border: css.getPropertyValue('--border')?.trim() || "#1f2937",
+    shadow: css.getPropertyValue('--shadow-lg')?.trim() || "0 16px 40px rgba(0,0,0,0.5)",
+    btnBg: css.getPropertyValue('--btn-bg')?.trim() || "#1f2937",
+    btnBgHover: css.getPropertyValue('--btn-bg-hover')?.trim() || "#2a3546",
+    btnText: css.getPropertyValue('--btn-text')?.trim() || "#e5e7eb",
+    btnPrimaryBg: css.getPropertyValue('--primary')?.trim() || "#60a5fa",
+    btnPrimaryText: "#0b0f1a",
+    error: css.getPropertyValue('--error')?.trim() || "#f87171",
   };
 
   return (

@@ -273,8 +273,8 @@ export default function Overview() {
                 padding: "12px 12px",
                 border: "1px solid var(--border)",
                 borderRadius: 12,
-                background: "#FFFFFF",
-                boxShadow: "var(--shadow)",
+                background: "var(--surface)",
+                boxShadow: "var(--shadow-sm)",
               }}
             >
               <div
@@ -298,10 +298,10 @@ export default function Overview() {
                 </svg>
               </div>
               <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
+                <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14 }}>
                   3 idle VMs detected
                 </div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>
+                <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
                   Stop now to save $150/month.
                 </div>
               </div>
@@ -342,10 +342,10 @@ export default function Overview() {
                 </svg>
               </div>
               <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
+                <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14 }}>
                   Resize Azure VM
                 </div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>
+                <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
                   Current usage 15%, downgrade to smaller instance.
                 </div>
               </div>
@@ -465,11 +465,10 @@ export default function Overview() {
           </>
         }
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, color: "#000000" }}>
-          <div className="badge" style={{ color: "#000000" }}>AWS: $242.12</div>
-          <div className="badge" style={{ color: "#000000" }}>Azure: $138.44</div>
-          <div className="badge" style={{ color: "#000000" }}>GCP: $31.76</div>
-
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, color: "var(--text)" }}>
+          <div className="badge" style={{ color: "var(--text)" }}>AWS: $242.12</div>
+          <div className="badge" style={{ color: "var(--text)" }}>Azure: $138.44</div>
+          <div className="badge" style={{ color: "var(--text)" }}>GCP: $31.76</div>
         </div>
       </Modal>
 

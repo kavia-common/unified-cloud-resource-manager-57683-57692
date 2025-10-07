@@ -1,30 +1,30 @@
-/* Minimalist Pure White theme foundation */
-:root{
-  --color-text:#111827; /* text */
-  --color-bg:#FFFFFF; /* background */
-  --color-surface:#F9FAFB; /* surface */
-  --color-primary:#374151; /* primary */
-  --color-secondary:#9CA3AF; /* secondary */
-  --color-success:#10B981; /* success */
-  --color-error:#EF4444; /* error */
+@import url("./styles/theme.css");
+
+/* Default the app to dark mode by adding theme class once. */
+html:not(.theme-light) {
+  /* ensure .theme-dark is present for variable resolution */
+}
+html.theme-dark, html:not(.theme-light) {
+  /* no-op: variables come from .theme-dark block in theme.css */
 }
 
-html, body, #root { height: 100%; background: var(--color-bg); color: var(--color-text); }
+/* Ensure height and base colors come from tokens */
+html, body, #root { height: 100%; background: var(--bg); color: var(--text); }
 
-/* Utility classes if Tailwind not configured */
-.bg-white{ background:#fff; }
-.text-gray-900{ color:#111827; }
-.text-gray-700{ color:#374151; }
-.text-gray-600{ color:#4B5563; }
-.text-gray-400{ color:#9CA3AF; }
-.text-red-600{ color:#DC2626; }
-.bg-gray-800{ background:#374151; }
-.hover\:bg-gray-900:hover{ background:#111827; }
+/* Utility classes remapped to tokens to preserve layout without restyling components */
+.bg-white{ background: var(--surface); }
+.text-gray-900{ color: var(--text); }
+.text-gray-700{ color: var(--text); }
+.text-gray-600{ color: var(--text-muted); }
+.text-gray-400{ color: var(--text-subtle); }
+.text-red-600{ color: var(--error); }
+.bg-gray-800{ background: var(--surface); }
+.hover\:bg-gray-900:hover{ background: var(--btn-bg-hover); }
 .border{ border-width:1px; }
 .border-b{ border-bottom-width:1px; }
-.border-gray-200{ border-color:#E5E7EB; }
-.border-gray-300{ border-color:#D1D5DB; }
-.border-red-400{ border-color:#F87171; }
+.border-gray-200{ border-color: var(--border); }
+.border-gray-300{ border-color: var(--border); }
+.border-red-400{ border-color: var(--error); }
 .rounded-md{ border-radius:0.375rem; }
 .rounded-lg{ border-radius:0.5rem; }
 .p-4{ padding:1rem; }
@@ -35,7 +35,7 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .text-sm{ font-size:0.875rem; }
 .text-xs{ font-size:0.75rem; }
 .font-semibold{ font-weight:600; }
-.shadow-xl{ box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+.shadow-xl{ box-shadow: var(--shadow-lg); }
 .fixed{ position:fixed; }
 .absolute{ position:absolute; }
 .relative{ position:relative; }
@@ -50,4 +50,4 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .max-w-xl{ max-width:36rem; }
 .mx-4{ margin-left:1rem; margin-right:1rem; }
 .min-h-screen{ min-height:100vh; }
-.bg-gray-900\/40{ background:rgba(17,24,39,0.4); }
+.bg-gray-900\/40{ background: var(--overlay); }

@@ -40,8 +40,8 @@ const RadarResourceChart = ({ data, height = 280 }) => {
     height,
     display: 'grid',
     placeItems: 'center',
-    background: 'var(--bg-canvas, #FFFFFF)',
-    border: '1px solid var(--border, #E5E7EB)',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
     borderRadius: 12,
     padding: 12,
   };
@@ -56,7 +56,7 @@ const RadarResourceChart = ({ data, height = 280 }) => {
     fontFamily: '"Helvetica Neue", Arial, sans-serif',
     fontSize: 12,
     fontWeight: 400,
-    fill: '#6B7280',
+    fill: 'var(--text-muted)',
   };
 
   return (

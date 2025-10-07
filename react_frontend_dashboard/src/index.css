@@ -77,10 +77,6 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .btn--sm { padding: 6px 12px; font-size: 13px; }
 .btn--lg { padding: 10px 16px; font-size: 15px; }
 
-/* Legacy class aliases to avoid layout/markup changes elsewhere */
-.btn.primary { composes: btn btn--primary; }
-.btn.secondary { composes: btn btn--secondary; }
-
 /* Utility classes mapped to tokens (no layout changes) */
 .bg-white{ background:var(--color-surface); }
 .text-gray-900{ color:var(--color-text); }

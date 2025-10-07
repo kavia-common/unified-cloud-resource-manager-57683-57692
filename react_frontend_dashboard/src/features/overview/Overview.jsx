@@ -298,40 +298,12 @@ export default function Overview() {
                   <path d="M6.5 6.5a7 7 0 1 0 11 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </div>
-              <div style={{ display: "grid", gap: 6, minWidth: 0, flex: 1 }}>
+              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
                   3 idle VMs detected
                 </div>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>
                   Stop now to save $150/month.
-                </div>
-                {/* Actions area inside the same cell; preserve existing layout without resizing */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-                  {/* First action button with visible text and aria-label */}
-                  <button
-                    type="button"
-                    className="btn btn--secondary btn--sm"
-                    aria-label="View idle VM details"
-                    title="View details"
-                  >
-                    View details
-                  </button>
-
-                  {/* Second action uses primary (dark-friendly) style; add subtext below when appropriate */}
-                  <div style={{ display: "grid", gap: 2 }}>
-                    <button
-                      type="button"
-                      className="btn btn--primary btn--sm"
-                      aria-label="Stop idle VMs now"
-                      title="Stop idle VMs"
-                      data-testid="rec-stop-idle-vms"
-                    >
-                      Stop now
-                    </button>
-                    <span className="text-xs" style={{ color: "var(--color-muted)" }}>
-                      Immediate stop, reversible within 24h
-                    </span>
-                  </div>
                 </div>
               </div>
             </li>
@@ -370,41 +342,12 @@ export default function Overview() {
                   <path d="M20 4l-7 7" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </div>
-              <div style={{ display: "grid", gap: 6, minWidth: 0, flex: 1 }}>
+              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
                   Resize Azure VM
                 </div>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>
                   Current usage 15%, downgrade to smaller instance.
-                </div>
-                {/* Actions area inside the same cell; preserve existing layout without resizing */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
-                  {/* First action button with explicit label and aria-label for accessibility */}
-                  <button
-                    type="button"
-                    className="btn btn--secondary btn--sm"
-                    aria-label="Review resize details"
-                    title="Review resize details"
-                  >
-                    Review
-                  </button>
-
-                  {/* Second button uses dark theme variant and includes concise description/subtext */}
-                  <div style={{ display: "grid", gap: 2 }}>
-                    <button
-                      type="button"
-                      className="btn btn--primary btn--sm"
-                      aria-label="Apply resize now"
-                      title="Apply resize now"
-                      data-testid="rec-apply-resize"
-                    >
-                      Apply
-                    </button>
-                    {/* Subtext placed directly under the button label using existing typography class */}
-                    <span className="text-xs" style={{ color: "var(--color-muted)" }}>
-                      1-click resize to the recommended size
-                    </span>
-                  </div>
                 </div>
               </div>
             </li>

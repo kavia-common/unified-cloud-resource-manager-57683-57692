@@ -19,6 +19,8 @@ export default function Topbar({ right }) {
         alignItems: 'center',
         padding: '10px 16px',
         backdropFilter: 'blur(6px)',
+        width: '100%', /* ensure it spans the main column width */
+        boxSizing: 'border-box'
       }}
     >
       <div className="title" style={{ fontWeight: 600, color: 'var(--text)' }}>Cloud Manager</div>

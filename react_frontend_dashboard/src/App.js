@@ -40,12 +40,19 @@ function App() {
         className="app-shell"
         role="application"
         aria-label="Cross-Cloud Manager App Shell"
-        style={{ background: "var(--bg)", color: "var(--text)" }}
+        style={{
+          background: "var(--bg)",
+          color: "var(--text)",
+          display: "flex",
+          flexDirection: "row",
+          minHeight: "100vh",
+          width: "100%"
+        }}
       >
         <SidebarNav />
-        <main className="main" role="main">
+        <main className="main" role="main" style={{ display: "flex", flexDirection: "column", flex: "1 1 auto", minWidth: 0, minHeight: "100vh", overflow: "hidden" }}>
           <Topbar />
-          <div className="content">
+          <div className="content" style={{ flex: "1 1 auto", minHeight: 0, overflow: "auto" }}>
             <Routes>
               {/* Redirect legacy /reports path to the current Reports & Analytics page */}
               <Route path="/reports" element={<Navigate to="/reports-analytics" replace />} />

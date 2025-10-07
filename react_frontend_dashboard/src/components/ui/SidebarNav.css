@@ -1,11 +1,14 @@
 .sidebarNav {
   width: var(--nav-width);
+  flex: 0 0 var(--nav-width);
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
   border-right: 1px solid var(--border);
   color: var(--text);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow: auto; /* Sidebar can scroll independently if content overflows */
 }
 
 .sidebarNav__brand {

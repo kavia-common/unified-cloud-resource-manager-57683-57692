@@ -1,8 +1,8 @@
 .sidebarNav {
   width: var(--nav-width);
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
-  border-right: 1px solid var(--border);
-  color: var(--text);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  border-right: 1px solid var(--border-color);
+  color: var(--color-text);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -14,31 +14,30 @@
   gap: 10px;
   text-decoration: none;
   padding: 16px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--color-text);
 }
 
 .sidebarNav__brandMark {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: color-mix(in oklab, var(--primary) 18%, transparent);
-  border: 1px solid var(--border);
+  background: #eef2ff;
+  border: 1px solid var(--border-color);
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-sm);
-  color: var(--primary);
 }
 
 .sidebarNav__brandLetter {
   font-weight: 800;
-  color: var(--text);
+  color: #1f2937;
   font-size: 12px;
 }
 
 .sidebarNav__brandName {
   font-weight: 700;
-  color: var(--text);
+  color: var(--color-text);
 }
 
 .sidebarNav__groups {
@@ -58,36 +57,36 @@
   gap: 10px;
   padding: 10px 12px;
   margin: 2px 4px;
-  color: var(--text);
+  color: var(--color-text);
   text-decoration: none;
   border: 1px solid transparent;
   border-radius: 10px;
   transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 .sidebarNav__item:hover {
-  background: var(--surface-2);
-  border-color: var(--border);
+  background: var(--color-surface-2);
+  border-color: var(--border-color);
 }
 .sidebarNav__item.active {
-  background: color-mix(in oklab, var(--primary) 12%, transparent);
-  border-color: var(--border);
-  color: var(--text);
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
 }
 
 .sidebarNav__icon {
   width: 18px;
   height: 18px;
-  color: var(--text-muted);
+  color: #6b7280;
 }
 
 .sidebarNav__label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text);
+  color: var(--color-text);
 }
 
 .sidebarNav__accent {
   height: 24px;
-  background: linear-gradient(90deg, color-mix(in oklab, var(--primary) 16%, transparent), color-mix(in oklab, var(--success) 12%, transparent));
-  border-top: 1px solid var(--border);
+  background: linear-gradient(90deg, rgba(37,99,235,0.12), rgba(16,185,129,0.10));
+  border-top: 1px solid var(--border-color);
 }

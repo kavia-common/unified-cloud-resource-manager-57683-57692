@@ -12,7 +12,7 @@ import Activity from "./features/activity/Activity";
 import CloudConnections from "./features/settings/CloudConnections";
 import Profile from "./features/profile/Profile";
 import "./App.css";
-import "./styles/theme.css";
+import "./theme.css";
 import Security from "./features/security/Security";
 import ResourceOps from "./features/operations/ResourceOps";
 import ReportsAnalytics from "./features/reports/ReportsAnalytics";
@@ -35,20 +35,22 @@ import ClickSpark from "./components/ui/ClickSpark";
 function App() {
   return (
     <BrowserRouter>
+      {/* 🔥 Enable click sparks globally */}
       <ClickSpark />
+
+      {/* App shell layout: [SidebarNav | Main] */}
       <div
         className="app-shell"
         role="application"
         aria-label="Cross-Cloud Manager App Shell"
-        style={{ background: "var(--bg)", color: "var(--text)" }}
       >
         <SidebarNav />
         <main className="main" role="main">
           <Topbar />
           <div className="content">
             <Routes>
-              {/* Redirect legacy /reports path to the current Reports & Analytics page */}
-              <Route path="/reports" element={<Navigate to="/reports-analytics" replace />} />
+            {/* Redirect legacy /reports path to the current Reports & Analytics page */}
+            <Route path="/reports" element={<Navigate to="/reports-analytics" replace />} />
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/inventory" element={<Inventory />} />
@@ -57,15 +59,21 @@ function App() {
               <Route path="/automation" element={<Automation />} />
               <Route path="/security" element={<Security />} />
               <Route path="/resource-ops" element={<ResourceOps />} />
+
               <Route path="/reports-analytics" element={<ReportsAnalytics />} />
+
               {/* Legacy/unrelated routes retained but not linked in nav */}
               <Route path="/activity" element={<Activity />} />
               <Route path="/settings" element={<CloudConnections />} />
               <Route path="/profile" element={<Profile />} />
+
               {/* Remove or redirect any legacy auth paths */}
               <Route path="/login" element={<Navigate to="/overview" replace />} />
               <Route path="/signin" element={<Navigate to="/overview" replace />} />
-              <Route path="/help" element={<div style={{ padding: 20 }}>Help coming soon.</div>} />
+              <Route
+                path="/help"
+                element={<div style={{ padding: 20 }}>Help coming soon.</div>}
+              />
               <Route path="/logout" element={<Navigate to="/overview" replace />} />
               <Route path="*" element={<Navigate to="/overview" replace />} />
             </Routes>

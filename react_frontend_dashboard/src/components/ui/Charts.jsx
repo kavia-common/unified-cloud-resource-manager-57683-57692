@@ -256,7 +256,7 @@ export function PieBreakdownChart({ data, dataKey = "value", nameKey = "name", c
  */
 export default function Charts() {
   return (
-    <div className="Charts surface" style={{ padding: 12, color: 'var(--text-muted)' }}>
+    <div className="Charts surface" style={{ padding: 12, color: 'var(--color-text-muted)' }}>
       Charts
     </div>
   );

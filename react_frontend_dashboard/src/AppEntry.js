@@ -1,18 +1,13 @@
 import React from "react";
 import AccountsPage from "./components/accounts/index.tsx";
-import "./index.css";
-import "./styles/theme.css";
 
 // PUBLIC_INTERFACE
-// Runtime App entry that renders the AccountsPage so the Add Account modal is available.
-// Uses CSS variables for dark theme without changing layout.
+// This is the runtime App entry that renders the AccountsPage so the Add Account modal is available.
 function AppEntry() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <header className="border-b p-4" style={{ borderColor: "var(--border)" }}>
-        <h1 className="text-xl font-semibold" style={{ color: "var(--text)" }}>
-          Unified Cloud Resource Manager
-        </h1>
+    <div className="min-h-screen bg-white text-gray-900">
+      <header className="border-b border-gray-200 p-4">
+        <h1 className="text-xl font-semibold">Unified Cloud Resource Manager</h1>
       </header>
       <main>
         <AccountsPage />

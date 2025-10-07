@@ -142,7 +142,7 @@ export default function PieChart({
     };
 
     return (
-      <div key={`label-${seg.label}-${mid.toFixed(2)}`} style={{ ...styleWrap, color: "var(--text-muted)" }} aria-hidden>
+      <div key={`label-${seg.label}-${mid.toFixed(2)}`} style={styleWrap} aria-hidden>
         <div style={catFont}>{seg.label}</div>
         <div style={pctFont}>{percent}%</div>
       </div>
@@ -182,11 +182,9 @@ export default function PieChart({
         position: "relative",
         width: size,
         height: size,
-        padding: Math.round(size * 0.06),
-        background: "var(--surface)",
-        overflow: "visible",
-        border: "1px solid var(--border)",
-        borderRadius: 12
+        padding: Math.round(size * 0.06), // scale padding with size to avoid clipping
+        background: "var(--chart-bg, #FFFFFF)",
+        overflow: "visible", // allow labels to extend
       }}
       role="img"
       aria-label={ariaSummary}

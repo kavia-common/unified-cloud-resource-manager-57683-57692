@@ -101,6 +101,15 @@
 
   /* Sidebar background token */
   --sidebar-bg: var(--color-surface);
+  /* Dedicated Sidebar surface variables to control backgrounds and states consistently */
+  --sidebar-surface: var(--color-surface);
+  --sidebar-surface-2: var(--color-surface-2);
+  --sidebar-border: var(--color-border);
+
+  /* Sidebar item state tokens - default (light) */
+  --sidebar-hover: var(--sidebar-surface-2);
+  --sidebar-active: rgba(59, 130, 246, 0.12);
+  --sidebar-active-border: var(--color-accent);
 }
 
 /* Dark theme defaults: app loads with .theme-dark on html by default */
@@ -198,6 +207,16 @@ html.theme-dark {
 
   /* Sidebar background token for dark mode */
   --sidebar-bg: var(--surface, #111827);
+
+  /* Sidebar dedicated variables for dark mode */
+  --sidebar-surface: var(--surface, #111827);       /* main sidebar panel */
+  --sidebar-surface-2: var(--surface-2, #1f2937);   /* hover/raised surfaces inside sidebar */
+  --sidebar-border: var(--border, #1f2937);
+
+  /* Sidebar item states (dark) */
+  --sidebar-hover: var(--sidebar-surface-2);        /* slightly lighter than main surface */
+  --sidebar-active: rgba(59, 130, 246, 0.12);       /* accented active background */
+  --sidebar-active-border: var(--color-accent);     /* clear active border */
 }
 
 /* Global application base */

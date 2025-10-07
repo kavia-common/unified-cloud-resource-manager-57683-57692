@@ -7,8 +7,16 @@
   --color-muted:#6B7280;
   --color-border:#E5E7EB;
 
-  /* Provide a default sidebar background that themes can override */
+  /* Provide default sidebar variables that themes can override */
   --sidebar-bg: var(--color-surface);
+  --sidebar-surface: var(--color-surface);
+  --sidebar-surface-2: var(--color-surface-2, #eef2f7);
+  --sidebar-border: var(--color-border);
+
+  /* Default state colors (light-safe) */
+  --sidebar-hover: var(--sidebar-surface-2);
+  --sidebar-active: rgba(59, 130, 246, 0.12);
+  --sidebar-active-border: var(--color-accent);
 }
 
 html, body, #root { height: 100%; background: var(--color-bg); color: var(--color-text); }

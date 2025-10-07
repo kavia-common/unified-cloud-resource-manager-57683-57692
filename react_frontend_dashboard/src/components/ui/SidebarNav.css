@@ -1,8 +1,8 @@
 .sidebarNav {
   width: var(--nav-width);
-  /* Force a definitive dark background via theme token; default to surface if not set */
-  background: var(--sidebar-bg, var(--color-surface));
-  border-right: 1px solid var(--color-border);
+  /* Use dedicated sidebar surface variables for consistent theming */
+  background: var(--sidebar-surface, var(--sidebar-bg, var(--color-surface)));
+  border-right: 1px solid var(--sidebar-border, var(--color-border));
   color: var(--color-text);
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@
   gap: 10px;
   text-decoration: none;
   padding: 16px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--sidebar-border, var(--color-border));
   color: var(--color-text);
 }
 
@@ -23,8 +23,8 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid var(--color-border);
+  background: var(--sidebar-surface-2, rgba(59, 130, 246, 0.08));
+  border: 1px solid var(--sidebar-border, var(--color-border));
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-sm);
@@ -66,8 +66,8 @@
   transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .sidebarNav__item:hover {
-  background: var(--navitem-hover-bg);
-  border-color: var(--color-border);
+  background: var(--sidebar-hover, var(--navitem-hover-bg));
+  border-color: var(--sidebar-border, var(--color-border));
 }
 .sidebarNav__item:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -75,8 +75,8 @@
   box-shadow: 0 0 0 2px var(--focus-ring);
 }
 .sidebarNav__item.active {
-  background: var(--navitem-active-bg);
-  border-color: var(--navitem-active-border);
+  background: var(--sidebar-active, var(--navitem-active-bg));
+  border-color: var(--sidebar-active-border, var(--navitem-active-border));
   color: var(--color-text);
 }
 
@@ -95,5 +95,5 @@
 .sidebarNav__accent {
   height: 24px;
   background: linear-gradient(90deg, rgba(37,99,235,0.12), rgba(16,185,129,0.10));
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--sidebar-border, var(--color-border));
 }

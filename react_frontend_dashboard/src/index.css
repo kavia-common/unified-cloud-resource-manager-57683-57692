@@ -123,3 +123,27 @@ html, body, #root { height: 100%; background: var(--color-bg); color: var(--colo
 .min-h-screen{ min-height:100vh; }
 /* Backdrop utility mapped to overlay token */
 .bg-gray-900\/40{ background:var(--color-overlay, rgba(17,24,39,0.4)); }
+
+/* Modal base classes to ensure proper stacking and interactions */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay, rgba(17,24,39,0.45));
+  display: grid;
+  place-items: center;
+  z-index: var(--z-modal, 1000);
+  padding: 16px;
+  backdrop-filter: blur(2px);
+  pointer-events: auto; /* allow clicks for backdrop-close */
+}
+.modal{
+  pointer-events: auto; /* ensure content gets clicks */
+}
+.modal-content{
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg, 0 10px 30px rgba(0,0,0,0.35));
+  overflow: hidden;
+}

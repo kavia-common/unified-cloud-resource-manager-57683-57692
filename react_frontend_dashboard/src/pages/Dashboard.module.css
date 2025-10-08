@@ -3,28 +3,36 @@
   gap: 16px;
 }
 
-/* New full-bleed image banner */
+/* Full-bleed image banner container */
 .imageBanner {
   position: relative;
   width: 100%;
   border-radius: 16px;
-  /* Ensure no background-image fallback is used */
+  /* Explicitly remove any background behavior */
   background: none;
   border: 1px solid var(--color-border, #E5E7EB);
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
   overflow: hidden;
+  /* Ensure container doesn't collapse during image load */
+  min-height: 120px;
 }
 
-/* Ensure the image scales responsively with a sensible max-height */
+/* Single image instance with clean rendering */
 .imageBannerImg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 360px; /* cap height on larger screens */
-  object-fit: cover; /* cover to fill width and crop softly if tall */
+  max-height: 360px;
+  object-fit: cover;
+  /* Smooth any layout shifts during load */
+  transition: opacity 0.2s ease;
+  /* Remove any default image behaviors */
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-/* Adjust max-height on smaller screens to keep proportions sensible */
+/* Responsive adjustments */
 @media (max-width: 900px) {
   .imageBannerImg {
     max-height: 300px;
@@ -37,7 +45,7 @@
   }
 }
 
-/* Body area remains minimalist */
+/* Body area styling */
 .body {
   display: grid;
   gap: 12px;

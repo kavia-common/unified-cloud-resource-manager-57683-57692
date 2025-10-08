@@ -5,6 +5,7 @@ import {
   formatRelativeTime,
   selectTopHighPriorityRecommendations,
 } from '../../services/recommendations';
+import { getTop3HighPriorityFromFake } from '../../services/recommendationsFake';
 
 type FetchState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -101,12 +102,17 @@ function SkeletonRow() {
  * due to double mounts (React StrictMode) or stale requests. Ensures the latest successful fetch
  * updates state and preserves previously shown items if a subsequent fetch returns empty.
  *
+ * Data sourcing note:
+ * - This component currently prioritizes fake data from the AI Recommendations page to reliably
+ *   populate the Top 3 items in the dashboard (dev mode). It will switch to Supabase-first when
+ *   real data is available. Supabase remains as a fallback for now.
+ *
  * Props:
  *  - none
  *
  * Behavior:
  *  - Uses a request-id guard so only the latest fetch updates state.
- *  - Logs fetch start/end, counts pre/post filter, and source via services.
+ *  - Logs dev-only which source filled the table: "TopRecs source: fake-data" | "TopRecs source: supabase".
  *  - Will not clear previously shown items if subsequent fetch filters to zero while raw > 0.
  */
 // PUBLIC_INTERFACE
@@ -129,13 +135,29 @@ export function TopRecommendations() {
       setState('loading');
       setError(null);
       try {
+        // 1) Try fake-data selector first
+        const fake = getTop3HighPriorityFromFake();
+        if (Array.isArray(fake) && fake.length === 3) {
+          if (!mounted || myId !== reqIdRef.current) return;
+          if (process.env.NODE_ENV !== 'test') {
+            console.debug('TopRecs source: fake-data');
+          }
+          setItems(fake);
+          setFetchedCount(fake.length);
+          setFilteredCount(fake.length);
+          setState('success');
+          // Do NOT attempt Supabase path if fake-data fulfilled the requirement
+          return;
+        }
+
+        // 2) Fallback to Supabase path using robust selector
         const raw = await getRecommendations();
         const ranked = selectTopHighPriorityRecommendations(raw, 3);
 
-        // Only update if this is the latest request and still mounted
         if (!mounted || myId !== reqIdRef.current) return;
 
         if (process.env.NODE_ENV !== 'test') {
+          console.debug('TopRecs source: supabase');
           console.debug(`[TopRecs] UI received raw=${raw.length}, ranked=${ranked.length}`);
           if (raw.length > 0 && ranked.length === 0) {
             console.debug('[TopRecs] Example raw item (first):', raw[0]);
@@ -145,7 +167,6 @@ export function TopRecommendations() {
         setFetchedCount(raw.length);
         setFilteredCount(ranked.length);
 
-        // Preserve previous items if we get an empty filtered result after previously showing data
         if (ranked.length === 0 && raw.length > 0 && items.length > 0) {
           console.warn(`[TopRecs] Filtered to 0; preserving previous items. fetched=${raw.length}`);
           setState('success');

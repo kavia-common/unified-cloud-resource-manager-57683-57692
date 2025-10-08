@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   getRecommendations,
   formatCurrency,
   formatRelativeTime,
+  selectTopHighPriorityRecommendations,
 } from '../../services/recommendations';
 
 type FetchState = 'idle' | 'loading' | 'success' | 'error';
@@ -93,6 +94,13 @@ function SkeletonRow() {
   );
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * TopRecommendations
+ * Renders the top 3 high-priority recommendations with robust handling to avoid flicker/empty state
+ * due to double mounts (React StrictMode) or stale requests. Ensures the latest successful fetch
+ * updates state and preserves previously shown items if a subsequent fetch returns empty.
+ */
 export default function TopRecommendations() {
   // Use a structural type here to avoid hard dependency on RankedRecommendation interface
   const [items, setItems] = useState<any[]>([]);
@@ -101,28 +109,45 @@ export default function TopRecommendations() {
   const [fetchedCount, setFetchedCount] = useState(0);
   const [filteredCount, setFilteredCount] = useState(0);
 
+  // Guard against StrictMode double-invoke and stale async results
+  const reqIdRef = useRef(0);
+
   useEffect(() => {
     let mounted = true;
+    const myId = ++reqIdRef.current;
+
     async function load() {
       setState('loading');
       setError(null);
       try {
-        const { selectTopHighPriorityRecommendations } = await import('../../services/recommendations');
         const raw = await getRecommendations();
-        setFetchedCount(raw.length);
         const ranked = selectTopHighPriorityRecommendations(raw, 3);
+
+        // Only update if this is the latest request and still mounted
+        if (!mounted || myId !== reqIdRef.current) return;
+
+        setFetchedCount(raw.length);
         setFilteredCount(ranked.length);
-        if (mounted) {
-          setItems(ranked);
+
+        // Preserve previous items if we get an empty filtered result after previously showing data
+        if (ranked.length === 0 && raw.length > 0 && items.length > 0) {
+          console.warn(`[TopRecs] Filtered to 0; preserving previous items. fetched=${raw.length}`);
           setState('success');
+          return;
         }
+
+        setItems(ranked);
+        setState('success');
+
         if (ranked.length === 0 && raw.length > 0) {
-          console.warn(`[TopRecs] Showing empty state after filtering. fetched=${raw.length} filtered=0`);
+          console.warn(
+            `[TopRecs] Showing empty state after filtering. fetched=${raw.length} filtered=0`
+          );
         }
       } catch (e: any) {
         // eslint-disable-next-line no-console
         console.warn('TopRecommendations fetch failed:', e?.message || e);
-        if (mounted) {
+        if (mounted && myId === reqIdRef.current) {
           setError('Unable to load recommendations.');
           setState('error');
         }
@@ -132,7 +157,7 @@ export default function TopRecommendations() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, []); // run once
 
   const content = useMemo(() => {
     if (state === 'loading') {
@@ -270,7 +295,7 @@ export default function TopRecommendations() {
               style={{ display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <button
-                aria-label={`Fix recommendation ${rec.title}`}
+                aria-label={`Fix recommendation ${(rec as any).title || (rec as any).name || 'item'}`}
                 onClick={() => {
                   // TODO: wire to automation/action flow
                   // eslint-disable-next-line no-console
@@ -290,7 +315,7 @@ export default function TopRecommendations() {
                 Fix now
               </button>
               <button
-                aria-label={`View details for ${rec.title}`}
+                aria-label={`View details for ${(rec as any).title || (rec as any).name || 'item'}`}
                 onClick={() => {
                   // TODO: navigate or open details drawer
                   // eslint-disable-next-line no-console

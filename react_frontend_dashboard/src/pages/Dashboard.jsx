@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./Dashboard.module.css";
-import bannerImg from "../assets/dashboard/banner-image.png";
+import newBanner from "../assets/dashboard/new-dashboard-banner.png";
 
 /**
  * PUBLIC_INTERFACE
@@ -8,37 +8,24 @@ import bannerImg from "../assets/dashboard/banner-image.png";
 // PUBLIC_INTERFACE
 export default function Dashboard() {
   /**
-   * Dashboard page with a minimalist Pure White banner.
-   * Left side: title/subtitle content
-   * Right side: decorative/product image pinned to the right
-   * Responsive: on small screens the image scales and drops below content to avoid overlap.
+   * Dashboard page showing a minimalist full-bleed banner image.
+   * - Replaces the previous welcome banner text/CTA with a pure image banner.
+   * - Responsive: full-width container, constrained max-height with cover behavior.
+   * - Pure White theme: clean spacing, subtle border, no clutter.
    */
   return (
     <div className={styles.pageWrap}>
-      <section className={styles.banner} aria-label="Dashboard banner">
-        <div className={styles.bannerContent}>
-          <h1 className={styles.bannerTitle}>Welcome back!</h1>
-          <p className={styles.bannerSubtitle}>
-            Manage, monitor, and optimize your cloud with ease
-          </p>
-          <div className={styles.bannerActions}>
-            <button className="btn primary">Quick Start</button>
-            <button className="btn">Learn More</button>
-          </div>
-        </div>
-
-        {/* Image pinned to the right. Hidden from screen readers as decorative. */}
-        <div className={styles.bannerImageWrap} aria-hidden="true">
-          <img
-            src={bannerImg}
-            alt=""
-            className={styles.bannerImage}
-            loading="eager"
-          />
-        </div>
+      {/* Full-width banner image replacing the previous welcome banner */}
+      <section className={styles.imageBanner} aria-label="Dashboard banner image">
+        <img
+          src={newBanner}
+          alt="Unified cloud dashboard banner"
+          className={styles.imageBannerImg}
+          loading="eager"
+        />
       </section>
 
-      {/* Placeholder body content to demonstrate layout continuity */}
+      {/* Body content below remains intact */}
       <div className={styles.body}>
         <div className={styles.card}>Your daily summary appears here.</div>
         <div className={styles.card}>Recent activity and insights.</div>

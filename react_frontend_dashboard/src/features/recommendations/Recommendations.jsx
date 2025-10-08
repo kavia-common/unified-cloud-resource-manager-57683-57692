@@ -19,12 +19,12 @@ export default function Recommendations() {
   const toast = useToast();
 
   // Mock inventory/usage data (dev/test scale)
-  const [compute, setCompute] = useState([
+  const [compute] = useState([
     { id: "i-001", name: "web-01", provider: "aws", type: "t3.large", region: "us-east-1", env: "prod", status: "running", cpu: 7, mem: 22, hourly: 0.0832 },
     { id: "i-002", name: "dev-api-01", provider: "aws", type: "t3.medium", region: "us-east-1", env: "dev", status: "running", cpu: 2, mem: 10, hourly: 0.0416 },
     { id: "vm-az-01", name: "test-batch", provider: "azure", type: "Standard_D4s_v5", region: "eastus", env: "test", status: "running", cpu: 4, mem: 18, hourly: 0.192 },
   ]);
-  const [databases, setDatabases] = useState([
+  const [databases] = useState([
     { id: "rds-orders", name: "orders-db", provider: "aws", engine: "postgres", tier: "db.t3.large", env: "prod", cpu: 12, storage_gb: 200, iops: 1000, hourly: 0.185 },
     { id: "azsql-app", name: "dev-app-db", provider: "azure", engine: "mssql", tier: "GP_S_Gen5_4", env: "dev", cpu: 3, storage_gb: 60, iops: 500, hourly: 0.25 },
   ]);

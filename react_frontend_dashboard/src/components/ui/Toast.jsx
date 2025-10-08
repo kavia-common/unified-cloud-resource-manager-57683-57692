@@ -95,7 +95,7 @@ export function ToastProvider({
       clearTimeout(timer);
       timersRef.current.delete(id);
     }
-  }, []);
+  }, [timersRef]);
 
   const show = useCallback(
     (message, opts = {}) => {

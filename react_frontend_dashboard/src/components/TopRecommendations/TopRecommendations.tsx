@@ -273,7 +273,7 @@ export function TopRecommendations() {
     return () => {
       mounted = false;
     };
-  }, []); // run once
+  }, [items.length]); // re-run if items.length changes since we use it in conditional logic
 
   const content = useMemo(() => {
     if (state === 'loading') {

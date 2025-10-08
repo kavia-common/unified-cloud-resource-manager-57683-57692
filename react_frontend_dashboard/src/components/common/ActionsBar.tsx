@@ -19,14 +19,7 @@ import React from "react";
  * - Primary text color #374151, subtle border #E5E7EB, hover bg #F3F4F6, rounded-md
  */
 export default function ActionsBar(): React.ReactElement {
-  // Handlers are currently placeholders for future Supabase Edge Functions integration.
-  const handleAddAccount = () => {
-    // TODO: Wire to open AddCloudAccountModal or navigate to Cloud Connections.
-    // TODO: Integrate with Supabase when available.
-    // eslint-disable-next-line no-console
-    console.log("[ActionsBar] Add Account clicked");
-  };
-
+  // Handler is currently a placeholder for future Supabase Edge Functions integration.
   const handleRunOptimization = () => {
     // TODO: Wire to trigger optimization Edge Function and show progress/toast.
     // TODO: Integrate with Supabase when available.

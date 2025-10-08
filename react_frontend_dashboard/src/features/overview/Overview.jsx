@@ -29,7 +29,7 @@ export default function Overview() {
    */
   // Dashboard stats state - initialize with mock baseline
   const [stats, setStats] = useState({ resources: 128, accounts: 2, daily: 412.32, recs: 6 });
-  const [mode, setMode] = useState("Monthly"); // Daily | Monthly | Yearly
+  const [mode, setMode] = useState("Monthly"); // Keep mode state for chart configuration
   const [chartData, setChartData] = useState([]);
 
   // Local modal states for the four stat cards

@@ -40,7 +40,35 @@ export default function DiscoverResourcesModal({ open, onClose, onComplete }) {
       setProgress(0);
       setIsScanning(true);
 
-      // Run mock scan
+      const startMockScan = () => {
+        // Smooth progress animation
+        setProgress(5);
+        progressTimer.current = setInterval(() => {
+          setProgress((p) => {
+            if (p >= 96) return p;
+            return p + Math.max(1, Math.round((100 - p) / 18));
+          });
+        }, 320);
+
+        // Simulate staged log updates
+        setTimeout(() => setLog((l) => [...l, "Scanning AWS (2 accounts) and Azure (1 subscription)…"]), 300);
+        setTimeout(() => setLog((l) => [...l, "Enumerating regions: us-east-1, us-west-2, eastus, westeurope…"]), 900);
+        setTimeout(() => setLog((l) => [...l, "Collecting compute, storage, database, and networking resources…"]), 1400);
+
+        // After delay, populate mock results
+        setTimeout(() => {
+          const mock = buildMockResources();
+          const mockSummary = summarize(mock);
+          setResources(mock);
+          setSummary(mockSummary);
+          setLog((l) => [...l, "Discovery complete."]);
+          setProgress(100);
+          clearInterval(progressTimer.current);
+          setIsScanning(false);
+          onComplete?.({ summary: mockSummary, resources: mock });
+        }, 2000);
+      };
+
       startMockScan();
     } else {
       // Cleanup when closing
@@ -54,62 +82,28 @@ export default function DiscoverResourcesModal({ open, onClose, onComplete }) {
     }
 
     return () => clearInterval(progressTimer.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  function startMockScan() {
-    // Smooth progress animation
-    setProgress(5);
-    progressTimer.current = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 96) return p;
-        return p + Math.max(1, Math.round((100 - p) / 18));
-      });
-    }, 320);
-
-    // Simulate staged log updates
-    setTimeout(() => setLog((l) => [...l, "Scanning AWS (2 accounts) and Azure (1 subscription)…"]), 300);
-    setTimeout(() => setLog((l) => [...l, "Enumerating regions: us-east-1, us-west-2, eastus, westeurope…"]), 900);
-    setTimeout(() => setLog((l) => [...l, "Collecting compute, storage, database, and networking resources…"]), 1400);
-
-    // After delay, populate mock results
-    setTimeout(() => {
-      const mock = buildMockResources();
-      const mockSummary = summarize(mock);
-      setResources(mock);
-      setSummary(mockSummary);
-      setLog((l) => [...l, "Discovery complete."]);
-      setProgress(100);
-      clearInterval(progressTimer.current);
-      setIsScanning(false);
-      onComplete?.({ summary: mockSummary, resources: mock });
-    }, 2000);
-  }
+  }, [open, onComplete]);
 
   function summarize(list) {
     const s = { compute: 0, storage: 0, databases: 0, networking: 0 };
     for (const r of list) {
       const t = String(r.type || "").toLowerCase();
-      if (["ec2", "vm", "aks-nodepool", "asg"].some((k) => t.includes(k) || t === "compute")) s.compute++;
-      else if (["s3", "blob", "disk", "storage"].some((k) => t.includes(k) || t === "storage")) s.storage++;
-      else if (["rds", "dynamodb", "cosmos", "postgres", "mysql", "sql"].some((k) => t.includes(k) || t === "database" || t === "databases")) s.databases++;
-      else if (["vpc", "subnet", "nsg", "vnet", "lb", "gateway"].some((k) => t.includes(k) || t === "network" || t === "networking")) s.networking++;
+      if ([/ec2/, /vm/, /aks-nodepool/, /asg/].some((k) => k.test(t) || t === "compute")) s.compute++;
+      else if ([/s3/, /blob/, /disk/, /storage/].some((k) => k.test(t) || t === "storage")) s.storage++;
+      else if ([/rds/, /dynamodb/, /cosmos/, /postgres/, /mysql/, /sql/].some((k) => k.test(t) || t === "database" || t === "databases")) s.databases++;
+      else if ([/vpc/, /subnet/, /nsg/, /vnet/, /lb/, /gateway/].some((k) => k.test(t) || t === "network" || t === "networking")) s.networking++;
     }
     return s;
   }
 
   function buildMockResources() {
-    // In-memory mock results; ready for replacement with API call results.
     return [
-      // AWS - Account A
       { accountName: "Prod Account A", provider: "AWS", region: "us-east-1", type: "EC2", name: "i-0a1b2c3d4e5", id: "i-0a1b2c3d4e5" },
       { accountName: "Prod Account A", provider: "AWS", region: "us-east-1", type: "RDS", name: "rds-prod-01", id: "arn:aws:rds:us-east-1:123:db:rds-prod-01" },
       { accountName: "Prod Account A", provider: "AWS", region: "us-west-2", type: "S3", name: "assets-prod-bucket", id: "assets-prod-bucket" },
       { accountName: "Prod Account A", provider: "AWS", region: "us-west-2", type: "VPC", name: "vpc-0cafe", id: "vpc-0cafe" },
-      // AWS - Account B
       { accountName: "Dev Account B", provider: "AWS", region: "us-east-1", type: "EC2", name: "i-0f1e2d3c4b5", id: "i-0f1e2d3c4b5" },
       { accountName: "Dev Account B", provider: "AWS", region: "us-west-2", type: "DynamoDB", name: "orders-dev", id: "arn:aws:dynamodb:us-west-2:456:table/orders-dev" },
-      // Azure - Subscription X
       { accountName: "Azure Sub X", provider: "Azure", region: "eastus", type: "VM", name: "vm-prod-01", id: "/subs/aaa/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm-prod-01" },
       { accountName: "Azure Sub X", provider: "Azure", region: "eastus", type: "Blob Storage", name: "storaccount01", id: "/subs/aaa/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/storaccount01" },
       { accountName: "Azure Sub X", provider: "Azure", region: "westeurope", type: "Postgres", name: "pg-prod-eu", id: "/subs/aaa/resourceGroups/rg2/providers/Microsoft.DBforPostgreSQL/servers/pg-prod-eu" },

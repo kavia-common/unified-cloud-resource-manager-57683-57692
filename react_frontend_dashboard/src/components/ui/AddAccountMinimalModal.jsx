@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import ReactDOM from "react-dom";
+import { createPortal } from "react-dom";
 import { useToast } from "./Toast";
 
 /**
@@ -448,5 +448,5 @@ export default function AddAccountMinimalModal({ open, onClose, onSaved }) {
   );
 
   // Render the modal via a portal to avoid stacking/overflow issues in parents
-  return ReactDOM.createPortal(modalContent, document.body);
+  return createPortal(modalContent, document.body);
 }

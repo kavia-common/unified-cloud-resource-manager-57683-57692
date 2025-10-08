@@ -35,7 +35,7 @@ export default function CloudConnections() {
     load();
     // No cleanup needed: ToastProvider manages its own timers
     return () => {};
-  }, []);
+  }, [load, showToast]);
 
   function handleSaved(acc) {
     // Optimistically update local view; backend persistence can be added later.

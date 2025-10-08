@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Dashboard.module.css";
 // Use cache-busted filename to avoid stale cache issues in preview environments
-import newBanner from "../assets/dashboard/new-dashboard-banner.v2.png";
+import newBanner from "../assets/dashboard/new-dashboard-banner.v3.png";
 
 /**
  * PUBLIC_INTERFACE

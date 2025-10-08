@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   getRecommendations,
   formatCurrency,
@@ -196,6 +197,7 @@ function SavingsPill({ value }: { value: number | null | undefined }) {
  */
 // PUBLIC_INTERFACE
 export function TopRecommendations() {
+  const navigate = useNavigate();
   // Use a structural type here to avoid hard dependency on RankedRecommendation interface
   const [items, setItems] = useState<any[]>([]);
   const [state, setState] = useState<FetchState>('idle');
@@ -385,7 +387,7 @@ export function TopRecommendations() {
                 <span>{(rec as any).title || (rec as any).name || 'Recommendation'}</span>
               </div>
               <div style={titleCellMeta()}>
-                {(rec as any).category || (rec as any).type || rec.environment || '—'}
+                {(rec as any).category || (rec as any).type || rec.environment || '\u2014'}
               </div>
             </div>
             <div role="cell">
@@ -404,9 +406,7 @@ export function TopRecommendations() {
               <button
                 aria-label={`Fix recommendation ${(rec as any).title || (rec as any).name || 'item'}`}
                 onClick={() => {
-                  // TODO: wire to automation/action flow
-                  // eslint-disable-next-line no-console
-                  console.log('Fix now clicked', rec.id);
+                  navigate('/recommendations');
                 }}
                 style={{
                   ...buttonBase(),
@@ -478,7 +478,7 @@ export function TopRecommendations() {
                   onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyles())}
                   onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
                 >
-                  ⋯
+                  \u22ef
                 </button>
               </div>
             </div>
@@ -486,7 +486,7 @@ export function TopRecommendations() {
         ))}
       </div>
     );
-  }, [state, error, items]);
+  }, [state, error, items, navigate]);
 
   return (
     <section
@@ -523,12 +523,10 @@ export function TopRecommendations() {
           Top Recommendations
         </h2>
         <span style={{ color: TOKENS.textSecondary, fontSize: 12 }}>
-          Top 3 high-priority with confidence ≥ 0.5
+          Top 3 high-priority with confidence \u2265 0.5
         </span>
       </div>
       {content}
     </section>
   );
 }
-
-// Note: No default export to ensure consistency with named-only exports.

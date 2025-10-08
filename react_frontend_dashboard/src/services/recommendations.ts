@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../lib/supabaseClient';
+import { getSupabaseClient } from '../lib/supabaseClient'; // Import only; never re-export to avoid circular/duplicate loads
 
 export type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Info';
 

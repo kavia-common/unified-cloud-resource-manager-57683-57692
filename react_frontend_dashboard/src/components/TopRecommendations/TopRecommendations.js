@@ -1,1 +1,1 @@
-export { default } from './TopRecommendations.tsx';
+export { TopRecommendations } from './index.ts';

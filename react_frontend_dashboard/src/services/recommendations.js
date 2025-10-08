@@ -1,12 +1,11 @@
 /**
  * PUBLIC_INTERFACE
- * JS facade for recommendations service.
+ * JS facade for recommendations service (named exports only).
  * Avoid default export to prevent circular default<->named re-export loops.
- * Export named symbols only.
  */
 export {
   getRecommendations,
-  // Backward compatibility export name (old selector) mapped to new implementation
+  // Backward compatibility alias
   selectTopHighPriorityRecommendations as selectTopHighRiskRecommendations,
   selectTopHighPriorityRecommendations,
   formatCurrency,

@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { getEdgeFunctionsBaseUrl, hasSupabaseConfig } from "../../services/supabaseClient";
+import { getSupabaseClient } from "../../lib/supabaseClient";
+
+// Backward-compatible helpers previously provided by services/supabaseClient
+function getEdgeFunctionsBaseUrl() {
+  const url = process.env.REACT_APP_SUPABASE_URL;
+  return url ? `${url}/functions/v1` : null;
+}
+const hasSupabaseConfig = Boolean(process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_KEY);
+
+// Initialize client once (safe no-op if env missing)
+getSupabaseClient();
 
 // PUBLIC_INTERFACE
 export default function DevConfigNotice() {

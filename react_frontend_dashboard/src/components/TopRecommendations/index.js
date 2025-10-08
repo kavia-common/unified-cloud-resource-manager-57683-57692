@@ -1,8 +1,5 @@
- // PUBLIC_INTERFACE
- /**
-  * JS facade that re-exports the TS component.
-  * Use this for JavaScript-only import sites to avoid direct .tsx path imports.
-  * Exports both default and named to match TS barrel and avoid import mismatches.
-  */
- export { default } from './TopRecommendations.tsx';
- export { default as TopRecommendations } from './TopRecommendations.tsx';
+/** PUBLIC_INTERFACE
+ * JS facade for TopRecommendations component.
+ * Use named export only to avoid duplicate/default export mismatches across TS/JS.
+ */
+export { default as TopRecommendations } from './TopRecommendations';

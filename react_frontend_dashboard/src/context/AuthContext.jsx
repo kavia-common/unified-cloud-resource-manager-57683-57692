@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { supabase } from "../services/supabaseClient";
+import { getSupabaseClient } from "../lib/supabaseClient";
+
+const supabase = getSupabaseClient();
 
 /**
  * Authentication context backed by Supabase.

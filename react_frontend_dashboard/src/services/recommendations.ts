@@ -48,7 +48,6 @@ export async function getRecommendations(): Promise<Recommendation[]> {
     console.info('[TopRecs] getRecommendations() invoked');
   }
   const supabase = getSupabaseClient();
-  if (!supabase) return [];
 
   // Helper to run a query and map results from an arbitrary table/view
   async function querySource(table: string): Promise<Recommendation[]> {

@@ -4,7 +4,7 @@ import "./index.css";
 import "./styles/theme.css";
 import "./components/ui/dark-theme-overrides.css";
 import App from "./App";
-import { hasSupabaseConfig } from "./services/supabaseClient";
+import { getSupabaseClient } from "./lib/supabaseClient";
 import { ToastProvider } from "./components/ui/Toast";
 import DevConfigNotice from "./components/ui/DevConfigNotice";
 
@@ -60,6 +60,9 @@ if (typeof document !== 'undefined') {
     html.classList.add('theme-dark');
   }
 }
+
+// Initialize Supabase client early (safe, no-throw); can be used by providers if needed
+getSupabaseClient();
 
 // Basic boot fallback UI while React mounts, then replaced on first paint.
 // This is defensive and ensures something visible appears immediately.

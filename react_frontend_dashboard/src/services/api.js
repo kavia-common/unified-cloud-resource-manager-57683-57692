@@ -2,7 +2,8 @@
  * Centralized API service for Supabase interactions and Edge Functions.
  * PUBLIC_INTERFACE exports are documented for use across the app.
  */
-import { supabase } from '../services/supabaseClient';
+import { getSupabaseClient } from '../lib/supabaseClient';
+const supabase = getSupabaseClient();
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 // Use absolute URL for Edge Functions to avoid relative-path failures in preview/build setups.

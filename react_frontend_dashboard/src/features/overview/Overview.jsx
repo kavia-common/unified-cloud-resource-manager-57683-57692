@@ -15,6 +15,7 @@ import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } fro
 import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 import ActionsBar from "../../components/common/ActionsBar.tsx";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
+import TopRecommendations from "../../components/TopRecommendations/TopRecommendations.js";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -247,120 +248,17 @@ export default function Overview() {
         />
       </div>
 
-      {/* Top Recommendations section */}
+      {/* Top Recommendations section (dynamic from Supabase) */}
       <div className="panel" style={{ marginTop: 8 }}>
         <div className="panel-header">
           <div className="panel-title">Top Recommendations</div>
-          {/* Subtitle intentionally minimal */}
-          <div className="text-xs" style={{ color: "var(--muted)" }} />
+          <div className="text-xs" style={{ color: "var(--muted)" }}>
+            High-risk, actionable with confidence
+          </div>
         </div>
         <div className="panel-body">
-          <ul
-            aria-label="Top recommendations list"
-            style={{
-              listStyle: "none",
-              margin: 0,
-              padding: 0,
-              display: "grid",
-              gap: 10,
-            }}
-          >
-            {/* Recommendation 1 (no buttons) */}
-            <li
-              className="rec-item"
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "12px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                background: "var(--color-surface)",
-                boxShadow: "var(--shadow)",
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  width: 28,
-                  height: 28,
-                  minWidth: 28,
-                  borderRadius: 8,
-                  display: "grid",
-                  placeItems: "center",
-                  background: "#ECFDF5", // green-50
-                  color: "#10B981", // success
-                  border: "1px solid #A7F3D0", // green-200
-                }}
-              >
-                {/* power icon */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M6.5 6.5a7 7 0 1 0 11 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
-              <div style={{ display: "grid", gap: 4, minWidth: 0, flex: 1 }}>
-                <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
-                  3 idle VMs detected
-                </div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>
-                  Stop now to save $150/month.
-                </div>
-              </div>
-            </li>
-
-            {/* Recommendation 2 (no buttons) */}
-            <li
-              className="rec-item"
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-                padding: "12px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: 12,
-                background: "#FFFFFF",
-                boxShadow: "var(--shadow)",
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  width: 28,
-                  height: 28,
-                  minWidth: 28,
-                  borderRadius: 8,
-                  display: "grid",
-                  placeItems: "center",
-                  background: "#EEF2FF", // indigo-50
-                  color: "#6366F1", // indigo-500
-                  border: "1px solid #C7D2FE", // indigo-200
-                }}
-              >
-                {/* resize icon */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 14v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M20 10V4h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M20 4l-7 7" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </div>
-              <div style={{ display: "grid", gap: 4, minWidth: 0, flex: 1 }}>
-                <div style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>
-                  Resize Azure VM
-                </div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>
-                  Current usage 15%, downgrade to smaller instance.
-                </div>
-              </div>
-            </li>
-          </ul>
-
-          {/* Responsive: tighten spacing on very small screens */}
-          <style>{`
-            @media (max-width: 480px) {
-              .rec-item { padding: 10px 10px; }
-            }
-          `}</style>
+          {/* Import the new component to render top 3 high-risk recommendations */}
+          <TopRecommendations />
         </div>
       </div>
 

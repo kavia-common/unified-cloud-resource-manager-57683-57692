@@ -1,2 +1,7 @@
-export * from './recommendations.ts';
-export { default as default } from './recommendations.ts';
+export {
+  getRecommendations as default,
+  getRecommendations,
+  selectTopHighRiskRecommendations,
+  formatCurrency,
+  formatRelativeTime
+} from './recommendations.ts';

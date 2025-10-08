@@ -18,7 +18,7 @@ import React from "react";
  * - Minimalist Pure White theme using inline styles aligned with CSS variables from theme.css
  * - Primary text color #374151, subtle border #E5E7EB, hover bg #F3F4F6, rounded-md
  */
-export default function ActionsBar(): JSX.Element {
+export default function ActionsBar(): React.ReactElement {
   // Handlers are currently placeholders for future Supabase Edge Functions integration.
   const handleAddAccount = () => {
     // TODO: Wire to open AddCloudAccountModal or navigate to Cloud Connections.

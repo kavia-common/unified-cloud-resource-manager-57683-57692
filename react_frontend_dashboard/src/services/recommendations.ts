@@ -42,6 +42,11 @@ const FALLBACK_SOURCES = ['ai_recommendations'];
  *  - Only latest TopRecommendations caller should set state; component enforces request-id guard.
  */
 export async function getRecommendations(): Promise<Recommendation[]> {
+  // Unit-safe logging; avoid noisy logs during tests
+  if (process.env.NODE_ENV !== 'test') {
+    // eslint-disable-next-line no-console
+    console.info('[TopRecs] getRecommendations() invoked');
+  }
   const supabase = getSupabaseClient();
   if (!supabase) return [];
 

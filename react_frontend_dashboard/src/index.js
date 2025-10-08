@@ -4,7 +4,7 @@ import "./index.css";
 import "./styles/theme.css";
 import "./components/ui/dark-theme-overrides.css";
 import App from "./App";
-import { getSupabaseClient } from "./lib/supabaseClient";
+import { getSupabaseClient } from "./lib/supabaseClient/index.js";
 import { ToastProvider } from "./components/ui/Toast";
 import DevConfigNotice from "./components/ui/DevConfigNotice";
 

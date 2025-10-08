@@ -25,8 +25,8 @@ export interface RankedRecommendation extends Recommendation {
   priorityScore: number;
 }
 
-const PRIMARY_SOURCES = ['ai_automation_rules', 'automation_rules', 'ai_rules'];
-const FALLBACK_SOURCES = ['ai_recommendations'];
+const PRIMARY_SOURCES = ['ai_automation_rules', 'automation_rules', 'ai_rules', 'automation_rules_view', 'ai_automation_rules_view'];
+const FALLBACK_SOURCES = ['ai_recommendations', 'recommendations_view'];
 
 /**
  * PUBLIC_INTERFACE
@@ -104,11 +104,17 @@ export async function getRecommendations(): Promise<Recommendation[]> {
         // confidence mapping
         let confidence: number | null = null;
         if (typeof r.confidence === 'number') confidence = r.confidence;
-        else if (typeof r.score === 'number') confidence = r.score / 100;
+        else if (typeof r.score === 'number') confidence = r.score > 1 ? r.score / 100 : r.score;
         else if (typeof r.confidence_score === 'number') confidence = r.confidence_score;
         else if (r.confidence != null) {
-          const n = Number(r.confidence);
-          confidence = Number.isFinite(n) ? (n > 1 ? n / 100 : n) : null;
+          const raw = String(r.confidence).trim();
+          if (raw.endsWith('%')) {
+            const n = Number(raw.replace('%', ''));
+            confidence = Number.isFinite(n) ? n / 100 : null;
+          } else {
+            const n = Number(raw);
+            confidence = Number.isFinite(n) ? (n > 1 ? n / 100 : n) : null;
+          }
         }
 
         // actionable mapping
@@ -149,22 +155,46 @@ export async function getRecommendations(): Promise<Recommendation[]> {
     }
   }
 
-  // Try primary sources first (AI Automation Rules family)
+  // Try primary sources; collect from multiple likely sources and merge unique by id+title
+  const collected: Recommendation[] = [];
+  const seen = new Set<string>();
+
+  const addUnique = (arr: Recommendation[]) => {
+    for (const r of arr) {
+      const key = `${String(r.id)}::${r.title}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        collected.push(r);
+      }
+    }
+  };
+
   for (const table of PRIMARY_SOURCES) {
     const items = await querySource(table);
-    if (items.length > 0) {
-      console.info(`[TopRecs] Using source: ${table} (${items.length} rows)`);
-      return items;
+    if (process.env.NODE_ENV !== 'test') {
+      console.debug(`[TopRecs] Source ${table} returned ${items.length} rows`);
+      if (items.length > 0) {
+        console.debug('[TopRecs] Example row:', items[0]);
+      }
     }
+    addUnique(items);
   }
 
-  // Fallback sources (ai_recommendations etc.)
+  // If primary yielded none, try fallbacks too, else include for broader coverage
   for (const table of FALLBACK_SOURCES) {
     const items = await querySource(table);
-    if (items.length > 0) {
-      console.info(`[TopRecs] Using fallback source: ${table} (${items.length} rows)`);
-      return items;
+    if (process.env.NODE_ENV !== 'test') {
+      console.debug(`[TopRecs] Fallback ${table} returned ${items.length} rows`);
+      if (items.length > 0) {
+        console.debug('[TopRecs] Example fallback row:', items[0]);
+      }
     }
+    addUnique(items);
+  }
+
+  if (collected.length > 0) {
+    console.info(`[TopRecs] Using merged sources; total unique rows=${collected.length}`);
+    return collected;
   }
 
   console.warn('[TopRecs] No data from any known source.');
@@ -180,11 +210,12 @@ function toNumber(v: any): number | null {
 function normalizeSeverity(sev?: string | null): Severity | null {
   if (!sev) return null;
   const s = String(sev).trim().toLowerCase();
-  if (s === 'critical' || s === 'p0') return 'Critical';
-  if (s === 'high' || s === 'p1') return 'High';
-  if (s === 'medium' || s === 'p2') return 'Medium';
-  if (s === 'low' || s === 'p3') return 'Low';
-  if (s === 'info' || s === 'informational') return 'Info';
+
+  if (s === 'critical' || s === 'crit' || s === 'c' || s === 'p0' || s === '0') return 'Critical';
+  if (s === 'high' || s === 'h' || s === 'p1' || s === '1') return 'High';
+  if (s === 'medium' || s === 'med' || s === 'm' || s === 'p2' || s === '2') return 'Medium';
+  if (s === 'low' || s === 'l' || s === 'p3' || s === '3') return 'Low';
+  if (s === 'info' || s === 'informational' || s === 'i' || s === 'p4' || s === '4') return 'Info';
   return null;
 }
 
@@ -263,20 +294,23 @@ export function selectTopHighPriorityRecommendations(
         ['P0', 'P1'].includes(String(r.severity).toUpperCase()));
 
     const highCategoryPriority =
-      (toNumber(r.category_priority) ?? -1) >= 80;
+      (toNumber(r.category_priority) ?? -1) >= 70;
 
     const passesPriority = highSeverity || highPriorityLabel || highCategoryPriority;
 
     const conf = toNumber(r.confidence);
     const passesConfidence = conf == null ? true : conf >= 0.5;
 
-    // Actionable only if the field exists and is explicitly false -> then exclude.
-    // If missing, do not filter.
+    // Actionable only if explicitly false -> exclude; missing or true -> include
     const actionableKnown = typeof r.actionable === 'boolean';
-    const passesActionable = actionableKnown ? r.actionable === true : true;
+    const passesActionable = actionableKnown ? r.actionable !== false : true;
 
     return passesPriority && passesConfidence && passesActionable;
   });
+
+  if (process.env.NODE_ENV !== 'test') {
+    console.debug(`[TopRecs] Filtering summary: fetched=${totalFetched} kept=${filtered.length}`);
+  }
 
   if (filtered.length === 0) {
     if (totalFetched > 0) {

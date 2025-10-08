@@ -135,6 +135,13 @@ export function TopRecommendations() {
         // Only update if this is the latest request and still mounted
         if (!mounted || myId !== reqIdRef.current) return;
 
+        if (process.env.NODE_ENV !== 'test') {
+          console.debug(`[TopRecs] UI received raw=${raw.length}, ranked=${ranked.length}`);
+          if (raw.length > 0 && ranked.length === 0) {
+            console.debug('[TopRecs] Example raw item (first):', raw[0]);
+          }
+        }
+
         setFetchedCount(raw.length);
         setFilteredCount(ranked.length);
 
@@ -213,7 +220,7 @@ export function TopRecommendations() {
           </div>
           {fetchedCount > 0 && (
             <div style={{ color: '#6B7280', fontSize: 12, textAlign: 'center' }}>
-              Note: {fetchedCount} items exist but none met the high-priority or confidence thresholds.
+              Note: {fetchedCount} items exist but none met relaxed high-priority and confidence thresholds.
             </div>
           )}
         </div>

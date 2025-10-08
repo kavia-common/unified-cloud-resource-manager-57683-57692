@@ -1,0 +1,118 @@
+.pageWrap {
+  display: grid;
+  gap: 16px;
+}
+
+/* Banner container with Pure White minimalist theme */
+.banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* text left, image right on desktop */
+  gap: 16px;
+  border-radius: 16px;
+  background: var(--color-surface-2, #F9FAFB); /* fallback to Pure White surface */
+  border: 1px solid var(--color-border, #E5E7EB);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Left side content */
+.bannerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  color: var(--color-text, #111827);
+  min-width: 0; /* prevent overflow */
+}
+
+.bannerTitle {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+  letter-spacing: 0.2px;
+}
+
+.bannerSubtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted, #374151);
+  max-width: 720px;
+}
+
+.bannerActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Right side image wrapper pinned to the right */
+.bannerImageWrap {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  max-width: 42%;
+  /* Ensure it's visually aligned to the right edge while respecting padding */
+  align-self: stretch;
+}
+
+.bannerImage {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  object-fit: contain;
+  /* Subtle elevation to separate from surface without heavy decoration */
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.08));
+  border-radius: 8px;
+}
+
+/* Responsive behavior: stack and scale image below content on small screens */
+@media (max-width: 900px) {
+  .banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .bannerImageWrap {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
+  }
+  .bannerImage {
+    max-width: 320px;
+  }
+}
+
+/* Extra small screens: keep text legible and avoid overlap */
+@media (max-width: 520px) {
+  .bannerTitle {
+    font-size: 18px;
+  }
+  .bannerSubtitle {
+    font-size: 13px;
+  }
+  .bannerImage {
+    max-width: 260px;
+  }
+}
+
+/* Demo body area */
+.body {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  background: var(--color-surface, #FFFFFF);
+  border: 1px solid var(--color-border, #E5E7EB);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--color-text, #111827);
+}

@@ -10,6 +10,9 @@ export default function Banner({
   // Optional subtitle; if not provided, we show the default product message
   subtitle = "Manage, monitor, and optimize your cloud with ease",
   align = "left",
+  // Optional right-side image (string URL). If provided, we render flex with space-between.
+  rightImageSrc,
+  rightImageAlt = "",
   children,
 }) {
   /** Minimalist curved banner with soft shadow, curved edges. */
@@ -18,6 +21,8 @@ export default function Banner({
       ? { alignItems: "center", textAlign: "center" }
       : { alignItems: "flex-start", textAlign: "left" };
 
+  const withImage = Boolean(rightImageSrc);
+
   return (
     <section
       aria-label="Page banner"
@@ -25,13 +30,13 @@ export default function Banner({
         position: "relative",
         overflow: "hidden",
         borderRadius: 16, // curved edges
-        // Use tokenized surface background to avoid gradients/hardcoded colors
         background: "var(--color-surface-2)",
         border: "1px solid var(--color-border)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+        padding: 16,
       }}
     >
-      {/* subtle decorative shape (keep but ensure it doesn't reduce contrast) */}
+      {/* subtle decorative shape (ensure it doesn't reduce contrast) */}
       <div
         aria-hidden="true"
         style={{
@@ -44,53 +49,115 @@ export default function Banner({
           background:
             "radial-gradient(closest-side, rgba(255,255,255,0.18), rgba(255,255,255,0.00))",
           filter: "blur(0.2px)",
+          pointerEvents: "none",
         }}
       />
       <div
         style={{
-          padding: "20px 20px",
           display: "flex",
-          gap: 10,
-          flexDirection: "column",
-          ...alignStyles,
-          color: "#FFFFFF", // default text color inside banner -> white
+          alignItems: "center",
+          justifyContent: withImage ? "space-between" : "flex-start",
+          gap: 12,
         }}
       >
-        {/* Title at the very top */}
-        <h1
+        <div
           style={{
-            margin: 0,
-            fontSize: 24,
-            lineHeight: 1.25,
-            fontWeight: 800,
-            color: "#FFFFFF", // white text on violet background
-            letterSpacing: 0.2,
+            padding: "8px 8px",
+            display: "flex",
+            gap: 10,
+            flexDirection: "column",
+            ...alignStyles,
+            color: "var(--color-text)", // Pure White text color
+            minWidth: 0,
           }}
         >
-          {title}
-        </h1>
-
-        {/* Subtitle directly under title */}
-        {subtitle && (
-          <p
+          {/* Title at the very top */}
+          <h1
             style={{
               margin: 0,
-              fontSize: 14,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.92)", // slightly softened white for hierarchy
-              maxWidth: 820,
+              fontSize: 24,
+              lineHeight: 1.25,
+              fontWeight: 800,
+              color: "var(--color-text)", // text on light surface
+              letterSpacing: 0.2,
             }}
           >
-            {subtitle}
-          </p>
-        )}
+            {title}
+          </h1>
 
-        {children && (
-          <div style={{ marginTop: 4, color: "#FFFFFF" }}>
-            {children}
+          {/* Subtitle directly under title */}
+          {subtitle && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "var(--muted, #374151)",
+                maxWidth: 820,
+              }}
+            >
+              {subtitle}
+            </p>
+          )}
+
+          {children && (
+            <div style={{ marginTop: 4, color: "var(--color-text)" }}>
+              {children}
+            </div>
+          )}
+        </div>
+
+        {withImage && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "relative",
+              flex: "0 0 auto",
+              maxWidth: "40%",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <img
+              src={rightImageSrc}
+              alt={rightImageAlt}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "auto",
+                maxWidth: 420,
+                objectFit: "contain",
+                filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.08))",
+                borderRadius: 8,
+              }}
+            />
           </div>
         )}
       </div>
+
+      {/* Responsive rules: stack and scale image using inline <style> for component-scoped behavior */}
+      <style>{`
+        @media (max-width: 900px) {
+          [aria-label="Page banner"] > div {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          [aria-label="Page banner"] img {
+            max-width: 320px !important;
+          }
+        }
+        @media (max-width: 520px) {
+          [aria-label="Page banner"] h1 {
+            font-size: 20px !important;
+          }
+          [aria-label="Page banner"] p {
+            font-size: 13px !important;
+          }
+          [aria-label="Page banner"] img {
+            max-width: 260px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

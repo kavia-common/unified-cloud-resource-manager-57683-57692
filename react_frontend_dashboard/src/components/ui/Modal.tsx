@@ -27,8 +27,6 @@ export const Modal: React.FC<ModalProps> = ({
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
   const titleId = React.useId();
 
-  if (!open) return null;
-
   // Accessibility: close on Escape and trap focus within dialog
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -65,7 +63,7 @@ export const Modal: React.FC<ModalProps> = ({
     return () => clearTimeout(t);
   }, []);
 
-  return (
+  return open ? (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0" style={{ background: 'var(--color-overlay)' }} onClick={onClose} />
       <div
@@ -90,7 +88,7 @@ export const Modal: React.FC<ModalProps> = ({
         <div className="p-4">{children}</div>
       </div>
     </div>
-  );
+  ) : null;
 };
 
 export default Modal;

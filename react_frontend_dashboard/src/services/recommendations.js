@@ -10,4 +10,4 @@ export {
   selectTopHighPriorityRecommendations,
   formatCurrency,
   formatRelativeTime,
-} from './recommendations';
+} from './recommendations.ts';

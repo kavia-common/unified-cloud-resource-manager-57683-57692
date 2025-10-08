@@ -9,36 +9,143 @@ import { getTop3HighPriorityFromFake } from '../../services/recommendationsFake'
 
 type FetchState = 'idle' | 'loading' | 'success' | 'error';
 
-const borderColor = '#E5E7EB';
-const surface = '#F9FAFB';
-const textColor = '#111827';
-const primary = '#374151';
-const success = '#10B981';
-const errorColor = '#EF4444';
+/**
+ * Dark theme tokens scoped to this component only.
+ * We avoid global CSS changes by using inline styles and a wrapper className hook.
+ */
+const TOKENS = {
+  bg: '#111827', // background for header row and hover
+  surface: '#1F2937', // container and row surface
+  border: '#374151',
+  text: '#F3F4F6',
+  textSecondary: '#D1D5DB',
+  subtle: '#9CA3AF',
+
+  criticalBg: '#7F1D1D',
+  criticalText: '#FEE2E2',
+  highBg: '#92400E',
+  highText: '#FFEDD5',
+
+  savingsBg: '#065F46',
+  savingsText: '#D1FAE5',
+
+  primaryOutline: '#4B5563',
+  linkDefault: '#D1D5DB',
+  linkHover: '#93C5FD',
+
+  focusRing: '#60A5FA',
+  hoverAccent: 'rgba(255,255,255,0.06)',
+};
+
+function focusableBase(): React.CSSProperties {
+  return {
+    outline: 'none',
+  };
+}
+
+function focusRingStyles(): React.CSSProperties {
+  return {
+    boxShadow: `0 0 0 2px ${TOKENS.focusRing}`,
+  };
+}
+
+function rowGridBase(): React.CSSProperties {
+  return {
+    display: 'grid',
+    gridTemplateColumns: '1.6fr 0.6fr 0.5fr 0.7fr 0.6fr 0.8fr',
+    gap: 12,
+  };
+}
+
+function titleCellMeta(): React.CSSProperties {
+  return { color: TOKENS.subtle, fontSize: 12, marginTop: 2 };
+}
+
+function headerText(): React.CSSProperties {
+  return {
+    color: TOKENS.textSecondary,
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+  };
+}
+
+function buttonBase(): React.CSSProperties {
+  return {
+    padding: '6px 10px',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+  };
+}
+
+function listRowBase(): React.CSSProperties {
+  return {
+    ...rowGridBase(),
+    padding: '14px 8px',
+    alignItems: 'center',
+    borderBottom: `1px solid ${TOKENS.border}`,
+    background: TOKENS.surface,
+  };
+}
+
+function SkeletonRow() {
+  // Dark skeleton shimmer with accessible contrast
+  return (
+    <div
+      style={{
+        ...rowGridBase(),
+        padding: '12px 8px',
+        alignItems: 'center',
+        borderBottom: `1px solid ${TOKENS.border}`,
+        background: TOKENS.surface,
+      }}
+    >
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            height: 12,
+            background:
+              'linear-gradient(90deg, rgba(55,65,81,0.6) 25%, rgba(75,85,99,0.6) 37%, rgba(55,65,81,0.6) 63%)',
+            borderRadius: 6,
+            animation: 'shine 1.2s infinite linear',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 function SeverityBadge({ severity }: { severity: string }) {
-  const color =
-    severity === 'Critical'
-      ? errorColor
-      : severity === 'High'
-      ? '#F87171'
-      : '#9CA3AF';
-  const bg =
-    severity === 'Critical'
-      ? '#FEE2E2'
-      : severity === 'High'
-      ? '#FEE2E2'
-      : '#F3F4F6';
+  // Map severities to dark badges
+  let bg = TOKENS.highBg;
+  let text = TOKENS.highText;
+  if (severity === 'Critical') {
+    bg = TOKENS.criticalBg;
+    text = TOKENS.criticalText;
+  } else if (severity === 'High') {
+    bg = TOKENS.highBg;
+    text = TOKENS.highText;
+  } else {
+    // default subtle for others
+    bg = '#374151';
+    text = TOKENS.textSecondary;
+  }
 
   return (
     <span
       style={{
         backgroundColor: bg,
-        color,
+        color: text,
         borderRadius: 999,
         padding: '2px 8px',
         fontSize: 12,
         fontWeight: 600,
+        border: `1px solid ${TOKENS.border}`,
       }}
       aria-label={`Severity ${severity}`}
     >
@@ -52,9 +159,9 @@ function SavingsPill({ value }: { value: number | null | undefined }) {
   return (
     <span
       style={{
-        color: success,
-        backgroundColor: '#ECFDF5',
-        border: `1px solid ${'#A7F3D0'}`,
+        color: TOKENS.savingsText,
+        backgroundColor: TOKENS.savingsBg,
+        border: `1px solid rgba(16,185,129,0.35)`,
         borderRadius: 999,
         padding: '2px 8px',
         fontSize: 12,
@@ -64,34 +171,6 @@ function SavingsPill({ value }: { value: number | null | undefined }) {
     >
       {label}
     </span>
-  );
-}
-
-function SkeletonRow() {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1.6fr 0.6fr 0.5fr 0.7fr 0.6fr 0.8fr',
-        gap: 12,
-        padding: '12px 8px',
-        alignItems: 'center',
-        borderBottom: `1px solid ${borderColor}`,
-      }}
-    >
-      {[...Array(6)].map((_, i) => (
-        <div
-          key={i}
-          style={{
-            height: 12,
-            background:
-              'linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 37%, #F3F4F6 63%)',
-            borderRadius: 6,
-            animation: 'shine 1.2s infinite linear',
-          }}
-        />
-      ))}
-    </div>
   );
 }
 
@@ -211,9 +290,9 @@ export function TopRecommendations() {
       return (
         <div
           style={{
-            color: errorColor,
-            backgroundColor: '#FEF2F2',
-            border: `1px solid ${'#FECACA'}`,
+            color: TOKENS.criticalText,
+            backgroundColor: 'rgba(127,29,29,0.15)',
+            border: `1px solid ${TOKENS.border}`,
             padding: 12,
             borderRadius: 8,
           }}
@@ -229,9 +308,9 @@ export function TopRecommendations() {
         <div style={{ display: 'grid', gap: 8 }}>
           <div
             style={{
-              color: primary,
-              backgroundColor: surface,
-              border: `1px dashed ${borderColor}`,
+              color: TOKENS.subtle,
+              backgroundColor: TOKENS.surface,
+              border: `1px dashed ${TOKENS.border}`,
               padding: 16,
               borderRadius: 8,
               textAlign: 'center',
@@ -240,7 +319,7 @@ export function TopRecommendations() {
             No high-priority recommendations right now
           </div>
           {fetchedCount > 0 && (
-            <div style={{ color: '#6B7280', fontSize: 12, textAlign: 'center' }}>
+            <div style={{ color: TOKENS.subtle, fontSize: 12, textAlign: 'center' }}>
               Note: {fetchedCount} items exist but none met relaxed high-priority and confidence thresholds.
             </div>
           )}
@@ -253,26 +332,21 @@ export function TopRecommendations() {
         role="table"
         aria-label="Top Recommendations table"
         style={{
-          border: `1px solid ${borderColor}`,
+          border: `1px solid ${TOKENS.border}`,
           borderRadius: 8,
           overflow: 'hidden',
-          background: '#FFFFFF',
+          background: TOKENS.surface,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
         }}
       >
         <div
           role="row"
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1.6fr 0.6fr 0.5fr 0.7fr 0.6fr 0.8fr',
-            gap: 12,
+            ...rowGridBase(),
             padding: '12px 8px',
-            background: surface,
-            borderBottom: `1px solid ${borderColor}`,
-            color: '#6B7280',
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: 0.2,
-            textTransform: 'uppercase',
+            background: TOKENS.bg,
+            borderBottom: `1px solid ${TOKENS.border}`,
+            ...headerText(),
           }}
         >
           <div role="columnheader">Title</div>
@@ -286,16 +360,15 @@ export function TopRecommendations() {
           <div
             key={rec.id}
             role="row"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.6fr 0.6fr 0.5fr 0.7fr 0.6fr 0.8fr',
-              gap: 12,
-              padding: '14px 8px',
-              alignItems: 'center',
-              borderBottom: `1px solid ${borderColor}`,
+            style={listRowBase()}
+            onMouseEnter={(e) => {
+              (e.currentTarget.style.backgroundColor as any) = TOKENS.bg;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget.style.backgroundColor as any) = TOKENS.surface;
             }}
           >
-            <div role="cell" style={{ color: textColor, fontWeight: 600 }}>
+            <div role="cell" style={{ color: TOKENS.text, fontWeight: 600 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span
                   style={{
@@ -304,33 +377,30 @@ export function TopRecommendations() {
                     height: 8,
                     borderRadius: 999,
                     backgroundColor:
-                      (rec.environment || '').toLowerCase() === 'prod' ? errorColor : primary,
+                      (rec.environment || '').toLowerCase() === 'prod' ? TOKENS.criticalBg : '#2563EB',
                   }}
                   aria-hidden
                   title={rec.environment ? `Env: ${rec.environment}` : 'Env'}
                 />
                 <span>{(rec as any).title || (rec as any).name || 'Recommendation'}</span>
               </div>
-              <div style={{ color: '#6B7280', fontSize: 12, marginTop: 2 }}>
+              <div style={titleCellMeta()}>
                 {(rec as any).category || (rec as any).type || rec.environment || '—'}
               </div>
             </div>
             <div role="cell">
               <SeverityBadge severity={(rec as any).severity || (rec as any).priority || 'High'} />
             </div>
-            <div role="cell" style={{ color: textColor }}>
+            <div role="cell" style={{ color: TOKENS.text }}>
               {Math.round((rec as any).risk_score ?? (rec as any).risk ?? 0)}
             </div>
             <div role="cell">
               <SavingsPill value={(rec as any).estimated_savings ?? (rec as any).savings ?? 0} />
             </div>
-            <div role="cell" style={{ color: '#6B7280' }}>
+            <div role="cell" style={{ color: TOKENS.subtle }}>
               {formatRelativeTime((rec as any).updated_at || (rec as any).last_seen || (rec as any).detected_at)}
             </div>
-            <div
-              role="cell"
-              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-            >
+            <div role="cell" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
                 aria-label={`Fix recommendation ${(rec as any).title || (rec as any).name || 'item'}`}
                 onClick={() => {
@@ -339,15 +409,19 @@ export function TopRecommendations() {
                   console.log('Fix now clicked', rec.id);
                 }}
                 style={{
-                  backgroundColor: primary,
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '6px 10px',
-                  borderRadius: 6,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  ...buttonBase(),
+                  backgroundColor: 'transparent',
+                  border: `1px solid ${TOKENS.primaryOutline}`,
+                  color: '#E5E7EB',
                 }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget.style.backgroundColor as any) = TOKENS.hoverAccent;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget.style.backgroundColor as any) = 'transparent';
+                }}
+                onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyles())}
+                onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
               >
                 Fix now
               </button>
@@ -359,15 +433,21 @@ export function TopRecommendations() {
                   console.log('View details clicked', rec.id);
                 }}
                 style={{
-                  backgroundColor: '#FFFFFF',
-                  color: primary,
-                  border: `1px solid ${borderColor}`,
-                  padding: '6px 10px',
-                  borderRadius: 6,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  ...buttonBase(),
+                  backgroundColor: 'transparent',
+                  border: `1px solid ${TOKENS.border}`,
+                  color: TOKENS.linkDefault,
                 }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget.style.color as any) = TOKENS.linkHover;
+                  (e.currentTarget.style.backgroundColor as any) = TOKENS.hoverAccent;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget.style.color as any) = TOKENS.linkDefault;
+                  (e.currentTarget.style.backgroundColor as any) = 'transparent';
+                }}
+                onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyles())}
+                onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
               >
                 View details
               </button>
@@ -381,16 +461,22 @@ export function TopRecommendations() {
                     e.stopPropagation();
                   }}
                   style={{
-                    backgroundColor: '#FFFFFF',
-                    color: '#6B7280',
-                    border: `1px solid ${borderColor}`,
+                    ...buttonBase(),
                     width: 32,
                     height: 32,
-                    borderRadius: 6,
-                    fontSize: 14,
-                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
+                    color: TOKENS.subtle,
+                    border: `1px solid ${TOKENS.border}`,
                   }}
                   title="More"
+                  onMouseEnter={(e) => {
+                    (e.currentTarget.style.backgroundColor as any) = TOKENS.hoverAccent;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget.style.backgroundColor as any) = 'transparent';
+                  }}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyles())}
+                  onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
                 >
                   ⋯
                 </button>
@@ -404,6 +490,7 @@ export function TopRecommendations() {
 
   return (
     <section
+      className="toprecs-dark"
       aria-labelledby="top-recommendations-header"
       style={{
         display: 'flex',
@@ -418,19 +505,24 @@ export function TopRecommendations() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          background: TOKENS.surface,
+          border: `1px solid ${TOKENS.border}`,
+          borderRadius: 8,
+          padding: 12,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
         }}
       >
         <h2
           style={{
             margin: 0,
             fontSize: 18,
-            color: textColor,
+            color: TOKENS.text,
             fontWeight: 700,
           }}
         >
           Top Recommendations
         </h2>
-        <span style={{ color: '#6B7280', fontSize: 12 }}>
+        <span style={{ color: TOKENS.textSecondary, fontSize: 12 }}>
           Top 3 high-priority with confidence ≥ 0.5
         </span>
       </div>

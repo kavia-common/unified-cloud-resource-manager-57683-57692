@@ -1,5 +1,4 @@
 /** PUBLIC_INTERFACE
- * JS facade for TopRecommendations component.
- * Use named export only to avoid duplicate/default export mismatches across TS/JS.
+ * JS facade for TopRecommendations component (named-only export).
  */
-export { default as TopRecommendations } from './TopRecommendations';
+export { TopRecommendations } from './TopRecommendations';

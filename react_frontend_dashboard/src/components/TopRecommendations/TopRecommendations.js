@@ -1,1 +1,2 @@
-export { TopRecommendations } from './index.ts';
+// PUBLIC_INTERFACE
+export { TopRecommendations } from './index';

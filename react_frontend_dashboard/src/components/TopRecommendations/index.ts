@@ -1,4 +1,4 @@
 /** PUBLIC_INTERFACE
- * Named export for TopRecommendations component mapping from the default export in TopRecommendations.tsx.
+ * Named export for TopRecommendations component.
  */
-export { default as TopRecommendations } from './TopRecommendations';
+export { TopRecommendations } from './TopRecommendations';

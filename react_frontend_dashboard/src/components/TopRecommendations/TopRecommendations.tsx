@@ -109,7 +109,8 @@ function SkeletonRow() {
  *  - Logs fetch start/end, counts pre/post filter, and source via services.
  *  - Will not clear previously shown items if subsequent fetch filters to zero while raw > 0.
  */
-export default function TopRecommendations() {
+// PUBLIC_INTERFACE
+export function TopRecommendations() {
   // Use a structural type here to avoid hard dependency on RankedRecommendation interface
   const [items, setItems] = useState<any[]>([]);
   const [state, setState] = useState<FetchState>('idle');
@@ -409,3 +410,5 @@ export default function TopRecommendations() {
     </section>
   );
 }
+
+// Note: No default export to ensure consistency with named-only exports.

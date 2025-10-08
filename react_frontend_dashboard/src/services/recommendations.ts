@@ -7,95 +7,178 @@ export interface Recommendation {
   title: string;
   category?: string | null;
   severity?: string | null;
+  priority?: string | null; // e.g., P0/P1/P2 if exists
   risk_score?: number | null;
+  category_priority?: number | null;
   estimated_savings?: number | null;
   environment?: string | null; // e.g., 'prod', 'dev', etc.
   confidence?: number | null; // 0..1
   actionable?: boolean | null;
   updated_at?: string | null; // ISO timestamp
+  detected_at?: string | null; // alternative timestamp
 }
 
 export interface RankedRecommendation extends Recommendation {
-  severity_norm: number; // 1.0 for Critical, 0.8 for High
-  normRisk: number;
-  normSavings: number;
+  severityWeight: number; // 1.0 for Critical, 0.85 for High, else 0.6
+  riskScoreNorm: number;
   recencyDecay: number;
-  priority: number;
+  priorityScore: number;
 }
 
-const DEFAULT_TABLE_NAME = 'ai_recommendations';
+const PRIMARY_SOURCES = ['ai_automation_rules', 'automation_rules', 'ai_rules'];
+const FALLBACK_SOURCES = ['ai_recommendations'];
 
 /**
  * PUBLIC_INTERFACE
  * getRecommendations
- * Fetches AI recommendations from Supabase with graceful handling for missing client or table.
- * Selects relevant fields and returns raw records.
+ * Fetches recommendations from Supabase using the same table/view as AI Automation Rules if available,
+ * with a fallback to ai_recommendations. Includes robust field mapping for differing schemas.
  */
-export async function getRecommendations(options?: {
-  tableName?: string;
-}): Promise<Recommendation[]> {
-  const table = options?.tableName || DEFAULT_TABLE_NAME;
+export async function getRecommendations(): Promise<Recommendation[]> {
   const supabase = getSupabaseClient();
-
-  // If no supabase client (e.g., env missing), return empty gracefully
   if (!supabase) return [];
 
-  try {
-    const { data, error } = await supabase
-      .from(table)
-      .select(
-        'id, title, category, severity, risk_score, estimated_savings, environment, confidence, actionable, updated_at'
-      )
-      .order('updated_at', { ascending: false })
-      .limit(200);
+  // Helper to run a query and map results from an arbitrary table/view
+  async function querySource(table: string): Promise<Recommendation[]> {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(400);
 
-    if (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to fetch recommendations:', error.message);
+      if (error) {
+        console.warn(`[TopRecs] Query error from ${table}:`, error.message);
+        return [];
+      }
+
+      const mapped: Recommendation[] = (data || []).map((r: any): Recommendation => {
+        // Robust field mapping across potential schemas
+        const id =
+          r.id ??
+          r.rule_id ??
+          r.recommendation_id ??
+          r.uuid ??
+          `${table}-${Math.random().toString(36).slice(2)}`;
+
+        const title = r.title ?? r.name ?? r.rule_name ?? r.recommendation ?? 'Recommendation';
+
+        const category =
+          r.category ??
+          r.type ??
+          r.rule_type ??
+          r.kind ??
+          r.category_name ??
+          null;
+
+        // severity/priority mapping
+        const severityRaw = r.severity ?? r.level ?? r.priority ?? null;
+        const normalizedSeverity = normalizeSeverity(severityRaw);
+        const priorityLabel = typeof r.priority === 'string' ? r.priority : null;
+
+        const risk_score = toNumber(
+          r.risk_score ?? r.risk ?? r.riskLevel ?? r.score ?? r.threat_score
+        );
+
+        const category_priority = toNumber(r.category_priority ?? r.impact_score ?? r.weight);
+
+        const estimated_savings = toNumber(
+          r.estimated_savings ?? r.savings ?? r.estimated_savings_monthly ?? r.cost_savings
+        );
+
+        const environment =
+          (r.environment ?? r.env ?? r.stage ?? r.account_env ?? null) &&
+          String(r.environment ?? r.env ?? r.stage ?? r.account_env).toLowerCase();
+
+        // confidence mapping
+        let confidence: number | null = null;
+        if (typeof r.confidence === 'number') confidence = r.confidence;
+        else if (typeof r.score === 'number') confidence = r.score / 100;
+        else if (typeof r.confidence_score === 'number') confidence = r.confidence_score;
+        else if (r.confidence != null) {
+          const n = Number(r.confidence);
+          confidence = Number.isFinite(n) ? (n > 1 ? n / 100 : n) : null;
+        }
+
+        // actionable mapping
+        const actionable =
+          typeof r.actionable === 'boolean'
+            ? r.actionable
+            : r.is_actionable === true ||
+              r.suggested_action != null ||
+              r.action != null ||
+              r.fix_available === true
+            ? true
+            : null;
+
+        const updated_at = r.updated_at ?? r.last_updated ?? r.last_seen ?? null;
+        const detected_at = r.detected_at ?? r.created_at ?? r.first_seen ?? null;
+
+        return {
+          id,
+          title,
+          category,
+          severity: normalizedSeverity ?? (typeof severityRaw === 'string' ? severityRaw : null),
+          priority: priorityLabel,
+          risk_score,
+          category_priority,
+          estimated_savings,
+          environment,
+          confidence,
+          actionable,
+          updated_at,
+          detected_at,
+        };
+      });
+
+      return mapped;
+    } catch (e: any) {
+      console.warn(`[TopRecs] Unexpected error from ${table}:`, e?.message || e);
       return [];
     }
-
-    const safeData = (data || []).map((r: any): Recommendation => ({
-      id: r.id ?? String(Math.random()),
-      title: r.title ?? 'Recommendation',
-      category: r.category ?? null,
-      severity: r.severity ?? null,
-      risk_score: typeof r.risk_score === 'number' ? r.risk_score : null,
-      estimated_savings:
-        typeof r.estimated_savings === 'number' ? r.estimated_savings : null,
-      environment: r.environment ?? null,
-      confidence:
-        typeof r.confidence === 'number' ? r.confidence : (r.confidence ? Number(r.confidence) : null),
-      actionable: typeof r.actionable === 'boolean' ? r.actionable : !!r.actionable,
-      updated_at: r.updated_at ?? null,
-    }));
-
-    return safeData;
-  } catch (e: any) {
-    // eslint-disable-next-line no-console
-    console.warn('Recommendations fetch error:', e?.message || e);
-    return [];
   }
+
+  // Try primary sources first (AI Automation Rules family)
+  for (const table of PRIMARY_SOURCES) {
+    const items = await querySource(table);
+    if (items.length > 0) {
+      console.info(`[TopRecs] Using source: ${table} (${items.length} rows)`);
+      return items;
+    }
+  }
+
+  // Fallback sources (ai_recommendations etc.)
+  for (const table of FALLBACK_SOURCES) {
+    const items = await querySource(table);
+    if (items.length > 0) {
+      console.info(`[TopRecs] Using fallback source: ${table} (${items.length} rows)`);
+      return items;
+    }
+  }
+
+  console.warn('[TopRecs] No data from any known source.');
+  return [];
+}
+
+function toNumber(v: any): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
 
 function normalizeSeverity(sev?: string | null): Severity | null {
   if (!sev) return null;
   const s = String(sev).trim().toLowerCase();
-  if (s === 'critical') return 'Critical';
-  if (s === 'high') return 'High';
-  if (s === 'medium') return 'Medium';
-  if (s === 'low') return 'Low';
+  if (s === 'critical' || s === 'p0') return 'Critical';
+  if (s === 'high' || s === 'p1') return 'High';
+  if (s === 'medium' || s === 'p2') return 'Medium';
+  if (s === 'low' || s === 'p3') return 'Low';
   if (s === 'info' || s === 'informational') return 'Info';
   return null;
 }
 
-function normalizeEnv(env?: string | null): string | null {
-  if (!env) return null;
-  return String(env).trim().toLowerCase();
-}
-
 function clamp01(n: number): number {
-  if (Number.isNaN(n)) return 0;
+  if (!Number.isFinite(n)) return 0;
   return Math.max(0, Math.min(1, n));
 }
 
@@ -109,76 +192,108 @@ function daysSince(dateISO?: string | null): number {
 
 /**
  * PUBLIC_INTERFACE
- * selectTopHighRiskRecommendations
- * Applies filtering, scoring, ranking, and selection of top N (default 3) recommendations.
+ * selectTopHighPriorityRecommendations
+ * Applies relaxed filtering and priority scoring to select the top N (default 3) high-priority items.
+ *
+ * High priority if:
+ *  - severity in ['Critical','High'] OR
+ *  - priority in ['P0','P1'] OR
+ *  - category_priority >= 80 (if field exists)
+ *
+ * Confidence threshold: >= 0.5
+ *
+ * Scoring:
+ *   priorityScore = 0.45*severityWeight + 0.35*riskScoreNorm + 0.2*recencyDecay
+ *   severityWeight: Critical=1.0, High=0.85, else 0.6
+ *   riskScoreNorm = (risk_score || risk || 0)/100
+ *   recencyDecay = exp(-daysSince(updated_at||detected_at)/21)
+ *
+ * Sort desc by priorityScore,
+ * tie-breakers: environment==='prod' > higher risk > newer updated_at.
  */
-export function selectTopHighRiskRecommendations(
+export function selectTopHighPriorityRecommendations(
   items: Recommendation[],
   topN = 3
 ): RankedRecommendation[] {
-  // Filter on actionable, confidence >= 0.7, severity in ['Critical', 'High']
-  const filtered = items
-    .map((r) => ({
-      ...r,
-      severity: normalizeSeverity(r.severity),
-      environment: normalizeEnv(r.environment),
-    }))
-    .filter((r) => !!r.actionable)
-    .filter((r) => (r.confidence ?? 0) >= 0.7)
-    .filter((r) => r.severity === 'Critical' || r.severity === 'High');
+  const mapped = items.map((r) => {
+    const sevNorm = normalizeSeverity(r.severity ?? r.priority ?? null);
+    const riskNorm = clamp01((toNumber(r.risk_score) ?? 0) / 100);
+    const recencyBase = r.updated_at ?? r.detected_at ?? null;
+    const ds = daysSince(recencyBase);
+    const recencyDecay = Math.exp(-ds / 21);
 
-  if (filtered.length === 0) return [];
+    const severityWeight =
+      sevNorm === 'Critical' ? 1.0 : sevNorm === 'High' ? 0.85 : 0.6;
 
-  // For normSavings normalization, compute max estimated_savings among filtered
-  const maxSavings = filtered.reduce((m, r) => {
-    const v = typeof r.estimated_savings === 'number' ? r.estimated_savings : 0;
-    return v > m ? v : m;
-  }, 0);
-
-  // Compute components and priority
-  const ranked: RankedRecommendation[] = filtered.map((r) => {
-    const severity_weight = r.severity === 'Critical' ? 1.0 : r.severity === 'High' ? 0.8 : 0;
-    const normRisk = clamp01(((r.risk_score ?? 0) as number) / 100);
-    const normSavings =
-      maxSavings > 0 ? clamp01(((r.estimated_savings ?? 0) as number) / maxSavings) : 0;
-    const ds = daysSince(r.updated_at);
-    const recencyDecay = r.updated_at ? Math.exp(-ds / 14) : 0.5;
-
-    const priority =
-      0.4 * severity_weight + 0.3 * normRisk + 0.2 * normSavings + 0.1 * recencyDecay;
+    const priorityScore = 0.45 * severityWeight + 0.35 * riskNorm + 0.2 * recencyDecay;
 
     return {
       ...r,
-      severity_norm: severity_weight,
-      normRisk,
-      normSavings,
+      severity: sevNorm ?? r.severity ?? r.priority ?? null,
+      severityWeight,
+      riskScoreNorm: riskNorm,
       recencyDecay,
-      priority,
-    };
+      priorityScore,
+      environment: r.environment ? String(r.environment).toLowerCase() : null,
+    } as RankedRecommendation;
   });
 
-  // Sort: priority desc; tie-breakers: prod env first, higher risk_score, higher savings, newer updated_at
-  ranked.sort((a, b) => {
-    if (b.priority !== a.priority) return b.priority - a.priority;
+  const totalFetched = mapped.length;
+
+  // Relaxed filtering based on provided rules
+  const filtered = mapped.filter((r) => {
+    const highSeverity =
+      r.severity === 'Critical' || r.severity === 'High';
+
+    const highPriorityLabel =
+      (r.priority && ['P0', 'P1'].includes(String(r.priority).toUpperCase())) ||
+      // some datasets overload severity field with P0/P1
+      (typeof r.severity === 'string' &&
+        ['P0', 'P1'].includes(String(r.severity).toUpperCase()));
+
+    const highCategoryPriority =
+      (toNumber(r.category_priority) ?? -1) >= 80;
+
+    const passesPriority = highSeverity || highPriorityLabel || highCategoryPriority;
+
+    const conf = toNumber(r.confidence);
+    const passesConfidence = conf == null ? true : conf >= 0.5;
+
+    // Actionable only if the field exists and is explicitly false -> then exclude.
+    // If missing, do not filter.
+    const actionableKnown = typeof r.actionable === 'boolean';
+    const passesActionable = actionableKnown ? r.actionable === true : true;
+
+    return passesPriority && passesConfidence && passesActionable;
+  });
+
+  if (filtered.length === 0) {
+    if (totalFetched > 0) {
+      console.warn(
+        `[TopRecs] 0 items after filtering. fetched=${totalFetched}, filtered=0 (severity/confidence/actionable filters may be too strict)`
+      );
+    }
+    return [];
+  }
+
+  // Sort by priorityScore desc; tie-breakers
+  filtered.sort((a, b) => {
+    if (b.priorityScore !== a.priorityScore) return b.priorityScore - a.priorityScore;
 
     const envA = a.environment === 'prod' ? 1 : 0;
     const envB = b.environment === 'prod' ? 1 : 0;
     if (envB !== envA) return envB - envA;
 
-    const riskA = a.risk_score ?? 0;
-    const riskB = b.risk_score ?? 0;
+    const riskA = toNumber(a.risk_score) ?? 0;
+    const riskB = toNumber(b.risk_score) ?? 0;
     if (riskB !== riskA) return riskB - riskA;
-
-    const saveA = a.estimated_savings ?? 0;
-    const saveB = b.estimated_savings ?? 0;
-    if (saveB !== saveA) return saveB - saveA;
 
     const tA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
     const tB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
     return tB - tA;
   });
 
-  return ranked.slice(0, topN);
+  return filtered.slice(0, topN);
 }
 
 /**
@@ -187,7 +302,7 @@ export function selectTopHighRiskRecommendations(
  * Formats a number in USD with compact notation, e.g., $12.3K.
  */
 export function formatCurrency(value?: number | null): string {
-  if (!value || !Number.isFinite(value)) return '-';
+  if (value == null || !Number.isFinite(value)) return '-';
   try {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -196,7 +311,7 @@ export function formatCurrency(value?: number | null): string {
       maximumFractionDigits: 1,
     }).format(value);
   } catch {
-    return `$${value.toFixed(0)}`;
+    return `$${Number(value).toFixed(0)}`;
   }
 }
 

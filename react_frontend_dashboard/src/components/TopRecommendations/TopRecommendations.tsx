@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   getRecommendations,
-  selectTopHighRiskRecommendations,
   formatCurrency,
   formatRelativeTime,
-  RankedRecommendation,
 } from '../../services/recommendations';
 
 type FetchState = 'idle' | 'loading' | 'success' | 'error';
@@ -96,9 +94,12 @@ function SkeletonRow() {
 }
 
 export default function TopRecommendations() {
-  const [items, setItems] = useState<RankedRecommendation[]>([]);
+  // Use a structural type here to avoid hard dependency on RankedRecommendation interface
+  const [items, setItems] = useState<any[]>([]);
   const [state, setState] = useState<FetchState>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [fetchedCount, setFetchedCount] = useState(0);
+  const [filteredCount, setFilteredCount] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -106,11 +107,17 @@ export default function TopRecommendations() {
       setState('loading');
       setError(null);
       try {
+        const { selectTopHighPriorityRecommendations } = await import('../../services/recommendations');
         const raw = await getRecommendations();
-        const ranked = selectTopHighRiskRecommendations(raw, 3);
+        setFetchedCount(raw.length);
+        const ranked = selectTopHighPriorityRecommendations(raw, 3);
+        setFilteredCount(ranked.length);
         if (mounted) {
           setItems(ranked);
           setState('success');
+        }
+        if (ranked.length === 0 && raw.length > 0) {
+          console.warn(`[TopRecs] Showing empty state after filtering. fetched=${raw.length} filtered=0`);
         }
       } catch (e: any) {
         // eslint-disable-next-line no-console
@@ -157,17 +164,24 @@ export default function TopRecommendations() {
 
     if (items.length === 0) {
       return (
-        <div
-          style={{
-            color: primary,
-            backgroundColor: surface,
-            border: `1px dashed ${borderColor}`,
-            padding: 16,
-            borderRadius: 8,
-            textAlign: 'center',
-          }}
-        >
-          No critical recommendations right now
+        <div style={{ display: 'grid', gap: 8 }}>
+          <div
+            style={{
+              color: primary,
+              backgroundColor: surface,
+              border: `1px dashed ${borderColor}`,
+              padding: 16,
+              borderRadius: 8,
+              textAlign: 'center',
+            }}
+          >
+            No high-priority recommendations right now
+          </div>
+          {fetchedCount > 0 && (
+            <div style={{ color: '#6B7280', fontSize: 12, textAlign: 'center' }}>
+              Note: {fetchedCount} items exist but none met the high-priority or confidence thresholds.
+            </div>
+          )}
         </div>
       );
     }
@@ -228,28 +242,28 @@ export default function TopRecommendations() {
                     height: 8,
                     borderRadius: 999,
                     backgroundColor:
-                      rec.environment === 'prod' ? errorColor : primary,
+                      (rec.environment || '').toLowerCase() === 'prod' ? errorColor : primary,
                   }}
                   aria-hidden
                   title={rec.environment ? `Env: ${rec.environment}` : 'Env'}
                 />
-                <span>{rec.title || 'Recommendation'}</span>
+                <span>{(rec as any).title || (rec as any).name || 'Recommendation'}</span>
               </div>
               <div style={{ color: '#6B7280', fontSize: 12, marginTop: 2 }}>
-                {rec.category || rec.environment || '—'}
+                {(rec as any).category || (rec as any).type || rec.environment || '—'}
               </div>
             </div>
             <div role="cell">
-              <SeverityBadge severity={rec.severity || 'High'} />
+              <SeverityBadge severity={(rec as any).severity || (rec as any).priority || 'High'} />
             </div>
             <div role="cell" style={{ color: textColor }}>
-              {Math.round(rec.risk_score ?? 0)}
+              {Math.round((rec as any).risk_score ?? (rec as any).risk ?? 0)}
             </div>
             <div role="cell">
-              <SavingsPill value={rec.estimated_savings ?? 0} />
+              <SavingsPill value={(rec as any).estimated_savings ?? (rec as any).savings ?? 0} />
             </div>
             <div role="cell" style={{ color: '#6B7280' }}>
-              {formatRelativeTime(rec.updated_at)}
+              {formatRelativeTime((rec as any).updated_at || (rec as any).last_seen || (rec as any).detected_at)}
             </div>
             <div
               role="cell"
@@ -355,7 +369,7 @@ export default function TopRecommendations() {
           Top Recommendations
         </h2>
         <span style={{ color: '#6B7280', fontSize: 12 }}>
-          High-risk, actionable with confidence
+          Top 3 high-priority with confidence ≥ 0.5
         </span>
       </div>
       {content}

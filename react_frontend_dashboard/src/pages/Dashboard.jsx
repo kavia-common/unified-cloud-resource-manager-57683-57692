@@ -1,32 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./Dashboard.module.css";
 // Single source for the banner image
-import newBanner from "../assets/dashboard/new-dashboard-banner.v3.png";
+import dashboardBanner from "../assets/dashboard/dashboard-banner.png";
 
 /**
  * PUBLIC_INTERFACE
+ * Dashboard page component showing overview banner and summary cards
  */
-// PUBLIC_INTERFACE
 export default function Dashboard() {
-  /**
-   * Dashboard page showing a minimalist full-bleed banner image.
-   * - Uses a single banner image instance
-   * - No error state toggles or background fallbacks
-   * - Responsive: full-width container, constrained max-height with cover behavior
-   * - Pure White theme: clean spacing, subtle border, no clutter
-   */
+  const [imageError, setImageError] = useState(false);
+
   return (
     <div className={styles.pageWrap}>
-      {/* Full-width banner image */}
-      <section className={styles.imageBanner} aria-label="Dashboard banner image">
-        <img
-          src={newBanner}
-          alt="Unified cloud dashboard banner"
-          className={styles.imageBannerImg}
-          loading="eager"
-          // Remove any onError handlers to prevent retry loops
-          // If image fails to load, it will show alt text without retrying
-        />
+      {/* Full-width banner image with fallback */}
+      <section className={styles.imageBanner} aria-label="Dashboard banner">
+        {!imageError ? (
+          <img
+            src={dashboardBanner}
+            alt="Cloud resource management dashboard banner"
+            className={styles.imageBannerImg}
+            loading="eager"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className={styles.bannerFallback}>
+            <h1>Welcome to Your Cloud Dashboard</h1>
+            <p>Manage and optimize your cloud resources from one place</p>
+          </div>
+        )}
       </section>
 
       {/* Body content */}

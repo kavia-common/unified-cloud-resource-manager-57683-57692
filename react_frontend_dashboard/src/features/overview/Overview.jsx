@@ -15,7 +15,7 @@ import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } fro
 import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 import ActionsBar from "../../components/common/ActionsBar.tsx";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
-import TopRecommendations from "../../components/TopRecommendations/TopRecommendations.js";
+import TopRecommendations from "../../components/TopRecommendations";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {

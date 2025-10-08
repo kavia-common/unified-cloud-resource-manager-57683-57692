@@ -33,6 +33,13 @@ const FALLBACK_SOURCES = ['ai_recommendations'];
  * getRecommendations
  * Fetches recommendations from Supabase using the same table/view as AI Automation Rules if available,
  * with a fallback to ai_recommendations. Includes robust field mapping for differing schemas.
+ *
+ * Returns:
+ *  - Recommendation[] (raw mapped items, without ranking)
+ *
+ * Notes:
+ *  - Adds console.info/console.warn logs for source used, counts, and errors.
+ *  - Only latest TopRecommendations caller should set state; component enforces request-id guard.
  */
 export async function getRecommendations(): Promise<Recommendation[]> {
   const supabase = getSupabaseClient();

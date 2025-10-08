@@ -100,6 +100,14 @@ function SkeletonRow() {
  * Renders the top 3 high-priority recommendations with robust handling to avoid flicker/empty state
  * due to double mounts (React StrictMode) or stale requests. Ensures the latest successful fetch
  * updates state and preserves previously shown items if a subsequent fetch returns empty.
+ *
+ * Props:
+ *  - none
+ *
+ * Behavior:
+ *  - Uses a request-id guard so only the latest fetch updates state.
+ *  - Logs fetch start/end, counts pre/post filter, and source via services.
+ *  - Will not clear previously shown items if subsequent fetch filters to zero while raw > 0.
  */
 export default function TopRecommendations() {
   // Use a structural type here to avoid hard dependency on RankedRecommendation interface

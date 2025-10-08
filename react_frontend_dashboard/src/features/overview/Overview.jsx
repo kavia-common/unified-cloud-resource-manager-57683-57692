@@ -222,8 +222,6 @@ export default function Overview() {
         title="Welcome back!"
         subtitle="Manage, monitor, and optimize your cloud with ease"
         align="left"
-        rightImageSrc={require("../../assets/dashboard/banner-image.png")}
-        rightImageAlt=""
       />
 
       {/* Key metrics */}

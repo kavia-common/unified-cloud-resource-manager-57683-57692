@@ -245,27 +245,7 @@ export default function Overview() {
       <RecommendationDetailsModal
         isOpen={isRecModalOpen}
         onClose={handleCloseRecDetails}
-        recommendation={{
-          id: selectedRec?.id,
-          title: selectedRec?.title || selectedRec?.name || 'Recommendation Details',
-          cloud:
-            selectedRec?.cloudProvider ||
-            selectedRec?.provider ||
-            (typeof selectedRec?.category === 'string'
-              ? (selectedRec?.category.toLowerCase().includes('azure')
-                ? 'Azure'
-                : selectedRec?.category.toLowerCase().includes('aws')
-                ? 'AWS'
-                : 'Multi-Cloud')
-              : 'Multi-Cloud'),
-          impactedServices:
-            Array.isArray(selectedRec?.impactedServices)
-              ? selectedRec?.impactedServices
-              : (selectedRec?.services && Array.isArray(selectedRec?.services) ? selectedRec?.services : []),
-          description:
-            selectedRec?.description ||
-            'This recommendation aims to optimize resource usage and reduce costs across your selected cloud environments. Review the impact and proposed actions before executing.',
-        }}
+        selectedRow={selectedRec}
       />
 
       {/* Key metrics */}

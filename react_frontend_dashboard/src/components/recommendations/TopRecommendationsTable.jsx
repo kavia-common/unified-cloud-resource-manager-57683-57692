@@ -54,6 +54,7 @@ export default function TopRecommendationsTable({ rows, onViewDetails }) {
                       style={styles.viewBtn}
                       onClick={() => onViewDetails && onViewDetails(row)}
                       aria-label={`View details for ${row.title || 'this recommendation'}`}
+                      data-testid={`view-details-${row.id || row.title}`}
                     >
                       View Details
                     </button>

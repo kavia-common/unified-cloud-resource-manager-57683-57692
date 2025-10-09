@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { computeAdaptivePlan, type AdaptivePlan, type RecommendationLite } from '../../lib/adaptivePolicy';
+import { getRecentRuns } from '../../lib/historyProvider';
 
 type Recommendation = {
   id: string | number;
@@ -9,6 +11,14 @@ type Recommendation = {
   costImpactMonthly?: number; // mock-safe
   proposedActions?: string[];
   history?: Array<{ date: string; event: string }>;
+  // Optional fields enabling adaptive hints
+  type?: string;
+  category?: string;
+  riskLevel?: 'low' | 'medium' | 'high';
+  estimatedSavingsPct?: number;
+  expectedSavingsPct?: number;
+  requiresApproval?: boolean;
+  tags?: string[];
 };
 
 type TabKey = 'overview' | 'resources' | 'cost' | 'plan' | 'history';
@@ -27,6 +37,17 @@ export interface RecommendationDetailsModalProps {
   // PUBLIC_INTERFACE
   /** Pass the exact row object from the Top Recommendations table without remapping or defaults. */
   selectedRow?: any | null;
+  // PUBLIC_INTERFACE
+  /** Optional run handler; when provided, enables Run optimization button. Accepts optional adaptive plan. */
+  onRun?: (recommendation: any, options?: { adaptive?: AdaptivePlan }) => Promise<void> | void;
+  // PUBLIC_INTERFACE
+  /** Optional policy context for safety guardrails (blackout/compliance/blast radius/hours). */
+  context?: {
+    blackoutActive?: boolean;
+    complianceFlag?: boolean;
+    defaultBlastRadius?: 'canary' | 'smart-subset' | 'all';
+    businessHoursLocal?: boolean;
+  };
 }
 
 /**
@@ -42,10 +63,17 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
   isOpen,
   onClose,
   selectedRow,
+  onRun,
+  context,
 }) => {
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const modalRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+
+  // Adaptive mode UI state
+  const [adaptiveMode, setAdaptiveMode] = useState<boolean>(false);
+  const [plan, setPlan] = useState<AdaptivePlan | null>(null);
+  const [running, setRunning] = useState(false);
 
   // Focus management & ESC to close
   useEffect(() => {
@@ -100,8 +128,62 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
   useEffect(() => {
     if (!isOpen) {
       setActiveTab('overview');
+      setAdaptiveMode(false);
+      setPlan(null);
     }
   }, [isOpen]);
+
+  // Build lite recommendation for policy
+  const recLite: RecommendationLite | null = useMemo(() => {
+    const r: any = selectedRow || {};
+    if (!r) return null;
+    return {
+      id: r.id,
+      type: r.type || r.category,
+      riskLevel: r.riskLevel || 'medium',
+      estimatedSavingsPct: r.estimatedSavingsPct || r.expectedSavingsPct,
+      requiresApproval: !!r.requiresApproval,
+      tags: r.tags || [],
+    };
+  }, [selectedRow]);
+
+  // Load adaptive plan when toggle enabled
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!adaptiveMode || !recLite) {
+        if (mounted) setPlan(null);
+        return;
+      }
+      const history = await getRecentRuns({
+        recommendationId: recLite.id,
+        recommendationType: recLite.type,
+        limit: 25,
+      });
+      const computed = computeAdaptivePlan({
+        recommendation: recLite,
+        history,
+        context: {
+          blackoutActive: context?.blackoutActive,
+          complianceFlag: context?.complianceFlag,
+          defaultBlastRadius: context?.defaultBlastRadius,
+          businessHoursLocal: context?.businessHoursLocal,
+        },
+      });
+      if (mounted) setPlan(computed);
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [
+    adaptiveMode,
+    recLite,
+    context?.blackoutActive,
+    context?.complianceFlag,
+    context?.defaultBlastRadius,
+    context?.businessHoursLocal,
+  ]);
 
   if (!isOpen) return null;
 
@@ -131,10 +213,24 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
     Array.isArray(selectedRow?.proposedActions) && selectedRow!.proposedActions.length > 0
       ? selectedRow!.proposedActions
       : [];
-  const history =
-    Array.isArray(selectedRow?.history) && selectedRow!.history.length > 0
-      ? selectedRow!.history
-      : [];
+  const history = Array.isArray(selectedRow?.history) && selectedRow!.history.length > 0 ? selectedRow!.history : [];
+
+  const confidencePct = Math.round((plan?.confidence ?? 0) * 100);
+
+  const handleRun = async () => {
+    if (!onRun) return;
+    setRunning(true);
+    try {
+      if (adaptiveMode && plan) {
+        await onRun(selectedRow, { adaptive: plan });
+      } else {
+        await onRun(selectedRow);
+      }
+      onClose();
+    } finally {
+      setRunning(false);
+    }
+  };
 
   return (
     <div
@@ -151,32 +247,76 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
         }
       }}
     >
-      <div
-        ref={modalRef}
-        className="rcm-modal"
-        style={styles.modal}
-      >
+      <div ref={modalRef} className="rcm-modal" style={styles.modal}>
         <div style={styles.header}>
           <h2 id="rec-modal-title" style={styles.title}>
             {title}
           </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={styles.closeButton}
-          >
-            ×
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Adaptive toggle only affects Run behavior; does not add extra external buttons */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={adaptiveMode}
+                onChange={(e) => setAdaptiveMode(e.target.checked)}
+              />
+              <span style={{ fontWeight: 600, color: '#111827', fontSize: 13 }}>Adaptive mode</span>
+            </label>
+            <button onClick={onClose} aria-label="Close" style={styles.closeButton}>
+              ×
+            </button>
+          </div>
         </div>
 
         <div style={styles.metaRow}>
-          <span style={styles.metaChip}>
-            Cloud: {cloud}
-          </span>
-          <span style={styles.metaChip}>
-            Services: {impacted.join(', ')}
-          </span>
+          <span style={styles.metaChip}>Cloud: {cloud}</span>
+          <span style={styles.metaChip}>Services: {impacted.join(', ') || '—'}</span>
         </div>
+
+        {adaptiveMode && (
+          <div style={styles.adaptiveBox} aria-live="polite">
+            <div style={{ display: 'grid', gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 12, color: '#374151', marginBottom: 4 }}>
+                  Confidence: <strong>{confidencePct}%</strong>
+                </div>
+                <div style={styles.meterTrack}>
+                  <div
+                    style={{
+                      width: `${confidencePct}%`,
+                      height: '100%',
+                      background: meterColor(plan?.confidence ?? 0),
+                      transition: 'width 0.3s ease',
+                    }}
+                    aria-label="confidence-meter"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Badge label={`Aggressiveness: ${plan?.aggressiveness ?? '—'}`} />
+                <Badge label={`Scope: ${plan?.scope ?? '—'}`} />
+                <Badge label={`Schedule: ${plan?.scheduleHint ?? '—'}`} />
+                {plan?.safeguards?.requireApproval ? (
+                  <Badge label="Approval required" tone="warning" />
+                ) : (
+                  <Badge label="Approval not required" tone="neutral" />
+                )}
+                {plan?.safeguards?.capScopeToCanary && <Badge label="Scope capped to canary" tone="warning" />}
+                {plan?.safeguards?.respectBlackout && <Badge label="Blackout active" tone="danger" />}
+              </div>
+
+              <div style={{ fontSize: 13, color: '#374151' }}>
+                Expected improvement:{' '}
+                {plan ? `${Math.round(plan.expectedSavingsDelta.minPct)}–${Math.round(plan.expectedSavingsDelta.maxPct)}%` : '—'}
+              </div>
+
+              <div style={styles.rationaleBox}>
+                {plan?.rationale || 'Rationale will appear when Adaptive mode is enabled.'}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div style={styles.tabsContainer}>
           <div role="tablist" aria-label="Recommendation detail tabs" style={styles.tablist}>
@@ -202,56 +342,29 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
           </div>
           <div style={styles.tabPanels}>
             {activeTab === 'overview' && (
-              <section
-                role="tabpanel"
-                id="panel-overview"
-                aria-labelledby="tab-overview"
-                style={styles.panel}
-              >
+              <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" style={styles.panel}>
                 <p style={styles.paragraph}>
                   {selectedRow?.description ||
                     'This recommendation aims to optimize resource usage and reduce costs across your selected cloud environments. Review the impact and proposed actions before executing.'}
                 </p>
                 <ul style={styles.list}>
-                  {selectedRow?.severity != null && (
-                    <li>Severity: {String(selectedRow.severity)}</li>
-                  )}
-                  {selectedRow?.priority != null && (
-                    <li>Priority: {String(selectedRow.priority)}</li>
-                  )}
-                  {selectedRow?.category != null && (
-                    <li>Category: {String(selectedRow.category)}</li>
-                  )}
-                  {typeof cost === 'number' && (
-                    <li>Est. Monthly Savings: ${Number(cost).toFixed(2)}</li>
-                  )}
+                  {selectedRow?.severity != null && <li>Severity: {String(selectedRow.severity)}</li>}
+                  {selectedRow?.priority != null && <li>Priority: {String(selectedRow.priority)}</li>}
+                  {selectedRow?.category != null && <li>Category: {String(selectedRow.category)}</li>}
+                  {typeof cost === 'number' && <li>Est. Monthly Savings: ${Number(cost).toFixed(2)}</li>}
                 </ul>
               </section>
             )}
             {activeTab === 'resources' && (
-              <section
-                role="tabpanel"
-                id="panel-resources"
-                aria-labelledby="tab-resources"
-                style={styles.panel}
-              >
-                <p style={styles.paragraph}>
-                  Affected resources include entries from the impacted services:
-                </p>
+              <section role="tabpanel" id="panel-resources" aria-labelledby="tab-resources" style={styles.panel}>
+                <p style={styles.paragraph}>Affected resources include entries from the impacted services:</p>
                 <ul style={styles.list}>
-                  {impacted.length > 0 ? impacted.map((svc, idx) => (
-                    <li key={idx}>{svc}</li>
-                  )) : <li>None listed</li>}
+                  {impacted.length > 0 ? impacted.map((svc, idx) => <li key={idx}>{svc}</li>) : <li>None listed</li>}
                 </ul>
               </section>
             )}
             {activeTab === 'cost' && (
-              <section
-                role="tabpanel"
-                id="panel-cost"
-                aria-labelledby="tab-cost"
-                style={styles.panel}
-              >
+              <section role="tabpanel" id="panel-cost" aria-labelledby="tab-cost" style={styles.panel}>
                 {typeof cost === 'number' ? (
                   <p style={styles.paragraph}>
                     Estimated monthly cost impact (savings): <strong>${Number(cost).toFixed(2)}</strong>
@@ -265,30 +378,14 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
               </section>
             )}
             {activeTab === 'plan' && (
-              <section
-                role="tabpanel"
-                id="panel-plan"
-                aria-labelledby="tab-plan"
-                style={styles.panel}
-              >
+              <section role="tabpanel" id="panel-plan" aria-labelledby="tab-plan" style={styles.panel}>
                 <p style={styles.paragraph}>Proposed execution steps:</p>
-                <ol style={styles.orderedList}>
-                  {actions.map((a, i) => (
-                    <li key={i}>{a}</li>
-                  ))}
-                </ol>
-                <p style={styles.paragraphSecondary}>
-                  Validate each step in a non-production environment prior to rollout.
-                </p>
+                <ol style={styles.orderedList}>{actions.map((a, i) => <li key={i}>{a}</li>)}</ol>
+                <p style={styles.paragraphSecondary}>Validate each step in a non-production environment prior to rollout.</p>
               </section>
             )}
             {activeTab === 'history' && (
-              <section
-                role="tabpanel"
-                id="panel-history"
-                aria-labelledby="tab-history"
-                style={styles.panel}
-              >
+              <section role="tabpanel" id="panel-history" aria-labelledby="tab-history" style={styles.panel}>
                 <ul style={styles.timeline}>
                   {history.map((h, i) => (
                     <li key={i} style={styles.timelineItem}>
@@ -300,6 +397,17 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
               </section>
             )}
           </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', padding: '12px 16px', borderTop: '1px solid #F3F4F6' }}>
+          <button className="btn-secondary" onClick={onClose} disabled={running}>
+            Cancel
+          </button>
+          {typeof onRun === 'function' && (
+            <button className="btn-primary" onClick={handleRun} disabled={running}>
+              {running ? 'Running...' : 'Run optimization'}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -322,10 +430,9 @@ const styles: { [k: string]: React.CSSProperties } = {
     backgroundColor: '#FFFFFF',
     color: '#111827',
     borderRadius: 12,
-    boxShadow:
-      '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
     width: '100%',
-    maxWidth: 840,
+    maxWidth: 920,
     maxHeight: '85vh',
     overflow: 'hidden',
     display: 'flex',
@@ -335,9 +442,10 @@ const styles: { [k: string]: React.CSSProperties } = {
   header: {
     display: 'flex',
     alignItems: 'center',
-    padding: '16px 20px',
+    padding: '12px 12px 12px 20px',
     borderBottom: '1px solid #F3F4F6',
     backgroundColor: '#FFFFFF',
+    gap: 8,
   },
   title: {
     fontSize: 18,
@@ -371,6 +479,20 @@ const styles: { [k: string]: React.CSSProperties } = {
     background: '#F3F4F6',
     padding: '6px 10px',
     borderRadius: 999,
+  },
+  adaptiveBox: {
+    border: '1px solid #E5E7EB',
+    borderRadius: 8,
+    padding: 12,
+    background: '#FFFFFF',
+    margin: '12px 16px',
+  },
+  meterTrack: {
+    height: 8,
+    width: '100%',
+    background: '#F3F4F6',
+    borderRadius: 999,
+    overflow: 'hidden',
   },
   tabsContainer: {
     display: 'flex',
@@ -444,5 +566,36 @@ const styles: { [k: string]: React.CSSProperties } = {
     minWidth: 90,
   },
 };
+
+function meterColor(conf: number) {
+  if (conf >= 0.8) return '#10B981'; // success
+  if (conf >= 0.6) return '#6EE7B7';
+  if (conf >= 0.4) return '#F59E0B'; // amber
+  return '#EF4444';
+}
+
+function Badge({ label, tone = 'neutral' }: { label: string; tone?: 'neutral' | 'warning' | 'danger' }) {
+  const stylesLocal: Record<string, { bg: string; color: string; b: string }> = {
+    neutral: { bg: '#F3F4F6', color: '#374151', b: '#E5E7EB' },
+    warning: { bg: '#FEF3C7', color: '#92400E', b: '#FDE68A' },
+    danger: { bg: '#FEE2E2', color: '#991B1B', b: '#FCA5A5' },
+  };
+  const st = stylesLocal[tone];
+  return (
+    <span
+      style={{
+        background: st.bg,
+        color: st.color,
+        border: `1px solid ${st.b}`,
+        padding: '2px 8px',
+        borderRadius: 999,
+        fontSize: 12,
+        lineHeight: '18px',
+      }}
+    >
+      {label}
+    </span>
+  );
+}
 
 export default RecommendationDetailsModal;

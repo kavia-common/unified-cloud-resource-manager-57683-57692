@@ -1,3 +1,5 @@
-export { default as RecommendationDetailsDrawer } from './RecommendationDetailsDrawer';
-export { default as TopRecommendationsTable } from './TopRecommendationsTable';
+/**
+ * Re-export convenience for recommendations components.
+ */
 export { default as RecommendationDetailsModal } from './RecommendationDetailsModal';
+export { default as RecommendationDetailsDrawer } from './RecommendationDetailsDrawer.jsx';

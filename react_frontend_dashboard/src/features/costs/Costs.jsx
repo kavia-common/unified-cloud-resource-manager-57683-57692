@@ -3,9 +3,10 @@ import StatCard from "../../components/ui/StatCard";
 import {
   MultiSeriesLineChart,
   StackedBarChart,
-  PieBreakdownChart,
   CLOUD_COLORS,
 } from "../../components/ui/Charts";
+import SimplePieChart from "../../components/ui/SimplePieChart";
+import SimpleBarChart from "../../components/ui/SimpleBarChart";
 
 /**
  * PUBLIC_INTERFACE
@@ -73,6 +74,21 @@ export default function Costs() {
   );
 
   const trendData = trendRange === "Monthly" ? monthlyTrend : yearlyTrend;
+
+  // PUBLIC_INTERFACE
+  // Adapter: Build monthly totals for SimpleBarChart using available monthlyTrend
+  function buildMonthlyTotalsForBarChart() {
+    if (!Array.isArray(monthlyTrend) || monthlyTrend.length === 0) {
+      // mock-safe fallback: 6 months placeholder
+      const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+      return labels.map((m, i) => ({ label: m, value: 4000 + i * 500 }));
+    }
+    // Sum across providers for monthly total
+    return monthlyTrend.map((row) => ({
+      label: row.date,
+      value: (row.aws || 0) + (row.azure || 0) + (row.gcp || 0),
+    }));
+  }
 
   // Top cost-driving services/resources mock
   const topServices = useMemo(
@@ -153,7 +169,7 @@ export default function Costs() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(260px, 340px) 1fr",
+              gridTemplateColumns: "minmax(260px, 420px) 1fr",
               gap: 16,
               alignItems: "stretch",
             }}
@@ -162,30 +178,33 @@ export default function Costs() {
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Provider Share
               </div>
-              <PieBreakdownChart
-                data={providerPieData}
-                dataKey="value"
-                nameKey="name"
-                colors={[CLOUD_COLORS.AWS, CLOUD_COLORS.Azure, CLOUD_COLORS.GCP]}
-                height={260}
-                innerRadius={60}
+              <SimplePieChart
+                data={[
+                  { label: "AWS", value: monthlyTotals.AWS, amount: monthlyTotals.AWS, color: CLOUD_COLORS.AWS },
+                  { label: "Azure", value: monthlyTotals.Azure, amount: monthlyTotals.Azure, color: CLOUD_COLORS.Azure },
+                  { label: "GCP", value: monthlyTotals.GCP, amount: monthlyTotals.GCP, color: CLOUD_COLORS.GCP },
+                ]}
+                width={380}
+                height={220}
+                legendPosition="right"
+                ariaLabel="Multi-cloud provider share"
               />
             </div>
-            <div className="card" style={{ padding: 14, display: "grid", gap: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div className="text-subtle" style={{ fontSize: 12 }}>
-                  Monthly Total
-                </div>
-                <div style={{ fontWeight: 700 }}>${formatNum(grandTotal)}</div>
+            <div>
+              <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
+                Monthly Total by Month
               </div>
-              <hr className="hr" />
-              <ProviderRow label="AWS" value={monthlyTotals.AWS} color={CLOUD_COLORS.AWS} />
-              <ProviderRow label="Azure" value={monthlyTotals.Azure} color={CLOUD_COLORS.Azure} />
-              <ProviderRow label="GCP" value={monthlyTotals.GCP} color={CLOUD_COLORS.GCP} />
+              <SimpleBarChart
+                data={buildMonthlyTotalsForBarChart()}
+                width={520}
+                height={240}
+                ariaLabel="Monthly totals by month"
+                color="#374151"
+              />
             </div>
           </div>
           <style>{`
-            @media (max-width: 860px) {
+            @media (max-width: 1020px) {
               .panel-body > div {
                 grid-template-columns: 1fr;
               }
@@ -333,31 +352,7 @@ export default function Costs() {
   );
 }
 
-// PUBLIC_INTERFACE
-function ProviderRow({ label, value, color }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 10 }}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-        <span
-          aria-hidden="true"
-          style={{ width: 10, height: 10, borderRadius: "50%", background: color, display: "inline-block" }}
-        />
-        <span style={{ color: "var(--color-text-muted)", fontSize: 12 }}>{label}</span>
-      </span>
-      <div aria-hidden="true" style={{ height: 6, background: "#F3F4F6", borderRadius: 999 }}>
-        <div
-          style={{
-            width: `${Math.min(100, Math.round((value / (value + 1)) * 100))}%`,
-            background: color,
-            height: 6,
-            borderRadius: 999,
-          }}
-        />
-      </div>
-      <span style={{ fontWeight: 600 }}>${formatNum(value)}</span>
-    </div>
-  );
-}
+
 
 // PUBLIC_INTERFACE
 function BudgetControl({ label, amount, onChange, currentSpend }) {

@@ -21,6 +21,54 @@
 /* Base app container */
 html, body, #root { height: 100%; background: var(--color-bg); color: var(--color-text); }
 
+/* Panels and cards minimal styling */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.panel-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.panel-title {
+  font-weight: 700;
+}
+.panel-body {
+  padding: 12px;
+}
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.text-subtle {
+  color: var(--color-muted);
+}
+.hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 880px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Shared Button System */
 .btn {
   --btn-bg: var(--btn-secondary-bg, transparent);

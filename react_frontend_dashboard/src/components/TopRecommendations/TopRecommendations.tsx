@@ -196,7 +196,16 @@ function SavingsPill({ value }: { value: number | null | undefined }) {
  *  - Will not clear previously shown items if subsequent fetch filters to zero while raw > 0.
  */
 // PUBLIC_INTERFACE
-export function TopRecommendations() {
+/** PUBLIC_INTERFACE
+ * TopRecommendations props for optional external details handler.
+ */
+type TopRecommendationsProps = {
+  // PUBLIC_INTERFACE
+  onViewDetails?: (rec: any) => void;
+};
+
+// PUBLIC_INTERFACE
+export function TopRecommendations({ onViewDetails }: TopRecommendationsProps) {
   const navigate = useNavigate();
   // Use a structural type here to avoid hard dependency on RankedRecommendation interface
   const [items, setItems] = useState<any[]>([]);
@@ -428,9 +437,12 @@ export function TopRecommendations() {
               <button
                 aria-label={`View details for ${(rec as any).title || (rec as any).name || 'item'}`}
                 onClick={() => {
-                  // TODO: navigate or open details drawer
-                  // eslint-disable-next-line no-console
-                  console.log('View details clicked', rec.id);
+                  if (typeof onViewDetails === 'function') {
+                    onViewDetails(rec);
+                  } else {
+                    // eslint-disable-next-line no-console
+                    console.debug('[TopRecs] View details clicked (no handler provided):', rec?.id);
+                  }
                 }}
                 style={{
                   ...buttonBase(),

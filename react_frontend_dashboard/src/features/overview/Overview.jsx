@@ -16,6 +16,7 @@ import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 import ActionsBar from "../../components/common/ActionsBar.tsx";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
 import { TopRecommendations } from "../../components/TopRecommendations";
+import { RecommendationDetailsDrawer } from "../../components/recommendations";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -39,6 +40,22 @@ export default function Overview() {
   const [showResources, setShowResources] = useState(false);
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
+
+  // Drawer state for Top Recommendations details
+  const [isRecDrawerOpen, setIsRecDrawerOpen] = useState(false);
+  const [selectedRec, setSelectedRec] = useState(null);
+
+  const handleOpenRecDetails = (rec) => {
+    // Minimal telemetry to aid debugging click wiring
+    // eslint-disable-next-line no-console
+    console.debug('[Overview] Opening recommendation details drawer for:', rec?.id || rec?.title);
+    setSelectedRec(rec);
+    setIsRecDrawerOpen(true);
+  };
+
+  const handleCloseRecDetails = () => {
+    setIsRecDrawerOpen(false);
+  };
 
   // Local UI state to control the portal-based minimal Add Account modal
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -224,6 +241,28 @@ export default function Overview() {
         align="left"
       />
 
+      {/* Right-side drawer for recommendation details */}
+      <RecommendationDetailsDrawer
+        isOpen={isRecDrawerOpen}
+        onClose={handleCloseRecDetails}
+        recommendation={{
+          // Provide fallback mapping to ensure summary shows as requested
+          id: selectedRec?.id,
+          title: selectedRec?.title || selectedRec?.name || 'Recommendation Details',
+          cloudProvider:
+            selectedRec?.cloudProvider ||
+            selectedRec?.provider ||
+            // Best effort: infer from environment/category if provided (not always available)
+            (selectedRec?.category?.toLowerCase().includes('azure') ? 'Azure'
+              : selectedRec?.category?.toLowerCase().includes('aws') ? 'AWS'
+              : undefined),
+          impactedServices:
+            Array.isArray(selectedRec?.impactedServices)
+              ? selectedRec?.impactedServices
+              : (selectedRec?.services && Array.isArray(selectedRec?.services) ? selectedRec?.services : []),
+        }}
+      />
+
       {/* Key metrics */}
       <div className="card-grid" aria-label="Key metrics" style={{ marginTop: 4 }}>
         <StatCard
@@ -258,7 +297,7 @@ export default function Overview() {
         </div>
         <div className="panel-body">
           {/* Import the new component to render top 3 high-risk recommendations */}
-          <TopRecommendations />
+          <TopRecommendations onViewDetails={handleOpenRecDetails} />
         </div>
       </div>
 

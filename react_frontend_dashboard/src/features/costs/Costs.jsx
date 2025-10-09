@@ -208,7 +208,8 @@ export default function Costs() {
             <div style={{ minHeight: 16 }} aria-hidden="true" />
 
             {/* Horizontal Percent by Provider */}
-            <div style={{ marginTop: 8 }}>
+            {/* Increased top margin to push the bar chart slightly further down relative to the pie chart */}
+            <div style={{ marginTop: 24 }}>
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Provider Share (Percent)
               </div>

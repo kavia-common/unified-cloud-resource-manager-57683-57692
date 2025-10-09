@@ -6,7 +6,17 @@ import {
   CLOUD_COLORS,
 } from "../../components/ui/Charts";
 import SimplePieChart from "../../components/ui/SimplePieChart";
-import SimpleBarChart from "../../components/ui/SimpleBarChart";
+// Recharts imports for the horizontal bar chart
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
 /**
  * PUBLIC_INTERFACE
@@ -199,17 +209,69 @@ export default function Costs() {
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Monthly Total by Month
               </div>
-              <StackedBarChart
-                data={buildMonthlyTotalsForBarChart().map(d => ({ name: d.label, total: d.value }))}
-                keys={["total"]}
-                colors={["#374151"]}
-                xKey="name"
-                height={240}
-                legend={false}
-                layout="vertical"
-              />
-              <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>
-                <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>
+              {/* Horizontal Bar Chart using Recharts */}
+              <div style={{ width: "100%", height: 260 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    layout="vertical"
+                    data={buildMonthlyTotalsForBarChart().map((d) => ({
+                      label: d.label,
+                      value: d.value,
+                    }))}
+                    margin={{ top: 8, right: 24, bottom: 8, left: 40 }}
+                  >
+                    <CartesianGrid stroke="#F3F4F6" horizontal={true} vertical={false} />
+                    {/* Category labels on Y-axis */}
+                    <YAxis
+                      type="category"
+                      dataKey="label"
+                      width={60}
+                      tick={{ fill: "#111827", fontSize: 12 }}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                      tickLine={{ stroke: "#E5E7EB" }}
+                    />
+                    {/* Numeric values on X-axis */}
+                    <XAxis
+                      type="number"
+                      tickFormatter={(v) => Number(v).toLocaleString()}
+                      tick={{ fill: "#6B7280", fontSize: 11 }}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                      tickLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <Tooltip
+                      formatter={(v) => [`$${Number(v).toLocaleString()}`, "Total"]}
+                      labelFormatter={(l) => `Month: ${l}`}
+                      contentStyle={{
+                        background: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 8,
+                        color: "#111827",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      wrapperStyle={{ color: "#111827", fontSize: 12 }}
+                    />
+                    <Bar
+                      name="Total"
+                      dataKey="value"
+                      fill="#374151"
+                      radius={[4, 4, 4, 4]}
+                      maxBarSize={26}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div
+                className="text-xs"
+                style={{ color: "var(--muted)", marginTop: 6, display: "flex", justifyContent: "space-between" }}
+              >
+                <span data-testid="horizontal-bar-chart-active">Horizontal bar chart rendered</span>
+                <span aria-hidden="true" style={{ color: "#9CA3AF" }}>
+                  Values in USD
+                </span>
               </div>
             </div>
           </div>
@@ -217,6 +279,12 @@ export default function Costs() {
             @media (max-width: 1020px) {
               .panel-body > div {
                 grid-template-columns: 1fr;
+              }
+            }
+            /* Ensure horizontal bar chart labels do not get clipped on very small screens */
+            @media (max-width: 520px) {
+              .recharts-wrapper {
+                margin-left: 8px;
               }
             }
           `}</style>

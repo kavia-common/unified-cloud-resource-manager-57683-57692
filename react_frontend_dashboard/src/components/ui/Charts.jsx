@@ -175,8 +175,8 @@ export function MultiSeriesOverviewChart({
               margin={{ top: 12, right: 24, bottom: 12, left: 72 }} // extra left for long labels, right for values
               data-testid="overview-horizontal-bar-chart"
             >
-              {/* Gridlines horizontal only for clean look */}
-              <CartesianGrid stroke="var(--gridline)" horizontal strokeWidth={1} vertical={false} />
+              {/* Gridlines removed for clean look per dark theme requirement */}
+              {/* Intentionally no CartesianGrid to avoid dotted/contrasting lines on dark */}
 
               {/* Categories on Y axis */}
               <YAxis
@@ -288,7 +288,7 @@ export function StackedBarChart({
     <div className="card surface" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} layout={layout} data-testid="stacked-horizontal-bar-chart">
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+          {/* Grid removed to eliminate dotted lines; axis ticks retain contrast via CSS vars */}
           {isHorizontal ? (
             <>
               <YAxis type="category" dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />

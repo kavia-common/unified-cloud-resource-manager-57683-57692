@@ -159,8 +159,15 @@ export default function Costs() {
       <div style={{ height: 0 }} aria-hidden="true" />
 
       {/* 1) Multi-Cloud Spend Summary */}
-      <div className="panel">
-        <div className="panel-header">
+      <div
+        className="panel"
+        style={{
+          background: "var(--surface, var(--color-surface))",
+          borderColor: "var(--border, var(--color-border))",
+          color: "var(--text, var(--color-text))",
+        }}
+      >
+        <div className="panel-header" style={{ background: "transparent" }}>
           <div className="panel-title">Multi-Cloud Spend Summary</div>
           <div className="text-subtle" style={{ fontSize: 12 }}>
             Visual breakdown by cloud provider
@@ -197,7 +204,7 @@ export default function Costs() {
               />
             </div>
 
-            {/* Middle column left intentionally empty to allow the pie + legend to breathe at larger widths */}
+            {/* Middle column spacer for breathing room on larger widths */}
             <div style={{ minHeight: 16 }} aria-hidden="true" />
 
             {/* Horizontal Percent by Provider */}
@@ -205,14 +212,16 @@ export default function Costs() {
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Provider Share (Percent)
               </div>
-              <div className="card surface" style={{ padding: 8, minWidth: 0 }}>
+              <div className="card surface" style={{ padding: 8, minWidth: 0, background: "var(--surface-2, var(--color-surface-2))" }}>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart
                     data={providerPercentData}
                     layout="vertical"
                     margin={{ top: 8, right: 16, bottom: 8, left: 48 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+                    {/* Remove dotted gridlines for a clean bar look on dark */}
+                    {/* Either remove grid or set solid stroke without dashes; we remove entirely */}
+                    {/* Note: Keeping axis lines off for minimalist style */}
                     <YAxis
                       dataKey="provider"
                       type="category"
@@ -233,6 +242,13 @@ export default function Costs() {
                     <RTooltip
                       formatter={(v) => [`${v}%`, "Percent"]}
                       labelFormatter={(l) => `${l}`}
+                      contentStyle={{
+                        background: "var(--surface, #111827)",
+                        border: "1px solid var(--border, #1f2937)",
+                        color: "var(--text, #e5e7eb)",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
                     />
                     <Bar dataKey="percent" radius={[0, 4, 4, 0]} isAnimationActive={false}>
                       {providerPercentData.map((entry) => {

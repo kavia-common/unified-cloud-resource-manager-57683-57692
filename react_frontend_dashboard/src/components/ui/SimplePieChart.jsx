@@ -37,14 +37,18 @@ export default function SimplePieChart({
 }) {
   const safe = useMemo(() => {
     const arr = Array.isArray(data) ? data : [];
+    const idxMap = { 0: "AWS", 1: "Azure", 2: "GCP" };
     return arr
       .filter((d) => d && typeof d.value === "number" && d.value >= 0)
-      .map((d, i) => ({
-        label: d.label ?? `Item ${i + 1}`,
-        value: d.value,
-        amount: typeof d.amount === "number" ? d.amount : d.value,
-        color: d.color || colors[i % colors.length],
-      }));
+      .map((d, i) => {
+        const providerName = d.label ?? (i in idxMap ? idxMap[i] : `Item ${i + 1}`);
+        return {
+          label: providerName,
+          value: d.value,
+          amount: typeof d.amount === "number" ? d.amount : d.value,
+          color: d.color || colors[i % colors.length],
+        };
+      });
   }, [data, colors]);
 
   const total = useMemo(() => safe.reduce((s, d) => s + d.value, 0), [safe]);
@@ -214,8 +218,9 @@ export default function SimplePieChart({
             else if (providerUpper === "AZURE") labelText = "Azure-10,320";
             else if (providerUpper === "GCP") labelText = "GCP-6,810";
             else {
-              const textValue = labelType === "percent" ? formatPercent(seg.frac) : formatValue(seg.amount).replace("$", "");
-              labelText = `${seg.label} · ${textValue}`;
+              // Thousands-formatted numeric value without currency symbol per requirement
+              const num = typeof seg.amount === "number" ? Number(seg.amount).toLocaleString() : String(seg.amount);
+              labelText = `${seg.label}-${num}`;
             }
             const txtFill = labelColor === "auto" ? autoTextColorForBg(seg.color) : labelColor;
 

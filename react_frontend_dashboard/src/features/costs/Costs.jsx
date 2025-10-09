@@ -6,18 +6,6 @@ import {
   CLOUD_COLORS,
 } from "../../components/ui/Charts";
 import SimplePieChart from "../../components/ui/SimplePieChart";
-// Recharts imports for the horizontal bar chart
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
-  LabelList,
-} from "recharts";
 
 /**
  * PUBLIC_INTERFACE
@@ -86,20 +74,7 @@ export default function Costs() {
 
   const trendData = trendRange === "Monthly" ? monthlyTrend : yearlyTrend;
 
-  // PUBLIC_INTERFACE
-  // Adapter: Build monthly totals for SimpleBarChart using available monthlyTrend
-  function buildMonthlyTotalsForBarChart() {
-    if (!Array.isArray(monthlyTrend) || monthlyTrend.length === 0) {
-      // mock-safe fallback: 6 months placeholder
-      const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-      return labels.map((m, i) => ({ label: m, value: 4000 + i * 500 }));
-    }
-    // Sum across providers for monthly total
-    return monthlyTrend.map((row) => ({
-      label: row.date,
-      value: (row.aws || 0) + (row.azure || 0) + (row.gcp || 0),
-    }));
-  }
+
 
   // Top cost-driving services/resources mock
   const topServices = useMemo(
@@ -206,99 +181,13 @@ export default function Costs() {
                 labelColor="auto"
               />
             </div>
-            <div>
-              <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
-                Monthly Total by Month
-              </div>
-              {/* Costs • Horizontal Bar (ref-matched) */}
-              <div style={{ width: "100%", height: 260 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    layout="vertical" // enforce horizontal bars
-                    data={buildMonthlyTotalsForBarChart().map((d) => ({
-                      name: d.label, // normalize to { name, value }
-                      value: d.value,
-                    }))}
-                    margin={{ top: 12, right: 48, bottom: 20, left: 72 }} // ample space to avoid clipping
-                    barCategoryGap={12}
-                    barGap={4}
-                    data-testid="costs-horizontal-bar-ref"
-                  >
-                    <CartesianGrid stroke="#F3F4F6" horizontal vertical={false} />
-                    {/* Category labels on the left */}
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={72}
-                      tick={{ fill: "#111827", fontSize: 12 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    {/* Numeric axis on the bottom */}
-                    <XAxis
-                      type="number"
-                      tickFormatter={(v) => Number(v).toLocaleString()}
-                      tick={{ fill: "#6B7280", fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      formatter={(v) => [`$${Number(v).toLocaleString()}`, "Total"]}
-                      labelFormatter={(l) => `Month: ${l}`}
-                      contentStyle={{
-                        background: "#FFFFFF",
-                        border: "1px solid #E5E7EB",
-                        borderRadius: 8,
-                        color: "#111827",
-                        fontSize: 12,
-                      }}
-                    />
-                    {/* Minimal legend/title */}
-                    <Legend
-                      verticalAlign="top"
-                      align="left"
-                      wrapperStyle={{ color: "#111827", fontSize: 12, paddingBottom: 4 }}
-                    />
-                    <Bar
-                      name="Monthly Total"
-                      dataKey="value"
-                      fill="#374151"
-                      radius={[0, 6, 6, 0]} // rounded right corners
-                      maxBarSize={26}
-                      isAnimationActive={false}
-                    >
-                      {/* Outside-right value labels with thousands formatting */}
-                      <LabelList
-                        dataKey="value"
-                        position="right"
-                        formatter={(v) => Number(v).toLocaleString()}
-                        style={{ fill: "#111827", fontSize: 12, fontWeight: 600 }}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div
-                className="text-xs"
-                style={{ color: "#6B7280", marginTop: 8, display: "flex", justifyContent: "space-between" }}
-              >
-                <span>Costs • Horizontal Bar (ref-matched)</span>
-                <span aria-hidden="true" style={{ color: "#9CA3AF" }}>
-                  Values in USD
-                </span>
-              </div>
-            </div>
+            {/* Spacer to preserve layout after removing the secondary chart */}
+            <div style={{ minHeight: 16 }} />
           </div>
           <style>{`
             @media (max-width: 1020px) {
               .panel-body > div {
                 grid-template-columns: 1fr;
-              }
-            }
-            /* Ensure horizontal bar chart labels do not get clipped on very small screens */
-            @media (max-width: 520px) {
-              .recharts-wrapper {
-                margin-left: 8px;
               }
             }
           `}</style>

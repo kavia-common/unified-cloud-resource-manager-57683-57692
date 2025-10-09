@@ -239,9 +239,9 @@ export default function Costs() {
               data={trendData}
               xKey="date"
               series={[
-                { key: "aws", label: "AWS", color: "#000000" },
-                { key: "azure", label: "Azure", color: "#1a237e" },
-                { key: "gcp", label: "GCP", color: "var(--series-3)" },
+                { key: "aws", label: "AWS", color: CLOUD_COLORS.AWS },
+                { key: "azure", label: "Azure", color: CLOUD_COLORS.Azure },
+                { key: "gcp", label: "GCP", color: CLOUD_COLORS.GCP },
               ]}
               height={260}
               showLegend

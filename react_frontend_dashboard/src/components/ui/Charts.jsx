@@ -23,9 +23,9 @@ import {
  * across chart types (bar, pie, etc).
  */
 export const CLOUD_COLORS = {
-  AWS: "#000000",      // black
-  Azure: "#1a237e",    // dark blue
-  GCP: "var(--series-3)", // token for GCP
+  AWS: "#4cc9f0",   // updated per spec
+  Azure: "#7209b7", // updated per spec
+  GCP: "#b545ff",   // updated per spec
 };
 
 /**

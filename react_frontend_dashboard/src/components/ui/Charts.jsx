@@ -250,8 +250,9 @@ export function MultiSeriesOverviewChart({
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="text-xs" style={{ alignSelf: "end", color: "var(--axis-text)", paddingTop: 4 }}>
-          <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>
+        {/* Removed debug caption near chart to keep UI clean */}
+        <div style={{ display: "none" }}>
+          <span data-testid="horizontal-bar-chart-active" />
         </div>
 
         {/* Side legend kept consistent with minimalist theme */}
@@ -410,8 +411,9 @@ export function PieBreakdownChart({
           </Pie>
         </RPieChart>
       </ResponsiveContainer>
-      <div className="text-xs" style={{ color: "var(--axis-text)", marginTop: 6 }}>
-        <span data-testid="pie-provider-labels-active">Pie labels: AWS/Azure/GCP enforced</span>
+      {/* Removed debug caption text below pie chart */}
+      <div style={{ display: "none" }}>
+        <span data-testid="pie-provider-labels-active" />
       </div>
       <style>{`
         @media (max-width: 640px) {

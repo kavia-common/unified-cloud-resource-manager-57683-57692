@@ -235,7 +235,7 @@ export default function ReportsAnalytics() {
       <h1 className="page-title" aria-label="Reports and Analytics page">Reports & Analytics</h1>
 
       {/* Spend Share (moved from Dashboard) */}
-      <section className="card" style={{ marginBottom: 16 }}>
+      <section className="card" style={{ marginBottom: 16 }} data-testid="reports-spend-share">
         <div className="card-header">
           <h2>Spend Share</h2>
           <div className="subtle">Interval: {mode}</div>
@@ -274,7 +274,7 @@ export default function ReportsAnalytics() {
       </section>
 
       {/* Cost Overview (moved from Dashboard) */}
-      <section className="card" style={{ marginBottom: 16 }}>
+      <section className="card" style={{ marginBottom: 16 }} data-testid="reports-cost-overview">
         <div className="card-header">
           <h2>Cost Overview</h2>
           <div>

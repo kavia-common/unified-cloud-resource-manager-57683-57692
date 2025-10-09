@@ -126,6 +126,9 @@ export function MultiSeriesOverviewChart({
   yAxisLabel = "Spend ($)",
   yDomain = [0, 50],
   yTicks = [0, 10, 20, 30, 40, 50],
+  // PUBLIC_INTERFACE
+  // Optional layout override for BarChart orientation. Defaults to "vertical" to render horizontal bars.
+  layout = "vertical",
 }) {
   // Card styling for Pure White minimalist theme
   const cardStyle = {
@@ -160,15 +163,16 @@ export function MultiSeriesOverviewChart({
   };
 
   return (
-    <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview bar chart: Series comparison by cloud provider">
+    <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview bar chart: Series comparison by cloud provider" data-testid="overview-chart-wrapper">
       <div style={layoutStyle}>
         <div style={chartContainerStyle}>
           <ResponsiveContainer width="100%" height={height}>
             {/* Horizontal orientation: layout='vertical', categories on Y axis */}
             <BarChart
               data={data}
-              layout="vertical"
+              layout={layout}
               margin={{ top: 12, right: 24, bottom: 12, left: 72 }} // extra left for long labels, right for values
+              data-testid="overview-horizontal-bar-chart"
             >
               {/* Gridlines horizontal only for clean look */}
               <CartesianGrid stroke="var(--gridline)" horizontal strokeWidth={1} vertical={false} />
@@ -264,18 +268,37 @@ export function MultiSeriesOverviewChart({
  * PUBLIC_INTERFACE
  * Stacked bar chart for cost by provider/service. keys: ['aws','azure']
  */
-export function StackedBarChart({ data, keys, colors, xKey = "name", height = 260, legend = true }) {
+export function StackedBarChart({
+  data,
+  keys,
+  colors,
+  xKey = "name",
+  height = 260,
+  legend = true,
+  // PUBLIC_INTERFACE: Optional layout override; default horizontal (vertical layout).
+  layout = "vertical",
+}) {
+  const isHorizontal = layout === "vertical";
   return (
     <div className="card surface" style={{ padding: 8 }}>
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data}>
+        <BarChart data={data} layout={layout} data-testid="stacked-horizontal-bar-chart">
           <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
-          <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
-          <YAxis tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+          {isHorizontal ? (
+            <>
+              <YAxis type="category" dataKey={xKey} tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+            </>
+          ) : (
+            <>
+              <XAxis dataKey={xKey} type="category" tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+              <YAxis type="number" tick={{ fontSize: 12, fill: "var(--axis-text)" }} />
+            </>
+          )}
           <Tooltip />
           {legend && <Legend />}
           {keys.map((k, i) => (
-            <Bar key={k} dataKey={k} stackId="a" fill={colors?.[i] || "#9CA3AF"} />
+            <Bar key={k} dataKey={k} stackId="a" fill={colors?.[i] || "#9CA3AF"} radius={isHorizontal ? [0, 3, 3, 0] : [3, 3, 0, 0]} />
           ))}
         </BarChart>
       </ResponsiveContainer>

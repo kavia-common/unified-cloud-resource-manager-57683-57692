@@ -189,9 +189,9 @@ export default function Costs() {
                 legendPosition="right"
                 ariaLabel="Multi-cloud provider share"
                 showLabels
-                labelType="percent"
+                labelType="value"
                 chartOffsetX={-12}
-                minLabelPercent={3}
+                minLabelPercent={100}
                 labelColor="auto"
               />
             </div>
@@ -199,12 +199,14 @@ export default function Costs() {
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Monthly Total by Month
               </div>
-              <SimpleBarChart
-                data={buildMonthlyTotalsForBarChart()}
-                width={520}
+              <StackedBarChart
+                data={buildMonthlyTotalsForBarChart().map(d => ({ name: d.label, total: d.value }))}
+                keys={["total"]}
+                colors={["#374151"]}
+                xKey="name"
                 height={240}
-                ariaLabel="Monthly totals by month"
-                color="#374151"
+                legend={false}
+                layout="vertical"
               />
               <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>
                 <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>

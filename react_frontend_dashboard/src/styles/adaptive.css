@@ -1,35 +1,173 @@
-/* Adaptive and Preflight minimal utilities — Pure White theme */
-/* Tokens */
+ /* Adaptive layout helpers and modal normalization — Pure White theme */
 :root {
-  --pw-text: #111827;
-  --pw-muted: #6B7280;
-  --pw-border: #E5E7EB;
-  --pw-surface: #FFFFFF;
-  --pw-chip-bg: #F9FAFB;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  --surface: var(--color-surface, #ffffff);
+  --surface-muted: #f9fafb;
+  --surface-border: var(--color-border, #e5e7eb);
+  --text: var(--color-text, #111827);
+  --text-muted: #6b7280;
+
+  --modal-max-w: 720px;
 }
 
-/* Utility classes (opt-in) */
-.pw-center {
-  text-align: center;
+/* Base container helpers */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  box-sizing: border-box;
 }
-.pw-subtle {
-  color: var(--pw-muted);
+.container--lg {
+  max-width: 1200px;
 }
+
+/* Grid/Flex utilities */
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Status line wrapping helpers */
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  line-height: 1.4;
+}
+.status-line .truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Modal normalization utilities to align header/title with content grid */
+.modal {
+  box-sizing: border-box;
+  width: 100%;
+}
+.modal--inset {
+  /* Reset any outer negative margins and ensure consistent inner padding */
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+@media (min-width: 640px) {
+  .modal--inset {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+.modal__container {
+  max-width: var(--modal-max-w);
+  margin: 0 auto;
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-5);
+}
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--surface-border);
+}
+.modal__title {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+.modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 24px; /* reserve space to balance with close button area */
+}
+
+/* Preflight content helpers - ensure wrapping and alignment within container */
+.preflight-desc {
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4) 0;
+}
+.preflight-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+@media (min-width: 640px) {
+  .preflight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.preflight-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--space-3);
+}
+.preflight-status.ok {
+  background: #10b98122;
+  color: #065f46;
+  border: 1px solid #10b98155;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.preflight-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.preflight-note {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Actions alignment for footers controlled by component footer prop; preserve utility for inline actions */
+.preflight-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* Additional minimal helpers from prior tokens */
+.pw-center { text-align: center; }
+.pw-subtle { color: var(--text-muted); }
 .pw-chip {
-  background: var(--pw-chip-bg);
-  border: 1px solid var(--pw-border);
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
   border-radius: 999px;
   padding: 4px 8px;
   font-size: 12px;
-  color: var(--pw-text);
+  color: var(--text);
 }
-
-/* Ensure modal content headings have consistent spacing */
-.modal-content h3 {
-  letter-spacing: -0.01em;
-}
-
-/* Allow rationale/long text to wrap cleanly inside containers using this class */
 .pw-wrap {
   white-space: normal;
   overflow: visible;

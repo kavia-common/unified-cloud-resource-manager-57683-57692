@@ -28,6 +28,12 @@ export default function SimplePieChart({
   legendPosition = "right",
   ariaLabel = "Pie chart",
   colors = ["#000000", "#1a237e", "var(--series-3)", "#9CA3AF", "#F59E0B", "#10B981"],
+  // New props to control labels and positioning
+  chartOffsetX = 0, // px shift for the pie group to nudge left/right
+  showLabels = false,
+  labelType = "percent", // 'percent' | 'value'
+  labelColor = "auto", // 'auto' | CSS color string
+  minLabelPercent = 3, // threshold below which labels render outside with leader lines
 }) {
   const safe = useMemo(() => {
     const arr = Array.isArray(data) ? data : [];
@@ -68,6 +74,44 @@ export default function SimplePieChart({
     const y2 = cy + r * Math.sin(end - Math.PI / 2);
     const largeArc = end - start > Math.PI ? 1 : 0;
     return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  };
+
+  // Compute mid point on arc at radius 'rr'
+  const midPoint = (seg, rr = r * 0.62) => {
+    const mid = (seg.start + seg.end) / 2;
+    const x = cx + rr * Math.cos(mid - Math.PI / 2);
+    const y = cy + rr * Math.sin(mid - Math.PI / 2);
+    return { x, y, mid };
+  };
+
+  // Relative luminance for contrast and auto text color
+  const hexToRgb = (hex) => {
+    try {
+      const h = hex.replace('#', '');
+      const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return { r, g, b };
+    } catch { return { r: 0, g: 0, b: 0 }; }
+  };
+  const relLum = ({ r, g, b }) => {
+    const toLin = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    const R = toLin(r), G = toLin(g), B = toLin(b);
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  };
+  const autoTextColorForBg = (bgHex) => {
+    const lum = relLum(hexToRgb(bgHex || '#ffffff'));
+    // Return dark text when background is light, else white with outline
+    return lum > 0.5 ? '#111827' : '#ffffff';
+  };
+
+  const formatPercent = (frac) => `${Math.max(0, Math.round(frac * 100))}%`;
+  const formatValue = (n) => {
+    try { return `$${Number(n).toLocaleString()}`; } catch { return `$${n}`; }
   };
 
   const legendItems = hasData
@@ -134,12 +178,89 @@ export default function SimplePieChart({
       height={svgH}
       viewBox={`0 0 ${svgW} ${svgH}`}
       aria-hidden
-      style={{ display: "block" }}
+      style={{ display: "block", overflow: "visible" }}
     >
       <title>Pie breakdown</title>
-      {segments.map((seg, i) => (
-        <path key={i} d={arcPath(cx, cy, r, seg.start, seg.end)} fill={seg.color} />
-      ))}
+      <g transform={`translate(${chartOffsetX}, 0)`}>
+        {segments.map((seg, i) => (
+          <path
+            key={i}
+            d={arcPath(cx, cy, r, seg.start, seg.end)}
+            fill={seg.color}
+            role="img"
+            aria-label={`${seg.label}: ${labelType === "percent" ? formatPercent(seg.frac) : formatValue(seg.amount)} (${formatPercent(seg.frac)})`}
+          />
+        ))}
+
+        {/* Labels */}
+        {showLabels &&
+          hasData &&
+          segments.map((seg, i) => {
+            const pct = seg.frac * 100;
+            const useOutside = pct < minLabelPercent;
+            const mid = midPoint(seg, useOutside ? r + 10 : r * 0.62);
+            const isRight = ((mid.mid % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) < Math.PI; // right half if angle < 180deg
+
+            // Leader line points for small slices
+            const pInner = midPoint(seg, r * 0.9);
+            const pOuter = midPoint(seg, r + 8);
+            const lineEndX = pOuter.x + (isRight ? 12 : -12);
+            const labelX = lineEndX + (isRight ? 4 : -4);
+
+            const textValue = labelType === "percent" ? formatPercent(seg.frac) : formatValue(seg.amount);
+            const txtFill = labelColor === "auto" ? autoTextColorForBg(seg.color) : labelColor;
+
+            const textShadow =
+              txtFill === "#ffffff"
+                ? "0 0 2px rgba(0,0,0,0.7), 0 0 1px rgba(0,0,0,0.6)"
+                : "0 0 2px rgba(255,255,255,0.25)";
+
+            return (
+              <g key={`label-${i}`} aria-hidden="true">
+                {useOutside ? (
+                  <>
+                    {/* Leader line */}
+                    <polyline
+                      points={`${pInner.x},${pInner.y} ${pOuter.x},${pOuter.y} ${lineEndX},${pOuter.y}`}
+                      fill="none"
+                      stroke="var(--axis-text, #6B7280)"
+                      strokeWidth="1"
+                    />
+                    {/* Outside label */}
+                    <text
+                      x={labelX}
+                      y={pOuter.y}
+                      textAnchor={isRight ? "start" : "end"}
+                      dominantBaseline="middle"
+                      fontSize={12}
+                      fontWeight={700}
+                      fill="var(--color-text)"
+                      style={{ paintOrder: "stroke", stroke: "var(--color-surface)", strokeWidth: 3 }}
+                    >
+                      {`${seg.label} · ${textValue}`}
+                    </text>
+                  </>
+                ) : (
+                  // Inside label
+                  <text
+                    x={mid.x}
+                    y={mid.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={12}
+                    fontWeight={700}
+                    fill={txtFill}
+                    style={{
+                      textShadow,
+                    }}
+                  >
+                    {textValue}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+      </g>
     </svg>
   );
 
@@ -148,7 +269,7 @@ export default function SimplePieChart({
       <figure
         role="figure"
         aria-label={ariaLabel}
-        style={{ display: "grid", gap: 10, background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 12, padding: 10 }}
+        style={{ display: "grid", gap: 10, background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 12, padding: 10, overflow: "visible" }}
       >
         <ChartSvg />
         <Legend />
@@ -170,6 +291,7 @@ export default function SimplePieChart({
         border: "1px solid var(--color-border)",
         borderRadius: 12,
         padding: 10,
+        overflow: "visible",
       }}
     >
       <ChartSvg />

@@ -188,6 +188,11 @@ export default function Costs() {
                 height={220}
                 legendPosition="right"
                 ariaLabel="Multi-cloud provider share"
+                showLabels
+                labelType="percent"
+                chartOffsetX={-12}
+                minLabelPercent={3}
+                labelColor="auto"
               />
             </div>
             <div>

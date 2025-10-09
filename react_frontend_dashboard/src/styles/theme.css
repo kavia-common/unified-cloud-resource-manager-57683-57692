@@ -54,6 +54,8 @@
   --axis-text: #6b7280;
   --gridline: #e5e7eb;
   --legend-text: #6b7280;
+  /* Chart label default text on surfaces; used when auto color not applied */
+  --chart-label-text: var(--text);
 
   --series-1: #3B82F6;
   --series-2: #F59E0B;

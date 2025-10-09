@@ -16,6 +16,7 @@ import {
   Legend,
   ResponsiveContainer,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 
 /**
@@ -209,34 +210,37 @@ export default function Costs() {
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Monthly Total by Month
               </div>
-              {/* Horizontal Bar Chart using Recharts */}
+              {/* Costs • Horizontal Bar (ref-matched) */}
               <div style={{ width: "100%", height: 260 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    layout="vertical"
+                    layout="vertical" // enforce horizontal bars
                     data={buildMonthlyTotalsForBarChart().map((d) => ({
-                      label: d.label,
+                      name: d.label, // normalize to { name, value }
                       value: d.value,
                     }))}
-                    margin={{ top: 8, right: 24, bottom: 8, left: 40 }}
+                    margin={{ top: 12, right: 48, bottom: 20, left: 72 }} // ample space to avoid clipping
+                    barCategoryGap={12}
+                    barGap={4}
+                    data-testid="costs-horizontal-bar-ref"
                   >
-                    <CartesianGrid stroke="#F3F4F6" horizontal={true} vertical={false} />
-                    {/* Category labels on Y-axis */}
+                    <CartesianGrid stroke="#F3F4F6" horizontal vertical={false} />
+                    {/* Category labels on the left */}
                     <YAxis
                       type="category"
-                      dataKey="label"
-                      width={60}
+                      dataKey="name"
+                      width={72}
                       tick={{ fill: "#111827", fontSize: 12 }}
-                      axisLine={{ stroke: "#E5E7EB" }}
-                      tickLine={{ stroke: "#E5E7EB" }}
+                      tickLine={false}
+                      axisLine={false}
                     />
-                    {/* Numeric values on X-axis */}
+                    {/* Numeric axis on the bottom */}
                     <XAxis
                       type="number"
                       tickFormatter={(v) => Number(v).toLocaleString()}
                       tick={{ fill: "#6B7280", fontSize: 11 }}
-                      axisLine={{ stroke: "#E5E7EB" }}
-                      tickLine={{ stroke: "#E5E7EB" }}
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <Tooltip
                       formatter={(v) => [`$${Number(v).toLocaleString()}`, "Total"]}
@@ -249,26 +253,36 @@ export default function Costs() {
                         fontSize: 12,
                       }}
                     />
+                    {/* Minimal legend/title */}
                     <Legend
                       verticalAlign="top"
-                      align="right"
-                      wrapperStyle={{ color: "#111827", fontSize: 12 }}
+                      align="left"
+                      wrapperStyle={{ color: "#111827", fontSize: 12, paddingBottom: 4 }}
                     />
                     <Bar
-                      name="Total"
+                      name="Monthly Total"
                       dataKey="value"
                       fill="#374151"
-                      radius={[4, 4, 4, 4]}
+                      radius={[0, 6, 6, 0]} // rounded right corners
                       maxBarSize={26}
-                    />
+                      isAnimationActive={false}
+                    >
+                      {/* Outside-right value labels with thousands formatting */}
+                      <LabelList
+                        dataKey="value"
+                        position="right"
+                        formatter={(v) => Number(v).toLocaleString()}
+                        style={{ fill: "#111827", fontSize: 12, fontWeight: 600 }}
+                      />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               <div
                 className="text-xs"
-                style={{ color: "var(--muted)", marginTop: 6, display: "flex", justifyContent: "space-between" }}
+                style={{ color: "#6B7280", marginTop: 8, display: "flex", justifyContent: "space-between" }}
               >
-                <span data-testid="horizontal-bar-chart-active">Horizontal bar chart rendered</span>
+                <span>Costs • Horizontal Bar (ref-matched)</span>
                 <span aria-hidden="true" style={{ color: "#9CA3AF" }}>
                   Values in USD
                 </span>

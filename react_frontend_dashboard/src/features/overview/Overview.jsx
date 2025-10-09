@@ -13,7 +13,7 @@ import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../s
 import { appendAccount, computeStatsFromAccounts, getAccounts, setAccounts } from "../../services/accountStore";
 // TEMP DEV: Healthcheck banner to verify preview visibility.
 import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
-import ActionsBar from "../../components/common/ActionsBar.tsx";
+
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
 import { TopRecommendations } from "../../components/TopRecommendations";
 import { RecommendationDetailsModal } from "../../components/recommendations";
@@ -44,8 +44,9 @@ export default function Overview() {
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
 
-  // Adaptive mode local state for dashboard-level Run Optimization
-  const [adaptiveEnabled, setAdaptiveEnabled] = useState(false);
+  // Embedded preflight state for unified Run Optimization flow
+  const [showRunPreflight, setShowRunPreflight] = useState(false);
+  const [adaptiveEnabledInternal, setAdaptiveEnabledInternal] = useState(false);
   const [adaptivePlan, setAdaptivePlan] = useState(null);
   const [adaptiveComputing, setAdaptiveComputing] = useState(false);
 
@@ -172,13 +173,7 @@ export default function Overview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Minimalist select styling aligned with Pure White theme
-  const selectStyles = {
-    display: "inline-grid",
-    alignItems: "center",
-    gridAutoFlow: "column",
-    gap: 8,
-  };
+
 
   // Axis config helpers and mode handling removed here for brevity (chart not shown in this trimmed file)
 
@@ -272,45 +267,125 @@ export default function Overview() {
       {/* Actions placed directly below Top Recommendations */}
       <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start" }}>
         <div style={{ width: "100%", maxWidth: 840, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          {/* Existing actions bar keeps the simple Run Optimization button for parity */}
-          <ActionsBar />
-
-          {/* Adaptive compact control group */}
-          <div
-            aria-label="Adaptive optimization controls"
+          {/* Single Run Optimization button opens embedded preflight */}
+          <button
+            type="button"
+            aria-label="Run Optimization"
+            data-testid="btn-run-optimization-dashboard"
+            onClick={() => {
+              setShowRunPreflight(true);
+            }}
+            className="btn"
             style={{
-              display: "inline-flex",
+              fontFamily: '"Helvetica Neue", Arial, sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+              lineHeight: 1,
+              padding: "10px 14px",
+              borderRadius: 8,
+              border: "1px solid #E5E7EB",
+              cursor: "pointer",
+              background: "#FFFFFF",
+              color: "#374151",
+              transition: "background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .05s ease"
+            }}
+            onMouseEnter={(e) => Object.assign(e.currentTarget.style, { background: "#F3F4F6", transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" })}
+            onMouseLeave={(e) => Object.assign(e.currentTarget.style, { background: "#FFFFFF", transform: "none", boxShadow: "none" })}
+            onFocus={(e) => Object.assign(e.currentTarget.style, { boxShadow: "0 0 0 3px rgba(59,130,246,0.25)", borderColor: "#93C5FD" })}
+            onBlur={(e) => Object.assign(e.currentTarget.style, { boxShadow: "none", borderColor: "#E5E7EB" })}
+          >
+            Run Optimization
+          </button>
+
+          {/* Keep existing Add Account entry point for convenience */}
+          <button
+            className="btn primary"
+            onClick={() => setIsAddOpen(true)}
+            aria-label="Add Account"
+            data-testid="overview-add-account-below-recs"
+            style={{ marginLeft: 4 }}
+          >
+            Add Account
+          </button>
+        </div>
+      </div>
+
+      {/* Preflight modal for Run Optimization */}
+      <Modal
+        title="Run optimization"
+        open={showRunPreflight}
+        onClose={() => {
+          setShowRunPreflight(false);
+          setAdaptiveEnabledInternal(false);
+          setAdaptivePlan(null);
+        }}
+        footer={
+          <>
+            <button
+              className="btn"
+              onClick={() => {
+                setShowRunPreflight(false);
+                setAdaptiveEnabledInternal(false);
+                setAdaptivePlan(null);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn primary"
+              onClick={() => {
+                const rec = selectedRec || { id: undefined, type: 'rightsizing', category: 'rightsizing' };
+                const options = adaptiveEnabledInternal && adaptivePlan ? { adaptive: adaptivePlan } : undefined;
+                handleRun(rec, options);
+                setShowRunPreflight(false);
+                setAdaptiveEnabledInternal(false);
+                setAdaptivePlan(null);
+              }}
+              disabled={adaptiveEnabledInternal && adaptiveComputing}
+            >
+              {adaptiveEnabledInternal && adaptiveComputing ? 'Preparing…' : 'Confirm & Run'}
+            </button>
+          </>
+        }
+      >
+        <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ color: "#6B7280", fontSize: 13 }}>
+            Review mode before executing. You can enable Adaptive Optimization to tailor aggressiveness,
+            scope, schedule, and safeguards automatically based on recent outcomes.
+          </div>
+
+          <div
+            style={{
+              display: "flex",
               alignItems: "center",
               gap: 10,
               padding: "8px 10px",
               border: "1px solid #E5E7EB",
               borderRadius: 10,
               background: "#FFFFFF",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
             }}
           >
-            {/* Toggle */}
-            <label htmlFor="adaptive-toggle" style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#111827" }}>
+            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#111827" }}>
               <input
-                id="adaptive-toggle"
                 type="checkbox"
-                checked={adaptiveEnabled}
+                checked={adaptiveEnabledInternal}
                 onChange={async (e) => {
                   const on = e.target.checked;
-                  setAdaptiveEnabled(on);
+                  setAdaptiveEnabledInternal(on);
                   if (on) {
                     await computeDashboardAdaptivePlan();
+                  } else {
+                    setAdaptivePlan(null);
                   }
                 }}
                 style={{ accentColor: "#374151", width: 16, height: 16 }}
                 aria-label="Toggle Adaptive mode"
               />
-              <span style={{ fontSize: 13, fontWeight: 600 }}>Adaptive</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>Adaptive mode</span>
             </label>
 
-            {/* Confidence meter badge and rationale (only when enabled) */}
-            {adaptiveEnabled && (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            {adaptiveEnabledInternal && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, minHeight: 24 }}>
                 <span
                   className="badge"
                   style={{
@@ -348,50 +423,11 @@ export default function Overview() {
             )}
           </div>
 
-          {/* Primary Run Optimization button that threads adaptive when enabled */}
-          <button
-            type="button"
-            aria-label="Run Optimization"
-            data-testid="btn-run-optimization-dashboard"
-            onClick={() => {
-              const rec = selectedRec || { id: undefined, type: 'rightsizing', category: 'rightsizing' };
-              const options = adaptiveEnabled ? { adaptive: adaptivePlan } : undefined;
-              handleRun(rec, options);
-            }}
-            className="btn"
-            style={{
-              fontFamily: '"Helvetica Neue", Arial, sans-serif',
-              fontSize: 14,
-              fontWeight: 600,
-              lineHeight: 1,
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: "1px solid #E5E7EB",
-              cursor: "pointer",
-              background: "#FFFFFF",
-              color: "#374151",
-              transition: "background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .05s ease"
-            }}
-            onMouseEnter={(e) => Object.assign(e.currentTarget.style, { background: "#F3F4F6", transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" })}
-            onMouseLeave={(e) => Object.assign(e.currentTarget.style, { background: "#FFFFFF", transform: "none", boxShadow: "none" })}
-            onFocus={(e) => Object.assign(e.currentTarget.style, { boxShadow: "0 0 0 3px rgba(59,130,246,0.25)", borderColor: "#93C5FD" })}
-            onBlur={(e) => Object.assign(e.currentTarget.style, { boxShadow: "none", borderColor: "#E5E7EB" })}
-          >
-            Run Optimization
-          </button>
-
-          {/* Keep existing Add Account entry point for convenience */}
-          <button
-            className="btn primary"
-            onClick={() => setIsAddOpen(true)}
-            aria-label="Add Account"
-            data-testid="overview-add-account-below-recs"
-            style={{ marginLeft: 4 }}
-          >
-            Add Account
-          </button>
+          <div style={{ fontSize: 12, color: "#9CA3AF" }}>
+            Tip: You can open a recommendation row to see full details before running.
+          </div>
         </div>
-      </div>
+      </Modal>
 
       {/* Responsive adjustments for very small devices: stack buttons */}
       <style>{`

@@ -127,6 +127,7 @@ export function MultiSeriesOverviewChart({
   yDomain = [0, 50],
   yTicks = [0, 10, 20, 30, 40, 50],
 }) {
+  // Card styling for Pure White minimalist theme
   const cardStyle = {
     background: "var(--color-surface)",
     border: "1px solid var(--border-color)",
@@ -149,48 +150,103 @@ export function MultiSeriesOverviewChart({
   };
   const colorDot = (color) => ({ width: 8, height: 8, borderRadius: "50%", background: color });
 
+  // Number formatting with thousands separators
+  const formatNumber = (n) => {
+    try {
+      return Number(n).toLocaleString();
+    } catch {
+      return String(n);
+    }
+  };
+
   return (
     <div className="chart-card" style={cardStyle} role="figure" aria-label="Overview bar chart: Series comparison by cloud provider">
       <div style={layoutStyle}>
         <div style={chartContainerStyle}>
           <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={data} margin={{ top: 16, right: 12, bottom: 36, left: 48 }}>
-              <CartesianGrid stroke="var(--gridline)" vertical={false} strokeWidth={1} />
-              <XAxis
+            {/* Horizontal orientation: layout='vertical', categories on Y axis */}
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ top: 12, right: 24, bottom: 12, left: 72 }} // extra left for long labels, right for values
+            >
+              {/* Gridlines horizontal only for clean look */}
+              <CartesianGrid stroke="var(--gridline)" horizontal strokeWidth={1} vertical={false} />
+
+              {/* Categories on Y axis */}
+              <YAxis
                 dataKey={xKey}
-                tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+                type="category"
+                width={64}
+                tick={{
+                  fill: "var(--axis-text)",
+                  fontSize: 12,
+                  fontFamily: '"Helvetica Neue", Arial, sans-serif',
+                }}
                 tickFormatter={xTickFormatter}
                 tickLine={false}
                 axisLine={false}
                 label={
                   xAxisLabel
-                    ? { value: xAxisLabel, position: "insideBottom", offset: -4, fill: "var(--axis-text)", fontSize: 12 }
+                    ? {
+                        value: xAxisLabel,
+                        position: "insideLeft",
+                        offset: -8,
+                        fill: "var(--axis-text)",
+                        fontSize: 12,
+                      }
                     : undefined
                 }
               />
-              <YAxis
+
+              {/* Values on X axis */}
+              <XAxis
+                type="number"
                 domain={yDomain}
                 ticks={yTicks}
-                tick={{ fill: "var(--axis-text)", fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+                tick={{
+                  fill: "var(--axis-text)",
+                  fontSize: 12,
+                  fontFamily: '"Helvetica Neue", Arial, sans-serif',
+                }}
+                tickFormatter={(v) => formatNumber(v)}
                 tickLine={false}
                 axisLine={false}
-                label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: "insideLeft", offset: 12, fill: "var(--axis-text)", fontSize: 12 } : undefined}
+                label={
+                  yAxisLabel
+                    ? {
+                        value: yAxisLabel,
+                        position: "insideBottomRight",
+                        offset: -4,
+                        fill: "var(--axis-text)",
+                        fontSize: 12,
+                      }
+                    : undefined
+                }
               />
-              <Tooltip contentStyle={{ fontSize: 12 }} />
+
+              <Tooltip
+                formatter={(value) => formatNumber(value)}
+                contentStyle={{ fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+              />
+
+              {/* Bars - keep API stable, just orientation change applies automatically */}
               {seriesOrder.map((s) => (
                 <Bar
                   key={s.key}
                   dataKey={s.key}
                   name={s.label}
                   fill={s.color}
-                  radius={[3, 3, 0, 0]}
-                  barSize={Math.max(8, 24 - seriesOrder.length * 2)}
+                  radius={[0, 3, 3, 0]} // round right edges in horizontal layout
+                  barSize={Math.max(10, 24 - seriesOrder.length * 2)}
                   isAnimationActive={false}
                 />
               ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {/* Side legend kept consistent with minimalist theme */}
         <div aria-label="Chart legend" style={sideLegendStyle}>
           {seriesOrder.map((s) => (
             <div key={s.key} className="legend-item" style={legendItemStyle}>

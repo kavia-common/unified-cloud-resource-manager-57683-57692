@@ -5,6 +5,16 @@ import {
   CLOUD_COLORS,
 } from "../../components/ui/Charts";
 import SimplePieChart from "../../components/ui/SimplePieChart";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  Cell,
+} from "recharts";
 
 /**
  * PUBLIC_INTERFACE
@@ -46,6 +56,17 @@ export default function Costs() {
     ],
     [monthlyTotals]
   );
+
+  // Horizontal percent bars data for AWS/Azure/GCP (0-100)
+  const providerPercentData = useMemo(() => {
+    const total = monthlyTotals.AWS + monthlyTotals.Azure + monthlyTotals.GCP;
+    const pct = (v) => (total > 0 ? Math.round((v / total) * 100) : 0);
+    return [
+      { provider: "AWS", percent: pct(monthlyTotals.AWS) },
+      { provider: "Azure", percent: pct(monthlyTotals.Azure) },
+      { provider: "GCP", percent: pct(monthlyTotals.GCP) },
+    ];
+  }, [monthlyTotals]);
 
   // Trend data (Monthly and Yearly) multi-series line chart mock
   const monthlyTrend = useMemo(
@@ -149,7 +170,7 @@ export default function Costs() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(260px, 420px) 1fr",
+              gridTemplateColumns: "minmax(260px, 420px) 1fr minmax(260px, 420px)",
               gap: 16,
               alignItems: "stretch",
             }}
@@ -175,10 +196,66 @@ export default function Costs() {
                 labelColor="auto"
               />
             </div>
-            {/* Spacer to preserve layout after removing the secondary chart */}
-            <div style={{ minHeight: 16 }} />
+
+            {/* Middle column left intentionally empty to allow the pie + legend to breathe at larger widths */}
+            <div style={{ minHeight: 16 }} aria-hidden="true" />
+
+            {/* Horizontal Percent by Provider */}
+            <div>
+              <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
+                Provider Share (Percent)
+              </div>
+              <div className="card surface" style={{ padding: 8, minWidth: 0 }}>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart
+                    data={providerPercentData}
+                    layout="vertical"
+                    margin={{ top: 8, right: 16, bottom: 8, left: 48 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--gridline)" />
+                    <YAxis
+                      dataKey="provider"
+                      type="category"
+                      tick={{ fontSize: 12, fill: "var(--axis-text)" }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval={0}
+                    />
+                    <XAxis
+                      type="number"
+                      domain={[0, 100]}
+                      ticks={[0, 20, 40, 60, 80, 100]}
+                      tick={{ fontSize: 12, fill: "var(--axis-text)" }}
+                      tickFormatter={(v) => `${v}`}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <RTooltip
+                      formatter={(v) => [`${v}%`, "Percent"]}
+                      labelFormatter={(l) => `${l}`}
+                    />
+                    <Bar dataKey="percent" radius={[0, 4, 4, 0]} isAnimationActive={false}>
+                      {providerPercentData.map((entry) => {
+                        const color =
+                          entry.provider === "AWS"
+                            ? CLOUD_COLORS.AWS
+                            : entry.provider === "Azure"
+                            ? CLOUD_COLORS.Azure
+                            : CLOUD_COLORS.GCP;
+                        return <Cell key={`cell-${entry.provider}`} fill={color} />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
           <style>{`
+            @media (max-width: 1280px) {
+              .panel-body > div {
+                grid-template-columns: minmax(260px, 1fr) 1fr;
+              }
+            }
             @media (max-width: 1020px) {
               .panel-body > div {
                 grid-template-columns: 1fr;

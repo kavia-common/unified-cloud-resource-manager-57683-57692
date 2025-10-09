@@ -174,54 +174,115 @@ export default function Costs() {
           </div>
         </div>
         <div className="panel-body">
+          {/* Equal-height synchronized charts layout */}
           <div
+            className="mc-spend-grid"
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(260px, 420px) 1fr minmax(260px, 420px)",
+              gridTemplateColumns: "1fr 1fr",
               gap: 16,
               alignItems: "stretch",
             }}
           >
-            <div>
-              <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
-                Provider Share
+            {/* Left: Pie with centered provider boxes below */}
+            <div className="mc-left" style={{ display: "grid", gridTemplateRows: "1fr auto", alignItems: "stretch" }}>
+              <div className="card surface" style={{ padding: 8, background: "var(--surface, var(--color-surface))", minHeight: 0 }}>
+                {/* Use a fixed height to sync with right chart via container height */}
+                <div style={{ display: "grid", gridTemplateRows: "auto 1fr", height: 260 }}>
+                  <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
+                    Provider Share
+                  </div>
+                  {/* Center the pie within the available space while respecting its own size */}
+                  <div style={{ display: "grid", placeItems: "center" }}>
+                    <SimplePieChart
+                      data={[
+                        { label: "AWS", value: monthlyTotals.AWS, amount: monthlyTotals.AWS, color: CLOUD_COLORS.AWS },
+                        { label: "Azure", value: monthlyTotals.Azure, amount: monthlyTotals.Azure, color: CLOUD_COLORS.Azure },
+                        { label: "GCP", value: monthlyTotals.GCP, amount: monthlyTotals.GCP, color: CLOUD_COLORS.GCP },
+                      ]}
+                      width={300}
+                      height={200}
+                      legendPosition="right"
+                      ariaLabel="Multi-cloud provider share"
+                      showLabels
+                      labelType="value"
+                      chartOffsetX={-12}
+                      minLabelPercent={100}
+                      labelColor="auto"
+                    />
+                  </div>
+                </div>
               </div>
-              <SimplePieChart
-                data={[
-                  { label: "AWS", value: monthlyTotals.AWS, amount: monthlyTotals.AWS, color: CLOUD_COLORS.AWS },
-                  { label: "Azure", value: monthlyTotals.Azure, amount: monthlyTotals.Azure, color: CLOUD_COLORS.Azure },
-                  { label: "GCP", value: monthlyTotals.GCP, amount: monthlyTotals.GCP, color: CLOUD_COLORS.GCP },
-                ]}
-                width={380}
-                height={220}
-                legendPosition="right"
-                ariaLabel="Multi-cloud provider share"
-                showLabels
-                labelType="value"
-                chartOffsetX={-12}
-                minLabelPercent={100}
-                labelColor="auto"
-              />
+
+              {/* Centered provider summary boxes below the pie */}
+              <div
+                className="mc-provider-boxes"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, minmax(0,1fr))",
+                  gap: 12,
+                  justifyItems: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  marginTop: 8,
+                }}
+              >
+                <div
+                  className="card surface"
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--surface-2, var(--color-surface-2))",
+                    borderColor: "var(--border, var(--color-border))",
+                    width: "100%",
+                    maxWidth: 220,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: CLOUD_COLORS.AWS }}>AWS</div>
+                  <div className="text-subtle" style={{ marginTop: 4, fontSize: 13 }}>$12,450 · 42%</div>
+                </div>
+                <div
+                  className="card surface"
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--surface-2, var(--color-surface-2))",
+                    borderColor: "var(--border, var(--color-border))",
+                    width: "100%",
+                    maxWidth: 220,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: CLOUD_COLORS.Azure }}>Azure</div>
+                  <div className="text-subtle" style={{ marginTop: 4, fontSize: 13 }}>$10,320 · 35%</div>
+                </div>
+                <div
+                  className="card surface"
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--surface-2, var(--color-surface-2))",
+                    borderColor: "var(--border, var(--color-border))",
+                    width: "100%",
+                    maxWidth: 220,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: CLOUD_COLORS.GCP }}>GCP</div>
+                  <div className="text-subtle" style={{ marginTop: 4, fontSize: 13 }}>$6,810 · 23%</div>
+                </div>
+              </div>
             </div>
 
-            {/* Middle column spacer for breathing room on larger widths */}
-            <div style={{ minHeight: 16 }} aria-hidden="true" />
-
-            {/* Horizontal Percent by Provider */}
-            <div>
+            {/* Right: Horizontal bar chart with matching height */}
+            <div className="mc-right">
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Provider Share (Percent)
               </div>
               <div className="card surface" style={{ padding: 8, minWidth: 0, background: "var(--surface-2, var(--color-surface-2))" }}>
-                <ResponsiveContainer width="100%" height={220}>
+                {/* Match height to left pie container height (260) */}
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart
                     data={providerPercentData}
                     layout="vertical"
                     margin={{ top: 8, right: 16, bottom: 8, left: 48 }}
                   >
-                    {/* Remove dotted gridlines for a clean bar look on dark */}
-                    {/* Either remove grid or set solid stroke without dashes; we remove entirely */}
-                    {/* Note: Keeping axis lines off for minimalist style */}
+                    {/* No grid lines */}
                     <YAxis
                       dataKey="provider"
                       type="category"
@@ -240,7 +301,6 @@ export default function Costs() {
                       axisLine={false}
                     />
                     <RTooltip
-                      // Show only the percentage value in tooltip
                       formatter={(v) => [`${v}%`, ""]}
                       labelFormatter={(l) => `${l}`}
                       contentStyle={{
@@ -250,13 +310,12 @@ export default function Costs() {
                         borderRadius: 8,
                         fontSize: 12,
                       }}
-                      cursor={false} // disable hover cursor highlight/overlay
+                      cursor={false}
                     />
                     <Bar
                       dataKey="percent"
                       radius={[0, 4, 4, 0]}
                       isAnimationActive={false}
-                      // Ensure no active bar overlay style is drawn
                       activeBar={false}
                     >
                       {providerPercentData.map((entry) => {
@@ -275,14 +334,19 @@ export default function Costs() {
             </div>
           </div>
           <style>{`
-            @media (max-width: 1280px) {
-              .panel-body > div {
-                grid-template-columns: minmax(260px, 1fr) 1fr;
+            /* Responsive behavior: stack vertically on small screens */
+            @media (max-width: 1020px) {
+              .mc-spend-grid {
+                grid-template-columns: 1fr;
+              }
+              .mc-provider-boxes {
+                grid-template-columns: 1fr;
+                justify-items: center;
               }
             }
-            @media (max-width: 1020px) {
-              .panel-body > div {
-                grid-template-columns: 1fr;
+            @media (min-width: 1021px) and (max-width: 1280px) {
+              .mc-spend-grid {
+                grid-template-columns: 1fr 1fr;
               }
             }
           `}</style>

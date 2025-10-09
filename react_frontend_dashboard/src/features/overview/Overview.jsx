@@ -17,6 +17,9 @@ import ActionsBar from "../../components/common/ActionsBar.tsx";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
 import { TopRecommendations } from "../../components/TopRecommendations";
 import { RecommendationDetailsModal } from "../../components/recommendations";
+// Adaptive imports
+import { computeAdaptivePlan } from "../../lib/adaptivePolicy";
+import { getRecentRuns } from "../../lib/historyProvider";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -41,6 +44,11 @@ export default function Overview() {
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
 
+  // Adaptive mode local state for dashboard-level Run Optimization
+  const [adaptiveEnabled, setAdaptiveEnabled] = useState(false);
+  const [adaptivePlan, setAdaptivePlan] = useState(null);
+  const [adaptiveComputing, setAdaptiveComputing] = useState(false);
+
   const handleOpenRecDetails = (rec) => {
     console.debug('[Overview] Opening recommendation details modal for:', rec?.id || rec?.title);
     setSelectedRec(rec);
@@ -50,6 +58,58 @@ export default function Overview() {
   const handleCloseRecDetails = () => {
     setIsRecModalOpen(false);
   };
+
+  // Build a lightweight current recommendation context by peeking at TopRecommendations DOM cache or fallback
+  // For simplicity, we compute an aggregated synthetic recommendation when user toggles Adaptive ON.
+  async function computeDashboardAdaptivePlan() {
+    try {
+      setAdaptiveComputing(true);
+      // Attempt to derive a generic recommendation context leaning towards 'rightsizing'
+      const syntheticRec = {
+        id: undefined,
+        type: 'rightsizing',
+        riskLevel: 'high', // dashboard top items are high-priority
+        estimatedSavingsPct: 9, // a mid-range estimate; refined when real table context is available
+        requiresApproval: false,
+        tags: ['dashboard', 'top-recs'],
+      };
+
+      // Fetch recent runs filtered by type to inform policy
+      const history = await getRecentRuns({ recommendationType: syntheticRec.type, limit: 25 }).catch(() => []);
+      const safeHistory = Array.isArray(history) ? history : [];
+
+      const plan = computeAdaptivePlan({
+        recommendation: syntheticRec,
+        history: safeHistory,
+        context: {
+          blackoutActive: false,
+          complianceFlag: false,
+          defaultBlastRadius: 'smart-subset',
+          businessHoursLocal: true,
+        },
+      });
+
+      setAdaptivePlan(plan);
+    } catch (e) {
+      console.warn('[Overview] Adaptive plan computation failed; using fallback.', e?.message || e);
+      setAdaptivePlan({
+        aggressiveness: 'conservative',
+        scope: 'canary',
+        scheduleHint: 'off-hours',
+        confidence: 0.45,
+        expectedSavingsDelta: { minPct: 2, maxPct: 6 },
+        rationale: 'Fallback plan due to missing data; using conservative defaults.',
+        safeguards: {
+          requireApproval: false,
+          capScopeToCanary: true,
+          respectBlackout: false,
+          blastRadiusMax: 'smart-subset',
+        },
+      });
+    } finally {
+      setAdaptiveComputing(false);
+    }
+  }
 
   // Local UI state to control the portal-based minimal Add Account modal
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -211,14 +271,122 @@ export default function Overview() {
 
       {/* Actions placed directly below Top Recommendations */}
       <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start" }}>
-        <div style={{ width: "100%", maxWidth: 640, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ width: "100%", maxWidth: 840, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          {/* Existing actions bar keeps the simple Run Optimization button for parity */}
           <ActionsBar />
+
+          {/* Adaptive compact control group */}
+          <div
+            aria-label="Adaptive optimization controls"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "8px 10px",
+              border: "1px solid #E5E7EB",
+              borderRadius: 10,
+              background: "#FFFFFF",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
+            }}
+          >
+            {/* Toggle */}
+            <label htmlFor="adaptive-toggle" style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#111827" }}>
+              <input
+                id="adaptive-toggle"
+                type="checkbox"
+                checked={adaptiveEnabled}
+                onChange={async (e) => {
+                  const on = e.target.checked;
+                  setAdaptiveEnabled(on);
+                  if (on) {
+                    await computeDashboardAdaptivePlan();
+                  }
+                }}
+                style={{ accentColor: "#374151", width: 16, height: 16 }}
+                aria-label="Toggle Adaptive mode"
+              />
+              <span style={{ fontSize: 13, fontWeight: 600 }}>Adaptive</span>
+            </label>
+
+            {/* Confidence meter badge and rationale (only when enabled) */}
+            {adaptiveEnabled && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <span
+                  className="badge"
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: "4px 8px",
+                    borderRadius: 999,
+                    border: "1px solid #E5E7EB",
+                    background: "#F9FAFB",
+                    color: "#111827",
+                    minWidth: 64,
+                    textAlign: "center"
+                  }}
+                  aria-label="Confidence"
+                  title="Adaptive plan confidence"
+                >
+                  {adaptiveComputing ? "…" : `Conf ${Math.round(((adaptivePlan?.confidence ?? 0) * 100))}%`}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "#6B7280",
+                    maxWidth: 360,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis"
+                  }}
+                  title={adaptivePlan?.rationale || "Adaptive rationale"}
+                >
+                  {adaptiveComputing
+                    ? "Computing adaptive plan…"
+                    : (adaptivePlan?.rationale || "Conservative defaults based on safety.")}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Primary Run Optimization button that threads adaptive when enabled */}
+          <button
+            type="button"
+            aria-label="Run Optimization"
+            data-testid="btn-run-optimization-dashboard"
+            onClick={() => {
+              const rec = selectedRec || { id: undefined, type: 'rightsizing', category: 'rightsizing' };
+              const options = adaptiveEnabled ? { adaptive: adaptivePlan } : undefined;
+              handleRun(rec, options);
+            }}
+            className="btn"
+            style={{
+              fontFamily: '"Helvetica Neue", Arial, sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+              lineHeight: 1,
+              padding: "10px 14px",
+              borderRadius: 8,
+              border: "1px solid #E5E7EB",
+              cursor: "pointer",
+              background: "#FFFFFF",
+              color: "#374151",
+              transition: "background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .05s ease"
+            }}
+            onMouseEnter={(e) => Object.assign(e.currentTarget.style, { background: "#F3F4F6", transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" })}
+            onMouseLeave={(e) => Object.assign(e.currentTarget.style, { background: "#FFFFFF", transform: "none", boxShadow: "none" })}
+            onFocus={(e) => Object.assign(e.currentTarget.style, { boxShadow: "0 0 0 3px rgba(59,130,246,0.25)", borderColor: "#93C5FD" })}
+            onBlur={(e) => Object.assign(e.currentTarget.style, { boxShadow: "none", borderColor: "#E5E7EB" })}
+          >
+            Run Optimization
+          </button>
+
+          {/* Keep existing Add Account entry point for convenience */}
           <button
             className="btn primary"
             onClick={() => setIsAddOpen(true)}
             aria-label="Add Account"
             data-testid="overview-add-account-below-recs"
-            style={{ marginLeft: 8 }}
+            style={{ marginLeft: 4 }}
           >
             Add Account
           </button>

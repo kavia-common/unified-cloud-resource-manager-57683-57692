@@ -224,6 +224,9 @@ function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
 
+// PUBLIC_INTERFACE
+export const __recommendationsServiceLoaded = true;
+
 function daysSince(dateISO?: string | null): number {
   if (!dateISO) return 0;
   const t = new Date(dateISO).getTime();

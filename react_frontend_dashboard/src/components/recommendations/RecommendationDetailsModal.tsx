@@ -139,12 +139,20 @@ export const RecommendationDetailsModal: React.FC<RecommendationDetailsModalProp
     if (!r) return null;
     return {
       id: r.id,
+      title: r.title || r.name || 'Recommendation',
+      category: r.category || r.type,
+      provider: r.provider || r.cloudProvider || r.cloud,
+      resourceId: r.resourceId || r.resource_id,
+      description: r.description,
+      severity: r.severity,
+      // non-strict extras used by computeAdaptivePlan
+      // mapped into our RecommendationLite compatible fields
       type: r.type || r.category,
       riskLevel: r.riskLevel || 'medium',
       estimatedSavingsPct: r.estimatedSavingsPct || r.expectedSavingsPct,
       requiresApproval: !!r.requiresApproval,
       tags: r.tags || [],
-    };
+    } as RecommendationLite;
   }, [selectedRow]);
 
   // Load adaptive plan when toggle enabled

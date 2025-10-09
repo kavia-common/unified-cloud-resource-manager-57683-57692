@@ -178,16 +178,10 @@ export default function SimplePieChart({
             const pOuter = midPoint(seg, r + 10);
             const lineEndX = pOuter.x + (isRight ? 16 : -16);
             const labelX = lineEndX + (isRight ? 6 : -6);
-
-            let labelText;
-            const providerUpper = String(seg.label || "").toUpperCase();
-            if (providerUpper === "AWS") labelText = "AWS-12,450";
-            else if (providerUpper === "AZURE") labelText = "Azure-10,320";
-            else if (providerUpper === "GCP") labelText = "GCP-6,810";
-            else {
-              const num = typeof seg.amount === "number" ? Number(seg.amount).toLocaleString() : String(seg.amount);
-              labelText = `${seg.label}-${num}`;
-            }
+            const labelText =
+              labelType === "percent"
+                ? formatPercent(seg.frac)
+                : formatValue(seg.amount);
 
             return (
               <g key={`label-${i}`} aria-hidden="true">
@@ -260,6 +254,7 @@ export default function SimplePieChart({
   );
 }
 
+ // PUBLIC_INTERFACE
 function formatCurrency(n) {
   try {
     return `$${Number(n).toLocaleString()}`;

@@ -208,7 +208,7 @@ export default function Costs() {
             <div style={{ minHeight: 16 }} aria-hidden="true" />
 
             {/* Horizontal Percent by Provider */}
-            <div>
+            <div style={{ marginTop: 8 }}>
               <div className="text-subtle" style={{ marginBottom: 6, fontSize: 12 }}>
                 Provider Share (Percent)
               </div>
@@ -217,7 +217,7 @@ export default function Costs() {
                   <BarChart
                     data={providerPercentData}
                     layout="vertical"
-                    margin={{ top: 8, right: 16, bottom: 8, left: 48 }}
+                    margin={{ top: 4, right: 16, bottom: 8, left: 48 }}
                   >
                     {/* Remove dotted gridlines for a clean bar look on dark */}
                     {/* Either remove grid or set solid stroke without dashes; we remove entirely */}

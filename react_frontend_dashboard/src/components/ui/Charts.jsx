@@ -349,10 +349,7 @@ export function PieBreakdownChart({
     const upper = String(provider).toUpperCase();
     const valueFormatted = formatNumber(value);
 
-    let formatted = `${provider}-${valueFormatted}`;
-    if (upper === "AWS") formatted = "AWS-12,450";
-    else if (upper === "AZURE") formatted = "Azure-10,320";
-    else if (upper === "GCP") formatted = "GCP-6,810";
+    let formatted = `${provider}`;
 
     const RAD = Math.PI / 180;
     const angle = -midAngle * RAD;

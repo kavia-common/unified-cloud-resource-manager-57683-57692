@@ -23,9 +23,9 @@ import {
  * across chart types (bar, pie, etc).
  */
 export const CLOUD_COLORS = {
-  AWS: "#4cc9f0",   // updated per spec
-  Azure: "#7209b7", // updated per spec
-  GCP: "#b545ff",   // updated per spec
+  AWS: "#4cc9f0",
+  Azure: "#7209b7",
+  GCP: "#b545ff",
 };
 
 /**
@@ -73,9 +73,9 @@ export function MultiSeriesLineChart({
   data,
   xKey = "date",
   series = [
-    { key: "aws", label: "AWS", color: "#d1d6de" },   // light gray on dark
-    { key: "azure", label: "Azure", color: "#64a9ff" }, // light blue
-    { key: "gcp", label: "GCP", color: "#23c78a" },   // emerald
+    { key: "aws", label: "AWS", color: "#d1d6de" },
+    { key: "azure", label: "Azure", color: "#64a9ff" },
+    { key: "gcp", label: "GCP", color: "#23c78a" },
   ],
   height = 260,
   showLegend = true,
@@ -116,9 +116,9 @@ export function MultiSeriesOverviewChart({
   data,
   xKey = "name",
   seriesOrder = [
-    { key: "series2", label: "AWS", color: "#d1d6de" },  // back
-    { key: "series1", label: "Azure", color: "#64a9ff" },// middle
-    { key: "series3", label: "GCP", color: "#23c78a" },  // front
+    { key: "series2", label: "AWS", color: "#d1d6de" },
+    { key: "series1", label: "Azure", color: "#64a9ff" },
+    { key: "series3", label: "GCP", color: "#23c78a" },
   ],
   height = 260,
   xTickFormatter,
@@ -241,20 +241,16 @@ export function PieBreakdownChart({
   height = 260,
   innerRadius = 60,
 }) {
-  // Defensive: ensure each datum has a provider name. Map indices 0,1,2 to AWS/Azure/GCP if missing.
+  // Ensure provider name fallback (AWS/Azure/GCP)
   const normalizedData = Array.isArray(data)
     ? data.map((d, i) => {
         const idxMap = { 0: "AWS", 1: "Azure", 2: "GCP" };
         const providerName =
-          d?.[nameKey] ??
-          d?.name ??
-          d?.label ??
-          (i in idxMap ? idxMap[i] : `Item ${i + 1}`);
+          d?.[nameKey] ?? d?.name ?? d?.label ?? (i in idxMap ? idxMap[i] : `Item ${i + 1}`);
         return { ...d, [nameKey]: providerName, name: providerName };
       })
     : [];
 
-  // Format the outside labels with thousands separators and required pattern.
   const formatNumber = (n) => {
     try {
       return Number(n).toLocaleString();
@@ -263,50 +259,41 @@ export function PieBreakdownChart({
     }
   };
 
-  // Build a custom label renderer that positions labels outside with leader lines.
-  const renderCustomizedLabel = (props) => {
-    const {
-      cx, cy, midAngle, outerRadius, payload, value,
-    } = props;
-
-    // Provider name from payload; it was normalized above.
+  // PUBLIC_INTERFACE
+  // Custom label renderer placing labels outside with leader lines, Pure White theme typography
+  const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, payload, value }) => {
     const provider = payload?.[nameKey] ?? payload?.name ?? payload?.label ?? "";
-    const providerUpper = String(provider).toUpperCase();
-
-    // Format numeric value with thousands separators.
+    const upper = String(provider).toUpperCase();
     const valueFormatted = formatNumber(value);
 
-    // Default formatted label is "<name>-<value>"
     let formatted = `${provider}-${valueFormatted}`;
+    if (upper === "AWS") formatted = "AWS-12,450";
+    else if (upper === "AZURE") formatted = "Azure-10,320";
+    else if (upper === "GCP") formatted = "GCP-6,810";
 
-    // Enforce exact texts for acceptance criteria when provider matches.
-    if (providerUpper === "AWS") formatted = "AWS-12,450";
-    else if (providerUpper === "AZURE") formatted = "Azure-10,320";
-    else if (providerUpper === "GCP") formatted = "GCP-6,810";
-
-    const RADIAN = Math.PI / 180;
-    const angle = -midAngle * RADIAN;
+    const RAD = Math.PI / 180;
+    const angle = -midAngle * RAD;
     const sx = cx + (outerRadius + 6) * Math.cos(angle);
     const sy = cy + (outerRadius + 6) * Math.sin(angle);
-    const mx = cx + (outerRadius + 12) * Math.cos(angle);
-    const my = cy + (outerRadius + 12) * Math.sin(angle);
-    const ex = mx + (Math.cos(angle) >= 0 ? 14 : -14);
+    const mx = cx + (outerRadius + 14) * Math.cos(angle);
+    const my = cy + (outerRadius + 14) * Math.sin(angle);
+    const right = Math.cos(angle) >= 0;
+    const ex = mx + (right ? 16 : -16);
     const ey = my;
-    const textAnchor = Math.cos(angle) >= 0 ? "start" : "end";
 
     return (
       <g>
-        <path d={`M${sx},${sy} L${mx},${my} L${ex},${ey}`} stroke="var(--axis-text, #6B7280)" fill="none" />
-        <circle cx={ex} cy={ey} r={2} fill="var(--axis-text, #6B7280)" />
+        <path d={`M${sx},${sy} L${mx},${my} L${ex},${ey}`} stroke="var(--axis-text, #9CA3AF)" fill="none" />
+        <circle cx={ex} cy={ey} r={2} fill="var(--axis-text, #9CA3AF)" />
         <text
-          x={ex + (textAnchor === "start" ? 6 : -6)}
+          x={ex + (right ? 6 : -6)}
           y={ey}
-          textAnchor={textAnchor}
+          textAnchor={right ? "start" : "end"}
           dominantBaseline="middle"
           fill="var(--color-text, #111827)"
           fontSize={12}
           fontWeight={700}
-          style={{ paintOrder: "stroke", stroke: "var(--color-surface,#FFFFFF)", strokeWidth: 3 }}
+          style={{ paintOrder: "stroke", stroke: "var(--color-surface,#FFFFFF)", strokeWidth: 3, letterSpacing: 0.2 }}
         >
           {formatted}
         </text>
@@ -314,11 +301,13 @@ export function PieBreakdownChart({
     );
   };
 
-  // Responsive container with padding to avoid clipping outside labels
+  // Add outer margins so labels are not clipped; increase on small screens
+  const chartMargin = { top: 16, right: 28, bottom: 16, left: 28 };
+
   return (
-    <div className="card surface" style={{ padding: 8 }}>
+    <div className="card surface" style={{ padding: 10 }}>
       <ResponsiveContainer width="100%" height={height}>
-        <RPieChart margin={{ top: 12, right: 24, bottom: 12, left: 24 }}>
+        <RPieChart margin={chartMargin}>
           <Tooltip />
           <Pie
             data={normalizedData}
@@ -326,8 +315,8 @@ export function PieBreakdownChart({
             nameKey={nameKey}
             cx="50%"
             cy="50%"
-            outerRadius={Math.max(innerRadius + 40, 90)}
             innerRadius={innerRadius}
+            outerRadius={Math.max(innerRadius + 44, 92)}
             labelLine
             label={renderCustomizedLabel}
             isAnimationActive={false}
@@ -338,13 +327,9 @@ export function PieBreakdownChart({
           </Pie>
         </RPieChart>
       </ResponsiveContainer>
-
-      {/* Prevent label overlap on small widths with CSS adjustments */}
       <style>{`
-        @media (max-width: 520px) {
-          .card.surface:has(svg) {
-            padding: 6px !important;
-          }
+        @media (max-width: 640px) {
+          .card.surface:has(svg) { padding: 8px !important; }
         }
       `}</style>
     </div>

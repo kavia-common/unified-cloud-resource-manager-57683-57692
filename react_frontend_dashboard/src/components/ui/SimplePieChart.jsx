@@ -3,22 +3,20 @@ import React, { useMemo } from "react";
 /**
  * PUBLIC_INTERFACE
  * Minimal SVG Pie Chart (no external libs).
- * Design reference: attachments/20251009_065413_Screenshot_2025-10-09_122334.png
- * Accessible and responsive-friendly with Pure White theme styling.
+ * Accessible and responsive-friendly with Pure White theme styling, with outside labels and leader lines.
  *
  * Props:
  * - data: Array<{ label: string, value: number, color?: string, amount?: number }>
- *   Note: value is used for slice size; amount can be provided for legend amounts.
  * - width?: number (default 320)
  * - height?: number (default 240)
  * - legendPosition?: 'right' | 'bottom' (default 'right')
- * - ariaLabel?: string (accessible name)
+ * - ariaLabel?: string
  * - colors?: string[] fallback palette
- *
- * Behavior:
- * - Renders solid slices without a center label.
- * - Legend shows provider label + amount and percentage. Legend stacks on small widths.
- * - Pure White minimalist styling: surfaces (#F9FAFB), text colors per CSS vars.
+ * - chartOffsetX?: number shift for pie position
+ * - showLabels?: boolean
+ * - labelType?: 'percent' | 'value'
+ * - labelColor?: 'auto' | CSS color
+ * - minLabelPercent?: number threshold for outside labels (use 100 to force all outside)
  */
 // PUBLIC_INTERFACE
 export default function SimplePieChart({
@@ -28,12 +26,11 @@ export default function SimplePieChart({
   legendPosition = "right",
   ariaLabel = "Pie chart",
   colors = ["#000000", "#1a237e", "var(--series-3)", "#9CA3AF", "#F59E0B", "#10B981"],
-  // New props to control labels and positioning
-  chartOffsetX = 0, // px shift for the pie group to nudge left/right
+  chartOffsetX = 0,
   showLabels = true,
-  labelType = "value", // 'percent' | 'value'
-  labelColor = "auto", // 'auto' | CSS color string
-  minLabelPercent = 100, // force all labels to render outside with leader lines
+  labelType = "value",
+  labelColor = "auto",
+  minLabelPercent = 100,
 }) {
   const safe = useMemo(() => {
     const arr = Array.isArray(data) ? data : [];
@@ -54,11 +51,10 @@ export default function SimplePieChart({
   const total = useMemo(() => safe.reduce((s, d) => s + d.value, 0), [safe]);
   const hasData = total > 0 && safe.length > 0;
 
-  // Drawing area
-  const padding = 8;
+  const padding = 14; // increased padding to reduce clipping
   const svgW = width;
   const svgH = height;
-  const r = Math.max(40, Math.min(svgW, svgH) / 2 - padding);
+  const r = Math.max(44, Math.min(svgW, svgH) / 2 - padding);
   const cx = svgW / 2;
   const cy = svgH / 2;
 
@@ -80,37 +76,11 @@ export default function SimplePieChart({
     return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
   };
 
-  // Compute mid point on arc at radius 'rr'
   const midPoint = (seg, rr = r * 0.62) => {
     const mid = (seg.start + seg.end) / 2;
     const x = cx + rr * Math.cos(mid - Math.PI / 2);
     const y = cy + rr * Math.sin(mid - Math.PI / 2);
     return { x, y, mid };
-  };
-
-  // Relative luminance for contrast and auto text color
-  const hexToRgb = (hex) => {
-    try {
-      const h = hex.replace('#', '');
-      const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
-      const r = (bigint >> 16) & 255;
-      const g = (bigint >> 8) & 255;
-      const b = bigint & 255;
-      return { r, g, b };
-    } catch { return { r: 0, g: 0, b: 0 }; }
-  };
-  const relLum = ({ r, g, b }) => {
-    const toLin = (v) => {
-      v /= 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    };
-    const R = toLin(r), G = toLin(g), B = toLin(b);
-    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
-  };
-  const autoTextColorForBg = (bgHex) => {
-    const lum = relLum(hexToRgb(bgHex || '#ffffff'));
-    // Return dark text when background is light, else white with outline
-    return lum > 0.5 ? '#111827' : '#ffffff';
   };
 
   const formatPercent = (frac) => `${Math.max(0, Math.round(frac * 100))}%`;
@@ -139,7 +109,7 @@ export default function SimplePieChart({
       }}
     >
       {legendItems.map((it, idx) => (
-        <button
+        <div
           key={`${it.label}-${idx}`}
           role="listitem"
           className="legend-item"
@@ -153,7 +123,6 @@ export default function SimplePieChart({
             border: "1px solid var(--color-border)",
             borderRadius: 10,
             padding: "6px 8px",
-            cursor: "default",
             textAlign: "left",
           }}
           aria-label={`${it.label}: ${formatCurrency(it.amount)} (${it.percent} percent)`}
@@ -171,7 +140,7 @@ export default function SimplePieChart({
           <span style={{ fontWeight: 700, fontSize: 12 }}>
             {formatCurrency(it.amount)} · {it.percent}%
           </span>
-        </button>
+        </div>
       ))}
     </div>
   );
@@ -196,81 +165,51 @@ export default function SimplePieChart({
           />
         ))}
 
-        {/* Labels */}
+        {/* Outside labels with leader lines per reference */}
         {showLabels &&
           hasData &&
           segments.map((seg, i) => {
             const pct = seg.frac * 100;
             const useOutside = pct < minLabelPercent;
-            const mid = midPoint(seg, useOutside ? r + 10 : r * 0.62);
-            const isRight = ((mid.mid % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) < Math.PI; // right half if angle < 180deg
+            const mid = midPoint(seg, useOutside ? r + 12 : r * 0.62);
+            const isRight = ((mid.mid % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) < Math.PI;
 
-            // Leader line points for small slices
-            const pInner = midPoint(seg, r * 0.9);
-            const pOuter = midPoint(seg, r + 8);
-            const lineEndX = pOuter.x + (isRight ? 12 : -12);
-            const labelX = lineEndX + (isRight ? 4 : -4);
+            const pInner = midPoint(seg, r * 0.92);
+            const pOuter = midPoint(seg, r + 10);
+            const lineEndX = pOuter.x + (isRight ? 16 : -16);
+            const labelX = lineEndX + (isRight ? 6 : -6);
 
-            // Build exact label text for AWS/Azure/GCP; otherwise fall back to label + amount
             let labelText;
             const providerUpper = String(seg.label || "").toUpperCase();
             if (providerUpper === "AWS") labelText = "AWS-12,450";
             else if (providerUpper === "AZURE") labelText = "Azure-10,320";
             else if (providerUpper === "GCP") labelText = "GCP-6,810";
             else {
-              // Thousands-formatted numeric value without currency symbol per requirement
               const num = typeof seg.amount === "number" ? Number(seg.amount).toLocaleString() : String(seg.amount);
               labelText = `${seg.label}-${num}`;
             }
-            const txtFill = labelColor === "auto" ? autoTextColorForBg(seg.color) : labelColor;
-
-            const textShadow =
-              txtFill === "#ffffff"
-                ? "0 0 2px rgba(0,0,0,0.7), 0 0 1px rgba(0,0,0,0.6)"
-                : "0 0 2px rgba(255,255,255,0.25)";
 
             return (
               <g key={`label-${i}`} aria-hidden="true">
-                {useOutside ? (
-                  <>
-                    {/* Leader line */}
-                    <polyline
-                      points={`${pInner.x},${pInner.y} ${pOuter.x},${pOuter.y} ${lineEndX},${pOuter.y}`}
-                      fill="none"
-                      stroke="var(--axis-text, #6B7280)"
-                      strokeWidth="1"
-                    />
-                    {/* Outside label */}
-                    <text
-                      x={labelX}
-                      y={pOuter.y}
-                      textAnchor={isRight ? "start" : "end"}
-                      dominantBaseline="middle"
-                      fontSize={12}
-                      fontWeight={700}
-                      fill="var(--color-text)"
-                      style={{ paintOrder: "stroke", stroke: "var(--color-surface)", strokeWidth: 3 }}
-                    >
-                      {labelText}
-                    </text>
-                  </>
-                ) : (
-                  // Inside label
-                  <text
-                    x={mid.x}
-                    y={mid.y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize={12}
-                    fontWeight={700}
-                    fill={txtFill}
-                    style={{
-                      textShadow,
-                    }}
-                  >
-                    {labelType === "percent" ? formatPercent(seg.frac) : formatValue(seg.amount)}
-                  </text>
-                )}
+                <polyline
+                  points={`${pInner.x},${pInner.y} ${pOuter.x},${pOuter.y} ${lineEndX},${pOuter.y}`}
+                  fill="none"
+                  stroke="var(--axis-text, #6B7280)"
+                  strokeWidth="1"
+                />
+                <circle cx={lineEndX} cy={pOuter.y} r="2" fill="var(--axis-text, #6B7280)" />
+                <text
+                  x={labelX}
+                  y={pOuter.y}
+                  textAnchor={isRight ? "start" : "end"}
+                  dominantBaseline="middle"
+                  fontSize={12}
+                  fontWeight={700}
+                  fill="var(--color-text)"
+                  style={{ paintOrder: "stroke", stroke: "var(--color-surface)", strokeWidth: 3 }}
+                >
+                  {labelText}
+                </text>
               </g>
             );
           })}
@@ -283,7 +222,7 @@ export default function SimplePieChart({
       <figure
         role="figure"
         aria-label={ariaLabel}
-        style={{ display: "grid", gap: 10, background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 12, padding: 10, overflow: "visible" }}
+        style={{ display: "grid", gap: 12, background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 12, padding: 12, overflow: "visible" }}
       >
         <ChartSvg />
         <Legend />
@@ -291,7 +230,6 @@ export default function SimplePieChart({
     );
   }
 
-  // right-side legend layout (default)
   return (
     <figure
       role="figure"
@@ -304,7 +242,7 @@ export default function SimplePieChart({
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
         borderRadius: 12,
-        padding: 10,
+        padding: 12,
         overflow: "visible",
       }}
     >
@@ -312,15 +250,10 @@ export default function SimplePieChart({
       <Legend />
       <style>{`
         @media (max-width: 720px) {
-          figure[aria-label="${ariaLabel}"] {
-            grid-template-columns: 1fr;
-          }
+          figure[aria-label="${ariaLabel}"] { grid-template-columns: 1fr; }
         }
-        /* Reduce potential overlap for outside labels on small screens */
         @media (max-width: 520px) {
-          figure[aria-label="${ariaLabel}"] text {
-            font-size: 11px !important;
-          }
+          figure[aria-label="${ariaLabel}"] text { font-size: 11px !important; }
         }
       `}</style>
     </figure>

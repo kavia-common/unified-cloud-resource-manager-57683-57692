@@ -240,7 +240,8 @@ export default function Costs() {
                       axisLine={false}
                     />
                     <RTooltip
-                      formatter={(v) => [`${v}%`, "Percent"]}
+                      // Show only the percentage value in tooltip
+                      formatter={(v) => [`${v}%`, ""]}
                       labelFormatter={(l) => `${l}`}
                       contentStyle={{
                         background: "var(--surface, #111827)",
@@ -249,8 +250,15 @@ export default function Costs() {
                         borderRadius: 8,
                         fontSize: 12,
                       }}
+                      cursor={false} // disable hover cursor highlight/overlay
                     />
-                    <Bar dataKey="percent" radius={[0, 4, 4, 0]} isAnimationActive={false}>
+                    <Bar
+                      dataKey="percent"
+                      radius={[0, 4, 4, 0]}
+                      isAnimationActive={false}
+                      // Ensure no active bar overlay style is drawn
+                      activeBar={false}
+                    >
                       {providerPercentData.map((entry) => {
                         const color =
                           entry.provider === "AWS"

@@ -231,8 +231,9 @@ export function MultiSeriesOverviewChart({
               />
 
               <Tooltip
-                formatter={(value) => formatNumber(value)}
+                formatter={(value, name) => formatNumber(value)}
                 contentStyle={{ fontSize: 12, fontFamily: '"Helvetica Neue", Arial, sans-serif' }}
+                cursor={false}
               />
 
               {/* Bars - keep API stable, just orientation change applies automatically */}

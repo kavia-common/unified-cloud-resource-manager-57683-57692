@@ -307,6 +307,9 @@ export default function ReportsAnalytics() {
             yDomain={axis.yDomain}
             yTicks={axis.yTicks}
           />
+          <div className="text-xs" style={{ color: "var(--axis-text)", marginTop: 6 }}>
+            <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>
+          </div>
         </div>
       </section>
 

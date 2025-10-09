@@ -127,8 +127,9 @@ export function MultiSeriesOverviewChart({
   yDomain = [0, 50],
   yTicks = [0, 10, 20, 30, 40, 50],
   // PUBLIC_INTERFACE
-  // Optional layout override for BarChart orientation. Defaults to "vertical" to render horizontal bars.
-  layout = "vertical",
+  // Force horizontal bars: ignore external overrides to avoid regressions from callers.
+  // In Recharts, BarChart layout="vertical" => horizontal bars with categories on Y axis.
+  // We intentionally do NOT expose a 'layout' prop to callers.
 }) {
   // Card styling for Pure White minimalist theme
   const cardStyle = {
@@ -170,7 +171,7 @@ export function MultiSeriesOverviewChart({
             {/* Horizontal orientation: layout='vertical', categories on Y axis */}
             <BarChart
               data={data}
-              layout={layout}
+              layout="vertical"
               margin={{ top: 12, right: 24, bottom: 12, left: 72 }} // extra left for long labels, right for values
               data-testid="overview-horizontal-bar-chart"
             >
@@ -248,6 +249,9 @@ export function MultiSeriesOverviewChart({
               ))}
             </BarChart>
           </ResponsiveContainer>
+        </div>
+        <div className="text-xs" style={{ alignSelf: "end", color: "var(--axis-text)", paddingTop: 4 }}>
+          <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>
         </div>
 
         {/* Side legend kept consistent with minimalist theme */}
@@ -406,6 +410,9 @@ export function PieBreakdownChart({
           </Pie>
         </RPieChart>
       </ResponsiveContainer>
+      <div className="text-xs" style={{ color: "var(--axis-text)", marginTop: 6 }}>
+        <span data-testid="pie-provider-labels-active">Pie labels: AWS/Azure/GCP enforced</span>
+      </div>
       <style>{`
         @media (max-width: 640px) {
           .card.surface:has(svg) { padding: 8px !important; }

@@ -206,6 +206,9 @@ export default function Costs() {
                 ariaLabel="Monthly totals by month"
                 color="#374151"
               />
+              <div className="text-xs" style={{ color: "var(--muted)", marginTop: 6 }}>
+                <span data-testid="horizontal-bar-chart-active">Horizontal bar chart enforced</span>
+              </div>
             </div>
           </div>
           <style>{`

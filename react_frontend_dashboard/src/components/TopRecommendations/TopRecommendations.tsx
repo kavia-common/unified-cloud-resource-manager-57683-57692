@@ -395,8 +395,9 @@ export function TopRecommendations({ onViewDetails }: TopRecommendationsProps) {
                 />
                 <span>{(rec as any).title || (rec as any).name || 'Recommendation'}</span>
               </div>
+              {/* Show only environment or em dash; do not show category/type labels */}
               <div style={titleCellMeta()}>
-                {(rec as any).category || (rec as any).type || rec.environment || '\u2014'}
+                {rec.environment || '\u2014'}
               </div>
             </div>
             <div role="cell">

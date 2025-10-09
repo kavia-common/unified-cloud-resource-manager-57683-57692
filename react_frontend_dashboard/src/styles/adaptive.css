@@ -1,1 +1,37 @@
-/* Minimal placeholder for future adaptive UI theming; current implementation uses inline styles per Minimalist theme. */
+/* Adaptive and Preflight minimal utilities — Pure White theme */
+/* Tokens */
+:root {
+  --pw-text: #111827;
+  --pw-muted: #6B7280;
+  --pw-border: #E5E7EB;
+  --pw-surface: #FFFFFF;
+  --pw-chip-bg: #F9FAFB;
+}
+
+/* Utility classes (opt-in) */
+.pw-center {
+  text-align: center;
+}
+.pw-subtle {
+  color: var(--pw-muted);
+}
+.pw-chip {
+  background: var(--pw-chip-bg);
+  border: 1px solid var(--pw-border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--pw-text);
+}
+
+/* Ensure modal content headings have consistent spacing */
+.modal-content h3 {
+  letter-spacing: -0.01em;
+}
+
+/* Allow rationale/long text to wrap cleanly inside containers using this class */
+.pw-wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}

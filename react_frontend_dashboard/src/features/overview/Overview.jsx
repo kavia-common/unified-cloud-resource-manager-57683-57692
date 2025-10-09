@@ -222,6 +222,25 @@ export default function Overview() {
     console.log('Running optimization payload', payload);
   };
 
+  // PUBLIC_INTERFACE
+  function capitalize(str) {
+    /** Capitalize the first letter of a string. */
+    if (!str || typeof str !== 'string') return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  // PUBLIC_INTERFACE
+  function windowLabel(hint) {
+    /** Map internal schedule hint to a user-friendly label. */
+    if (!hint) return 'Off-hours';
+    const map = {
+      'off-hours': 'Off-hours',
+      'maintenance': 'Maintenance window',
+      'business': 'Business hours',
+    };
+    return map[hint] || capitalize(hint);
+  }
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
       {/* TEMP DEV Healthcheck - visible banner to confirm render and routing. */}
@@ -348,24 +367,19 @@ export default function Overview() {
           </>
         }
       >
-        <div style={{ display: "grid", gap: 12 }}>
-          <div style={{ color: "#6B7280", fontSize: 13 }}>
-            Review mode before executing. You can enable Adaptive Optimization to tailor aggressiveness,
-            scope, schedule, and safeguards automatically based on recent outcomes.
+        <div className="preflight-wrapper">
+          {/* Header wrapper for alignment and minimalist spacing */}
+          <div className="preflight-header" role="group" aria-label="Run optimization preflight header">
+            <h3 className="preflight-title">Run optimization</h3>
+            <p className="preflight-sub">
+              Review mode before executing. You can enable Adaptive Optimization to tailor aggressiveness,
+              scope, schedule, and safeguards automatically based on recent outcomes.
+            </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "8px 10px",
-              border: "1px solid #E5E7EB",
-              borderRadius: 10,
-              background: "#FFFFFF",
-            }}
-          >
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#111827" }}>
+          {/* Adaptive section */}
+          <div className="adaptive-row">
+            <label className="adaptive-toggle">
               <input
                 type="checkbox"
                 checked={adaptiveEnabledInternal}
@@ -378,55 +392,136 @@ export default function Overview() {
                     setAdaptivePlan(null);
                   }
                 }}
-                style={{ accentColor: "#374151", width: 16, height: 16 }}
                 aria-label="Toggle Adaptive mode"
               />
-              <span style={{ fontSize: 13, fontWeight: 600 }}>Adaptive mode</span>
+              <span className="adaptive-toggle-label">Adaptive mode</span>
             </label>
 
             {adaptiveEnabledInternal && (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, minHeight: 24 }}>
-                <span
-                  className="badge"
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    padding: "4px 8px",
-                    borderRadius: 999,
-                    border: "1px solid #E5E7EB",
-                    background: "#F9FAFB",
-                    color: "#111827",
-                    minWidth: 64,
-                    textAlign: "center"
-                  }}
-                  aria-label="Confidence"
-                  title="Adaptive plan confidence"
-                >
-                  {adaptiveComputing ? "…" : `Conf ${Math.round(((adaptivePlan?.confidence ?? 0) * 100))}%`}
+              <div className="adaptive-status" aria-live="polite">
+                {/* Normalize copy: Confidence • Plan • Window • Rationale */}
+                <span className="adaptive-chip" title="Adaptive plan confidence">
+                  {adaptiveComputing ? "…" : `Confidence: ${Math.round(((adaptivePlan?.confidence ?? 0) * 100))}%`}
                 </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "#6B7280",
-                    maxWidth: 360,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis"
-                  }}
-                  title={adaptivePlan?.rationale || "Adaptive rationale"}
-                >
+                <span className="adaptive-dot" aria-hidden="true">•</span>
+                <span className="adaptive-chip" title="Execution plan scope and aggressiveness">
                   {adaptiveComputing
-                    ? "Computing adaptive plan…"
-                    : (adaptivePlan?.rationale || "Conservative defaults based on safety.")}
+                    ? "Plan: …"
+                    : `Plan: ${adaptivePlan?.aggressiveness ? capitalize(adaptivePlan.aggressiveness) : 'Conservative'} (${adaptivePlan?.scope || 'canary'})`}
+                </span>
+                <span className="adaptive-dot" aria-hidden="true">•</span>
+                <span className="adaptive-chip" title="Scheduling window">
+                  {adaptiveComputing
+                    ? "Window: …"
+                    : `Window: ${windowLabel(adaptivePlan?.scheduleHint)}`
+                  }
+                </span>
+                <span className="adaptive-dot" aria-hidden="true">•</span>
+                <span className="adaptive-rationale" title={adaptivePlan?.rationale || "Adaptive rationale"}>
+                  {adaptiveComputing
+                    ? "Rationale: computing…"
+                    : `Rationale: ${adaptivePlan?.rationale || "based on safety defaults"}`}
                 </span>
               </div>
             )}
           </div>
 
-          <div style={{ fontSize: 12, color: "#9CA3AF" }}>
+          <div className="preflight-tip">
             Tip: You can open a recommendation row to see full details before running.
           </div>
         </div>
+
+        {/* Local helpers for display formatting */}
+        <style>{`
+          .preflight-wrapper {
+            display: grid;
+            gap: 12px;
+          }
+          .preflight-header {
+            display: grid;
+            gap: 6px;
+            padding: 0 12px;
+            text-align: center;
+          }
+          .preflight-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.3;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.01em;
+          }
+          .preflight-sub {
+            margin: 0;
+            color: #6B7280;
+            font-size: 13px;
+          }
+          .adaptive-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            background: #FFFFFF;
+          }
+          .adaptive-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #111827;
+            user-select: none;
+            padding-top: 2px;
+          }
+          .adaptive-toggle input[type="checkbox"] {
+            inline-size: 16px;
+            block-size: 16px;
+            accent-color: #374151;
+          }
+          .adaptive-toggle-label {
+            font-size: 13px;
+            font-weight: 600;
+          }
+          .adaptive-status {
+            display: inline-flex;
+            flex-wrap: wrap;
+            row-gap: 4px;
+            column-gap: 8px;
+            align-items: center;
+            min-height: 24px;
+            max-width: 100%;
+          }
+          .adaptive-chip {
+            font-size: 12px;
+            color: #111827;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 999px;
+            padding: 4px 8px;
+            white-space: nowrap;
+          }
+          .adaptive-dot {
+            color: #9CA3AF;
+            font-size: 12px;
+            line-height: 1;
+            margin: 0 2px;
+          }
+          .adaptive-rationale {
+            font-size: 12px;
+            color: #6B7280;
+            max-width: 520px;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            line-height: 1.4;
+          }
+          .preflight-tip {
+            font-size: 12px;
+            color: #9CA3AF;
+            padding: 0 12px;
+          }
+        `}</style>
       </Modal>
 
       {/* Responsive adjustments for very small devices: stack buttons */}

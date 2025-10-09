@@ -464,42 +464,13 @@ export function TopRecommendations({ onViewDetails }: TopRecommendationsProps) {
               >
                 View details
               </button>
-              <div style={{ position: 'relative' }}>
-                <button
-                  aria-label="More actions"
-                  onClick={(e) => {
-                    // TODO: Replace with real popover/menu
-                    // eslint-disable-next-line no-alert
-                    window.alert('Actions: Snooze, Dismiss (stub)');
-                    e.stopPropagation();
-                  }}
-                  style={{
-                    ...buttonBase(),
-                    width: 32,
-                    height: 32,
-                    backgroundColor: 'transparent',
-                    color: TOKENS.subtle,
-                    border: `1px solid ${TOKENS.border}`,
-                  }}
-                  title="More"
-                  onMouseEnter={(e) => {
-                    (e.currentTarget.style.backgroundColor as any) = TOKENS.hoverAccent;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget.style.backgroundColor as any) = 'transparent';
-                  }}
-                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyles())}
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
-                >
-                  \u22ef
-                </button>
-              </div>
+              {/* Removed overflow/ellipsis button to keep only two actions */}
             </div>
           </div>
         ))}
       </div>
     );
-  }, [state, error, items, navigate]);
+  }, [state, error, items, navigate, onViewDetails]);
 
   return (
     <section
@@ -536,7 +507,7 @@ export function TopRecommendations({ onViewDetails }: TopRecommendationsProps) {
           Top Recommendations
         </h2>
         <span style={{ color: TOKENS.textSecondary, fontSize: 12 }}>
-          Top 3 high-priority with confidence \u2265 0.5
+          Top 3 high-priority with confidence ≥ 0.5
         </span>
       </div>
       {content}

@@ -1,5 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import RecommendationDetailsDrawer from './RecommendationDetailsDrawer';
+import React, { useMemo } from 'react';
 
 // Minimal mock-safe data if no external data is passed
 const DEFAULT_ROWS = [
@@ -17,31 +16,19 @@ const DEFAULT_ROWS = [
   },
 ];
 
-export default function TopRecommendationsTable({ rows }) {
+/**
+ * PUBLIC_INTERFACE
+ * TopRecommendationsTable
+ * Minimal table that lists recommendations and delegates "View Details" to parent via onViewDetails(row).
+ */
+export default function TopRecommendationsTable({ rows, onViewDetails }) {
   const data = useMemo(() => {
     if (Array.isArray(rows) && rows.length > 0) return rows;
     return DEFAULT_ROWS;
   }, [rows]);
 
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [selectedRecommendation, setSelectedRecommendation] = useState(null);
-
-  const handleViewDetails = useCallback((row) => {
-    setSelectedRecommendation(row);
-    setDrawerOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setDrawerOpen(false);
-    // retain selection for potential re-open, or clear if desired:
-    // setSelectedRecommendation(null);
-  }, []);
-
   return (
     <div style={styles.wrapper}>
-      <div style={styles.header}>
-        <h3 style={styles.title}>Top Recommendations</h3>
-      </div>
       <div style={styles.tableContainer}>
         <table style={styles.table} role="table" aria-label="Top Recommendations">
           <thead>
@@ -65,7 +52,7 @@ export default function TopRecommendationsTable({ rows }) {
                   <td style={styles.td}>
                     <button
                       style={styles.viewBtn}
-                      onClick={() => handleViewDetails(row)}
+                      onClick={() => onViewDetails && onViewDetails(row)}
                       aria-label={`View details for ${row.title || 'this recommendation'}`}
                     >
                       View Details
@@ -74,15 +61,16 @@ export default function TopRecommendationsTable({ rows }) {
                 </tr>
               );
             })}
+            {data.length === 0 && (
+              <tr>
+                <td colSpan={4} style={{ padding: 16, color: '#6B7280' }}>
+                  No recommendations available.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-
-      <RecommendationDetailsDrawer
-        isOpen={isDrawerOpen}
-        onClose={handleClose}
-        recommendation={selectedRecommendation}
-      />
     </div>
   );
 }
@@ -93,16 +81,6 @@ const styles = {
     border: '1px solid #E5E7EB',
     borderRadius: 12,
     overflow: 'hidden',
-  },
-  header: {
-    padding: '12px 16px',
-    borderBottom: '1px solid #F3F4F6',
-    background: '#F9FAFB',
-  },
-  title: {
-    margin: 0,
-    fontSize: 16,
-    color: '#111827',
   },
   tableContainer: {
     width: '100%',
@@ -144,6 +122,3 @@ const styles = {
     outline: 'none',
   },
 };
-
-// Improve focus styles using inline pseudo-like approach by adding global listeners would be overkill,
-// but React inline doesn't support :hover/:focus. Rely on browser default focus ring plus clear visual design.

@@ -16,7 +16,7 @@ import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 import ActionsBar from "../../components/common/ActionsBar.tsx";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
 import { TopRecommendations } from "../../components/TopRecommendations";
-import { RecommendationDetailsDrawer } from "../../components/recommendations";
+import { RecommendationDetailsModal } from "../../components/recommendations";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -41,20 +41,20 @@ export default function Overview() {
   const [showDailySpend, setShowDailySpend] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
 
-  // Drawer state for Top Recommendations details
-  const [isRecDrawerOpen, setIsRecDrawerOpen] = useState(false);
+  // Modal state for Top Recommendations details
+  const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
 
   const handleOpenRecDetails = (rec) => {
     // Minimal telemetry to aid debugging click wiring
     // eslint-disable-next-line no-console
-    console.debug('[Overview] Opening recommendation details drawer for:', rec?.id || rec?.title);
+    console.debug('[Overview] Opening recommendation details modal for:', rec?.id || rec?.title);
     setSelectedRec(rec);
-    setIsRecDrawerOpen(true);
+    setIsRecModalOpen(true);
   };
 
   const handleCloseRecDetails = () => {
-    setIsRecDrawerOpen(false);
+    setIsRecModalOpen(false);
   };
 
   // Local UI state to control the portal-based minimal Add Account modal
@@ -241,25 +241,30 @@ export default function Overview() {
         align="left"
       />
 
-      {/* Right-side drawer for recommendation details */}
-      <RecommendationDetailsDrawer
-        isOpen={isRecDrawerOpen}
+      {/* Centered modal for recommendation details */}
+      <RecommendationDetailsModal
+        isOpen={isRecModalOpen}
         onClose={handleCloseRecDetails}
         recommendation={{
-          // Provide fallback mapping to ensure summary shows as requested
           id: selectedRec?.id,
           title: selectedRec?.title || selectedRec?.name || 'Recommendation Details',
-          cloudProvider:
+          cloud:
             selectedRec?.cloudProvider ||
             selectedRec?.provider ||
-            // Best effort: infer from environment/category if provided (not always available)
-            (selectedRec?.category?.toLowerCase().includes('azure') ? 'Azure'
-              : selectedRec?.category?.toLowerCase().includes('aws') ? 'AWS'
-              : undefined),
+            (typeof selectedRec?.category === 'string'
+              ? (selectedRec?.category.toLowerCase().includes('azure')
+                ? 'Azure'
+                : selectedRec?.category.toLowerCase().includes('aws')
+                ? 'AWS'
+                : 'Multi-Cloud')
+              : 'Multi-Cloud'),
           impactedServices:
             Array.isArray(selectedRec?.impactedServices)
               ? selectedRec?.impactedServices
               : (selectedRec?.services && Array.isArray(selectedRec?.services) ? selectedRec?.services : []),
+          description:
+            selectedRec?.description ||
+            'This recommendation aims to optimize resource usage and reduce costs across your selected cloud environments. Review the impact and proposed actions before executing.',
         }}
       />
 

@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import StatCard from "../../components/ui/StatCard";
 import {
   MultiSeriesLineChart,
   StackedBarChart,
@@ -135,13 +134,8 @@ export default function Costs() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      {/* Header stats */}
-      <div className="card-grid">
-        <StatCard title="Total Monthly Spend" value={`$${formatNum(grandTotal)}`} />
-        <StatCard title="AWS" value={`$${formatNum(monthlyTotals.AWS)}`} />
-        <StatCard title="Azure" value={`$${formatNum(monthlyTotals.Azure)}`} />
-        <StatCard title="GCP" value={`$${formatNum(monthlyTotals.GCP)}`} />
-      </div>
+      {/* Header stats removed per request to hide summary metric boxes while keeping pie chart */}
+      <div style={{ height: 0 }} aria-hidden="true" />
 
       {/* 1) Multi-Cloud Spend Summary */}
       <div className="panel">

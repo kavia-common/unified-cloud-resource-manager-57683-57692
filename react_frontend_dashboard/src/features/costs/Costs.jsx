@@ -37,7 +37,7 @@ export default function Costs() {
     [monthlyTotals]
   );
 
-  // Pie data for provider share (kept for potential future use)
+  // Pie data for provider share
   const providerPieData = useMemo(
     () => [
       { name: "AWS", value: monthlyTotals.AWS, color: CLOUD_COLORS.AWS },
@@ -149,7 +149,7 @@ export default function Costs() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(300px, 520px) 1fr",
+              gridTemplateColumns: "minmax(260px, 420px) 1fr",
               gap: 16,
               alignItems: "stretch",
             }}
@@ -174,85 +174,6 @@ export default function Costs() {
                 minLabelPercent={100}
                 labelColor="auto"
               />
-              {/* Provider labels block: exact text, Pure White typography, responsive */}
-              <div
-                aria-label="Provider labels"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-                  gap: 8,
-                  marginTop: 10,
-                  alignItems: "stretch",
-                }}
-              >
-                {/* AWS */}
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 4,
-                    padding: "8px 10px",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 10,
-                    background: "var(--color-surface)",
-                    minWidth: 0,
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: "var(--color-muted)" }}>AWS</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)" }}>
-                    $12,450 · 42%
-                  </div>
-                </div>
-                {/* subtle separator on wider screens */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    display: "none",
-                    borderLeft: "1px solid var(--color-border)",
-                    margin: "0 4px",
-                  }}
-                />
-                {/* Azure */}
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 4,
-                    padding: "8px 10px",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 10,
-                    background: "var(--color-surface)",
-                    minWidth: 0,
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: "var(--color-muted)" }}>Azure</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)" }}>
-                    $10,320 · 35%
-                  </div>
-                </div>
-                {/* GCP */}
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 4,
-                    padding: "8px 10px",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 10,
-                    background: "var(--color-surface)",
-                    minWidth: 0,
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: "var(--color-muted)" }}>GCP</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)" }}>
-                    $6,810 · 23%
-                  </div>
-                </div>
-              </div>
-              <style>{`
-                @media (max-width: 720px) {
-                  [aria-label="Provider labels"] {
-                    grid-template-columns: 1fr;
-                  }
-                }
-              `}</style>
             </div>
             {/* Spacer to preserve layout after removing the secondary chart */}
             <div style={{ minHeight: 16 }} />

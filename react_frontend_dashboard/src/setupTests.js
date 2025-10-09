@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
 
+/**
+ * Jest setup for CRA v5.
+ * Provides minimal mocks so tests can run in CI without browser APIs.
+ */
+
 // Mock Supabase environment variables
 process.env.REACT_APP_SUPABASE_URL = 'http://localhost:8000';
 process.env.REACT_APP_SUPABASE_KEY = 'test-anon-key';

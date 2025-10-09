@@ -8,10 +8,13 @@ Setup
   - REACT_APP_SUPABASE_URL
   - REACT_APP_SUPABASE_KEY  (public anon key)
 - Install dependencies:
+  - Use Node 18 LTS (see .nvmrc -> v18)
   - npm ci (preferred in CI) or npm install
 - Start the development server:
   - npm run start:dev (pins port 3000) or npm start
     - This runs: react-scripts start (as defined in package.json "scripts.start")
+- CI builds:
+  - Use `npm run build:ci` to avoid treating ESLint warnings as errors in CI.
 
 Troubleshooting
 - If the preview shows a blank screen or 404 for /static/js/bundle.js:

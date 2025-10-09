@@ -2,11 +2,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import StatCard from "../../components/ui/StatCard";
 import Banner from "../../components/ui/Banner";
-import { CLOUD_COLORS } from "../../components/ui/Charts";
 
 import { Modal } from "../../components/ui/Modal";
 import AddCloudAccountModal from "../../components/ui/AddCloudAccountModal";
-import DiscoverResourcesModal from "../../components/ui/DiscoverResourcesModal";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/ui/Toast";
 import { createLinkedAccount, getLinkedAccounts, isAuthenticated } from "../../services/api";
@@ -17,9 +15,6 @@ import HealthcheckBanner from "../../components/dev/HealthcheckBanner";
 import AddAccountMinimalModal from "../../components/ui/AddAccountMinimalModal.jsx";
 import { TopRecommendations } from "../../components/TopRecommendations";
 import { RecommendationDetailsModal } from "../../components/recommendations";
-// Adaptive imports
-import { computeAdaptivePlan } from "../../lib/adaptivePolicy";
-import { getRecentRuns } from "../../lib/historyProvider";
 
 /* PUBLIC_INTERFACE */
 export default function Overview() {
@@ -44,11 +39,7 @@ export default function Overview() {
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
 
-  // Embedded preflight state for unified Run Optimization flow
-  const [showRunPreflight, setShowRunPreflight] = useState(false);
-  const [adaptiveEnabledInternal, setAdaptiveEnabledInternal] = useState(false);
-  const [adaptivePlan, setAdaptivePlan] = useState(null);
-  const [adaptiveComputing, setAdaptiveComputing] = useState(false);
+
 
   const handleOpenRecDetails = (rec) => {
     console.debug('[Overview] Opening recommendation details modal for:', rec?.id || rec?.title);
@@ -60,57 +51,7 @@ export default function Overview() {
     setIsRecModalOpen(false);
   };
 
-  // Build a lightweight current recommendation context by peeking at TopRecommendations DOM cache or fallback
-  // For simplicity, we compute an aggregated synthetic recommendation when user toggles Adaptive ON.
-  async function computeDashboardAdaptivePlan() {
-    try {
-      setAdaptiveComputing(true);
-      // Attempt to derive a generic recommendation context leaning towards 'rightsizing'
-      const syntheticRec = {
-        id: undefined,
-        type: 'rightsizing',
-        riskLevel: 'high', // dashboard top items are high-priority
-        estimatedSavingsPct: 9, // a mid-range estimate; refined when real table context is available
-        requiresApproval: false,
-        tags: ['dashboard', 'top-recs'],
-      };
 
-      // Fetch recent runs filtered by type to inform policy
-      const history = await getRecentRuns({ recommendationType: syntheticRec.type, limit: 25 }).catch(() => []);
-      const safeHistory = Array.isArray(history) ? history : [];
-
-      const plan = computeAdaptivePlan({
-        recommendation: syntheticRec,
-        history: safeHistory,
-        context: {
-          blackoutActive: false,
-          complianceFlag: false,
-          defaultBlastRadius: 'smart-subset',
-          businessHoursLocal: true,
-        },
-      });
-
-      setAdaptivePlan(plan);
-    } catch (e) {
-      console.warn('[Overview] Adaptive plan computation failed; using fallback.', e?.message || e);
-      setAdaptivePlan({
-        aggressiveness: 'conservative',
-        scope: 'canary',
-        scheduleHint: 'off-hours',
-        confidence: 0.45,
-        expectedSavingsDelta: { minPct: 2, maxPct: 6 },
-        rationale: 'Fallback plan due to missing data; using conservative defaults.',
-        safeguards: {
-          requireApproval: false,
-          capScopeToCanary: true,
-          respectBlackout: false,
-          blastRadiusMax: 'smart-subset',
-        },
-      });
-    } finally {
-      setAdaptiveComputing(false);
-    }
-  }
 
   // Local UI state to control the portal-based minimal Add Account modal
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -284,268 +225,22 @@ export default function Overview() {
       </div>
 
       {/* Actions placed directly below Top Recommendations */}
-      <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start" }}>
+      <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-start" }}>
         <div style={{ width: "100%", maxWidth: 840, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }} data-testid="actions-bar">
-          {/* Single Run Optimization button opens embedded preflight */}
-          <button
-            type="button"
-            aria-label="Run Optimization"
-            data-testid="btn-run-optimization-dashboard"
-            onClick={() => {
-              setShowRunPreflight(true);
-            }}
-            className="btn"
-            style={{
-              fontFamily: '"Helvetica Neue", Arial, sans-serif',
-              fontSize: 14,
-              fontWeight: 600,
-              lineHeight: 1,
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: "1px solid #E5E7EB",
-              cursor: "pointer",
-              background: "#FFFFFF",
-              color: "#374151",
-              transition: "background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .05s ease"
-            }}
-            onMouseEnter={(e) => Object.assign(e.currentTarget.style, { background: "#F3F4F6", transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" })}
-            onMouseLeave={(e) => Object.assign(e.currentTarget.style, { background: "#FFFFFF", transform: "none", boxShadow: "none" })}
-            onFocus={(e) => Object.assign(e.currentTarget.style, { boxShadow: "0 0 0 3px rgba(59,130,246,0.25)", borderColor: "#93C5FD" })}
-            onBlur={(e) => Object.assign(e.currentTarget.style, { boxShadow: "none", borderColor: "#E5E7EB" })}
-          >
-            Run Optimization
-          </button>
-
           {/* Keep existing Add Account entry point for convenience */}
           <button
             className="btn primary"
             onClick={() => setIsAddOpen(true)}
             aria-label="Add Account"
             data-testid="overview-add-account-below-recs"
-            style={{ marginLeft: 4 }}
+            style={{ marginLeft: 0 }}
           >
             Add Account
           </button>
         </div>
       </div>
 
-      {/* Preflight modal for Run Optimization */}
-      <Modal
-        title="Run optimization"
-        open={showRunPreflight}
-        onClose={() => {
-          setShowRunPreflight(false);
-          setAdaptiveEnabledInternal(false);
-          setAdaptivePlan(null);
-        }}
-        footer={
-          <>
-            <button
-              className="btn"
-              onClick={() => {
-                setShowRunPreflight(false);
-                setAdaptiveEnabledInternal(false);
-                setAdaptivePlan(null);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn primary"
-              onClick={() => {
-                const rec = selectedRec || { id: undefined, type: 'rightsizing', category: 'rightsizing' };
-                const options = adaptiveEnabledInternal && adaptivePlan ? { adaptive: adaptivePlan } : undefined;
-                handleRun(rec, options);
-                setShowRunPreflight(false);
-                setAdaptiveEnabledInternal(false);
-                setAdaptivePlan(null);
-              }}
-              disabled={adaptiveEnabledInternal && adaptiveComputing}
-            >
-              {adaptiveEnabledInternal && adaptiveComputing ? 'Preparing…' : 'Confirm & Run'}
-            </button>
-          </>
-        }
-      >
-        {/* Modal content normalization: centered container and header alignment */}
-        <div className="modal modal--inset">
-          <div className="modal__container">
-            <div className="modal__header">
-              <h2 className="modal__title">Run optimization</h2>
-              <div className="modal__header-actions" aria-hidden="true" />
-            </div>
 
-            <div className="preflight-wrapper">
-              {/* Subheading and description */}
-              <p className="preflight-desc" style={{ marginTop: 0 }}>
-                We’ll run a quick preflight to ensure your environment is ready to generate the best recommendations.
-                This takes less than a minute.
-              </p>
-
-              {/* Adaptive section */}
-              <div className="adaptive-row">
-                <label className="adaptive-toggle">
-                  <input
-                    type="checkbox"
-                    checked={adaptiveEnabledInternal}
-                    onChange={async (e) => {
-                      const on = e.target.checked;
-                      setAdaptiveEnabledInternal(on);
-                      if (on) {
-                        await computeDashboardAdaptivePlan();
-                      } else {
-                        setAdaptivePlan(null);
-                      }
-                    }}
-                    aria-label="Toggle Adaptive mode"
-                  />
-                  <span className="adaptive-toggle-label">Adaptive mode</span>
-                </label>
-
-                {adaptiveEnabledInternal && (
-                  <div className="adaptive-status" aria-live="polite">
-                    {/* Normalize copy: Confidence • Plan • Window • Rationale */}
-                    <span className="adaptive-chip" title="Adaptive plan confidence">
-                      {adaptiveComputing ? "…" : `Confidence: ${Math.round(((adaptivePlan?.confidence ?? 0) * 100))}%`}
-                    </span>
-                    <span className="adaptive-dot" aria-hidden="true">•</span>
-                    <span className="adaptive-chip" title="Execution plan scope and aggressiveness">
-                      {adaptiveComputing
-                        ? "Plan: …"
-                        : `Plan: ${adaptivePlan?.aggressiveness ? capitalize(adaptivePlan.aggressiveness) : 'Conservative'} (${adaptivePlan?.scope || 'canary'})`}
-                    </span>
-                    <span className="adaptive-dot" aria-hidden="true">•</span>
-                    <span className="adaptive-chip" title="Scheduling window">
-                      {adaptiveComputing
-                        ? "Window: …"
-                        : `Window: ${windowLabel(adaptivePlan?.scheduleHint)}`
-                      }
-                    </span>
-                    <span className="adaptive-dot" aria-hidden="true">•</span>
-                    <span className="adaptive-rationale" title={adaptivePlan?.rationale || "Adaptive rationale"}>
-                      {adaptiveComputing
-                        ? "Rationale: computing…"
-                        : `Rationale: ${adaptivePlan?.rationale || "based on safety defaults"}`}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Status list aligns with same container grid */}
-              <div className="preflight-grid">
-                <div className="preflight-item">
-                  <div className="preflight-status ok" aria-label="status ok">✓</div>
-                  <div>
-                    <div className="preflight-name">Accounts linked</div>
-                    <div className="preflight-note">
-                      {stats.accounts > 0
-                        ? "All set — accounts are connected."
-                        : "No accounts linked. Add an account to improve results."}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="preflight-item">
-                  <div className="preflight-status ok" aria-label="status ok">✓</div>
-                  <div>
-                    <div className="preflight-name">Data freshness</div>
-                    <div className="preflight-note">
-                      Latest discovery completed 2h ago. Long names wrap properly and do not
-                      overflow the status line for better readability across viewports.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="preflight-item">
-                  <div className="preflight-status ok" aria-label="status ok">✓</div>
-                  <div>
-                    <div className="preflight-name">Permissions</div>
-                    <div className="preflight-note">
-                      Read permissions verified. Optimization can proceed safely.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="preflight-tip">
-                Tip: You can open a recommendation row to see full details before running.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Local helpers for display formatting and to preserve existing styles where needed */}
-        <style>{`
-          .preflight-wrapper {
-            display: grid;
-            gap: 12px;
-          }
-          .adaptive-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 10px 12px;
-            border: 1px solid #E5E7EB;
-            border-radius: 10px;
-            background: #FFFFFF;
-          }
-          .adaptive-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            color: #111827;
-            user-select: none;
-            padding-top: 2px;
-          }
-          .adaptive-toggle input[type="checkbox"] {
-            inline-size: 16px;
-            block-size: 16px;
-            accent-color: #374151;
-          }
-          .adaptive-toggle-label {
-            font-size: 13px;
-            font-weight: 600;
-          }
-          .adaptive-status {
-            display: inline-flex;
-            flex-wrap: wrap;
-            row-gap: 4px;
-            column-gap: 8px;
-            align-items: center;
-            min-height: 24px;
-            max-width: 100%;
-          }
-          .adaptive-chip {
-            font-size: 12px;
-            color: #111827;
-            background: #F9FAFB;
-            border: 1px solid #E5E7EB;
-            border-radius: 999px;
-            padding: 4px 8px;
-            white-space: nowrap;
-          }
-          .adaptive-dot {
-            color: #9CA3AF;
-            font-size: 12px;
-            line-height: 1;
-            margin: 0 2px;
-          }
-          .adaptive-rationale {
-            font-size: 12px;
-            color: #6B7280;
-            max-width: 520px;
-            white-space: normal;
-            overflow: visible;
-            text-overflow: clip;
-            line-height: 1.4;
-          }
-          .preflight-tip {
-            font-size: 12px;
-            color: #9CA3AF;
-          }
-        `}</style>
-      </Modal>
 
       {/* Responsive adjustments for very small devices: stack buttons */}
       <style>{`

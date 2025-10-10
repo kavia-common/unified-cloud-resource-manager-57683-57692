@@ -207,7 +207,8 @@ export default function PieChart({
             <rect x="0" y="0" width={size} height={size} rx="10" ry="10" />
           </clipPath>
         </defs>
-        <g clipPath="url(#donutClip)">
+        {/* Shift donut slightly left to provide more room for right-side labels */}
+        <g clipPath="url(#donutClip)" transform="translate(-10, 0)">
           {/* Draw ring segments */}
           {finalSegments.map((seg, idx) => (
             <path

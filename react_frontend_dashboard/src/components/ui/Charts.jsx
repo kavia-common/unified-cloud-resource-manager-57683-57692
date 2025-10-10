@@ -407,25 +407,35 @@ export function PieBreakdownChart({
       }}
     >
       <ResponsiveContainer width="100%" height={height}>
-        <RPieChart margin={{ top: 8, right: 12, bottom: 8, left: 12 }}>
-          <Tooltip />
-          <Pie
-            data={normalizedData}
-            dataKey={dataKey}
-            nameKey={nameKey}
-            cx="50%"
-            cy="50%"
-            innerRadius={computeRadii(height).innerRadius}
-            outerRadius={computeRadii(height).outerRadius}
-            labelLine={true}
-            label={renderCenterLabel}
-            isAnimationActive={false}
-          >
-            {normalizedData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-            ))}
-          </Pie>
-        </RPieChart>
+        {/* Use a render-prop pattern to access measured width for precise cx shift */}
+        {({ width }) => {
+          const boxW = Math.max(0, width || height || 320);
+          // Shift center ~10px left; clamp to non-negative
+          const cxValue = Math.max(0, boxW / 2 - 10);
+          const { innerRadius, outerRadius } = computeRadii(boxW);
+
+          return (
+            <RPieChart margin={{ top: 8, right: 12, bottom: 8, left: 12 }}>
+              <Tooltip />
+              <Pie
+                data={normalizedData}
+                dataKey={dataKey}
+                nameKey={nameKey}
+                cx={cxValue}
+                cy="50%"
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                labelLine={true}
+                label={renderCenterLabel}
+                isAnimationActive={false}
+              >
+                {normalizedData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                ))}
+              </Pie>
+            </RPieChart>
+          );
+        }}
       </ResponsiveContainer>
       <LegendBelow />
     </div>

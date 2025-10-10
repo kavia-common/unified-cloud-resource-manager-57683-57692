@@ -131,15 +131,15 @@ export default function PieChart({
       letterSpacing: "0.2px",
       whiteSpace: "normal",
       overflowWrap: "anywhere",
-      maxWidth: 160,
+      maxWidth: 140,
     };
 
     const catFont = {
-      fontSize: size >= 480 ? 13 : size < 320 ? 11 : 12,
+      fontSize: size >= 480 ? 12 : size < 320 ? 10 : 11,
       fontWeight: 400,
     };
     const pctFont = {
-      fontSize: size >= 480 ? 16 : size < 320 ? 13 : 14,
+      fontSize: size >= 480 ? 14 : size < 320 ? 12 : 12,
       fontWeight: 600,
     };
 
@@ -189,7 +189,7 @@ export default function PieChart({
         background: "var(--chart-bg, var(--color-surface))",
         overflow: "hidden", // contain labels in the card
         borderRadius: 12,
-        border: "1px solid var(--color-border, #E5E7EB)",
+        border: "2px solid var(--color-border, #E5E7EB)",
       }}
       role="img"
       aria-label={ariaSummary}

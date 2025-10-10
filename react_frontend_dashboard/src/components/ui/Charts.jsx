@@ -323,9 +323,10 @@ export function PieBreakdownChart({
   dataKey = "value",
   nameKey = "name",
   colors = DEFAULT_COLORS,
-  // Increase default height to better accommodate outside labels like "$12,450"
+  // Increase default height to better accommodate centered labels
   height = 300,
-  innerRadius = 60,
+  // Increase innerRadius to create donut center space for the value label
+  innerRadius = 72,
 }) {
   // Ensure provider name fallback (AWS/Azure/GCP)
   const normalizedData = Array.isArray(data)
@@ -346,64 +347,24 @@ export function PieBreakdownChart({
   };
 
   // PUBLIC_INTERFACE
-  // Custom label renderer placing labels outside with leader lines, Pure White theme typography
-  const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, payload, value }) => {
-    const provider = payload?.[nameKey] ?? payload?.name ?? payload?.label ?? "";
-    const upper = String(provider).toUpperCase();
+  // Centered label renderer that places the total/value text inside the donut at (cx, cy).
+  // This ensures values like "$12,450" never overflow the card.
+  const renderCenterLabel = ({ cx, cy, value }) => {
     const valueFormatted = formatNumber(value);
-
-    // Maintain formatting while allowing flexible wrapping if needed
-    let formatted = `${provider} - ${valueFormatted}`;
-    if (upper === "AWS") formatted = "AWS - 12,450";
-    else if (upper === "AZURE") formatted = "Azure - 10,320";
-    else if (upper === "GCP") formatted = "GCP - 6,810";
-
-    const RAD = Math.PI / 180;
-    const angle = -midAngle * RAD;
-    // Slightly larger offsets to keep away from pie edge and avoid clipping at container bounds
-    const sx = cx + (outerRadius + 8) * Math.cos(angle);
-    const sy = cy + (outerRadius + 8) * Math.sin(angle);
-    const mx = cx + (outerRadius + 18) * Math.cos(angle);
-    const my = cy + (outerRadius + 18) * Math.sin(angle);
-    const right = Math.cos(angle) >= 0;
-    const ex = mx + (right ? 18 : -18);
-    const ey = my;
-
-    // Responsive font sizing and wrapping controls
-    const labelFontSize = 11; // slightly smaller to reduce chance of overflow
-    const textStyle = {
-      paintOrder: "stroke",
-      stroke: "var(--color-surface,#FFFFFF)",
-      strokeWidth: 3,
-      letterSpacing: 0.2,
-      whiteSpace: "normal",
-      overflowWrap: "anywhere",
-    };
-
+    const fontSize = 13; // reduced for safety on smaller cards
     return (
-      <g>
-        <path d={`M${sx},${sy} L${mx},${my} L${ex},${ey}`} stroke="var(--axis-text, #9CA3AF)" fill="none" />
-        <circle cx={ex} cy={ey} r={2} fill="var(--axis-text, #9CA3AF)" />
-        <foreignObject
-          x={Math.min(ex, ex + (right ? 0 : -160))}
-          y={ey - 12}
-          width="160"
-          height="28"
+      <g pointerEvents="none">
+        <text
+          x={cx}
+          y={cy}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill="var(--color-text, #111827)"
+          fontSize={fontSize}
+          fontWeight={700}
         >
-          <div
-            xmlns="http://www.w3.org/1999/xhtml"
-            style={{
-              fontSize: labelFontSize,
-              fontWeight: 700,
-              color: "var(--color-text, #111827)",
-              textAlign: right ? "left" : "right",
-              lineHeight: 1.1,
-              ...textStyle,
-            }}
-          >
-            {formatted}
-          </div>
-        </foreignObject>
+          ${valueFormatted}
+        </text>
       </g>
     );
   };
@@ -415,12 +376,15 @@ export function PieBreakdownChart({
     <div
       className="card surface"
       style={{
-        padding: 12,
+        padding: 16,
         // Ensure enough vertical space for labels and prevent clipping
         minHeight: Math.max(280, height),
         // Important: contain visuals while keeping a clean look
         overflow: "hidden",
         position: "relative",
+        // Thicker border and slightly larger radius for prominence
+        border: "2px solid var(--color-border, #E5E7EB)",
+        borderRadius: 12,
       }}
     >
       <ResponsiveContainer width="100%" height={height}>
@@ -433,9 +397,11 @@ export function PieBreakdownChart({
             cx="50%"
             cy="50%"
             innerRadius={innerRadius}
-            outerRadius={Math.max(innerRadius + 44, 92)}
-            labelLine
-            label={renderCustomizedLabel}
+            // Slightly reduce outer radius growth to keep more inner space
+            outerRadius={Math.max(innerRadius + 36, 92)}
+            // Force inner centered label and no label lines
+            labelLine={false}
+            label={renderCenterLabel}
             isAnimationActive={false}
           >
             {normalizedData.map((entry, index) => (
@@ -444,16 +410,17 @@ export function PieBreakdownChart({
           </Pie>
         </RPieChart>
       </ResponsiveContainer>
-      {/* Removed debug caption text below pie chart */}
-      <div style={{ display: "none" }}>
-        <span data-testid="pie-provider-labels-active" />
-      </div>
       <style>{`
+        /* Ensure any text inside the chart wraps/clamps visually and stays in bounds */
+        .card.surface svg text {
+          font-size: 12px;
+        }
         @media (max-width: 640px) {
-          .card.surface:has(svg) { padding: 10px !important; min-height: 260px; }
+          .card.surface:has(svg) { padding: 12px !important; min-height: 260px; }
+          .card.surface svg text { font-size: 11px !important; }
         }
         @media (max-width: 520px) {
-          .card.surface:has(svg) { padding: 10px !important; min-height: 260px; }
+          .card.surface:has(svg) { padding: 10px !important; min-height: 240px; }
           .card.surface svg text { font-size: 10px !important; }
         }
       `}</style>

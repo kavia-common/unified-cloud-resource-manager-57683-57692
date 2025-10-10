@@ -197,7 +197,7 @@ export default function SimplePieChart({
                   y={pOuter.y}
                   textAnchor={isRight ? "start" : "end"}
                   dominantBaseline="middle"
-                  fontSize={12}
+                  fontSize={11}
                   fontWeight={700}
                   fill="var(--color-text)"
                   style={{ paintOrder: "stroke", stroke: "var(--color-surface)", strokeWidth: 3 }}
@@ -216,7 +216,7 @@ export default function SimplePieChart({
       <figure
         role="figure"
         aria-label={ariaLabel}
-        style={{ display: "grid", gap: 12, background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: 12, padding: 12, overflow: "visible" }}
+        style={{ display: "grid", gap: 12, background: "var(--color-surface)", border: "2px solid var(--color-border)", borderRadius: 12, padding: 12, overflow: "hidden" }}
       >
         <ChartSvg />
         <Legend />
@@ -234,10 +234,10 @@ export default function SimplePieChart({
         gap: 12,
         alignItems: "center",
         background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
+        border: "2px solid var(--color-border)",
         borderRadius: 12,
         padding: 12,
-        overflow: "visible",
+        overflow: "hidden",
       }}
     >
       <ChartSvg />

@@ -184,10 +184,10 @@ export default function PieChart({
         position: "relative",
         width: size,
         height: size,
-        minHeight: Math.max(280, size),
-        padding: Math.round(size * 0.08), // extra padding to keep labels within the box
+        minHeight: Math.max(260, size),
+        padding: Math.round(size * 0.08), // safe padding to keep labels within the box
         background: "var(--chart-bg, var(--color-surface))",
-        overflow: "hidden", // contain labels in the card
+        overflow: "visible", // allow labels to render fully within the card
         borderRadius: 12,
         border: "2px solid var(--color-border, #E5E7EB)",
       }}
@@ -202,22 +202,29 @@ export default function PieChart({
         aria-hidden
       >
         <title>Donut breakdown</title>
-        {/* Draw ring segments */}
-        {finalSegments.map((seg, idx) => (
-          <path
-            key={`${seg.label}-${idx}`}
-            d={buildPath(outerR, innerR, seg.startDeg, seg.endDeg)}
-            fill={seg.color}
-            stroke={hoverIdx === idx ? "#FFFFFF" : "none"}
-            strokeWidth={hoverIdx === idx ? 1 : 0}
-            onMouseEnter={() => setHoverIdx(idx)}
-            onMouseLeave={() => setHoverIdx(null)}
-            style={{ transition: "stroke 120ms ease" }}
-          />
-        ))}
+        <defs>
+          <clipPath id="donutClip">
+            <rect x="0" y="0" width={size} height={size} rx="10" ry="10" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#donutClip)">
+          {/* Draw ring segments */}
+          {finalSegments.map((seg, idx) => (
+            <path
+              key={`${seg.label}-${idx}`}
+              d={buildPath(outerR, innerR, seg.startDeg, seg.endDeg)}
+              fill={seg.color}
+              stroke={hoverIdx === idx ? "#FFFFFF" : "none"}
+              strokeWidth={hoverIdx === idx ? 1 : 0}
+              onMouseEnter={() => setHoverIdx(idx)}
+              onMouseLeave={() => setHoverIdx(null)}
+              style={{ transition: "stroke 120ms ease" }}
+            />
+          ))}
+        </g>
       </svg>
 
-      {/* External labels */}
+      {/* External labels kept visible within padding without clipping */}
       {hasData && finalSegments.map(labelFor)}
     </div>
   );

@@ -216,7 +216,15 @@ export default function SimplePieChart({
       <figure
         role="figure"
         aria-label={ariaLabel}
-        style={{ display: "grid", gap: 12, background: "var(--color-surface)", border: "2px solid var(--color-border)", borderRadius: 12, padding: 12, overflow: "hidden" }}
+        style={{
+          display: "grid",
+          gap: 12,
+          background: "var(--color-surface)",
+          border: "2px solid var(--color-border)",
+          borderRadius: 12,
+          padding: 12,
+          overflow: "visible",
+        }}
       >
         <ChartSvg />
         <Legend />
@@ -230,14 +238,14 @@ export default function SimplePieChart({
       aria-label={ariaLabel}
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr minmax(160px, 40%)",
+        gridTemplateColumns: "1fr minmax(180px, 40%)",
         gap: 12,
         alignItems: "center",
         background: "var(--color-surface)",
         border: "2px solid var(--color-border)",
         borderRadius: 12,
         padding: 12,
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       <ChartSvg />
@@ -246,7 +254,7 @@ export default function SimplePieChart({
         @media (max-width: 720px) {
           figure[aria-label="${ariaLabel}"] { grid-template-columns: 1fr; }
         }
-        @media (max-width: 520px) {
+        @media (max-width: 560px) {
           figure[aria-label="${ariaLabel}"] text { font-size: 11px !important; }
         }
       `}</style>

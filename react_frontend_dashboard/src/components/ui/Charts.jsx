@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -15,6 +15,7 @@ import {
   PieChart as RPieChart,
   Pie,
   Cell,
+  Label,
 } from "recharts";
 
 /**
@@ -323,35 +324,43 @@ export function PieBreakdownChart({
   dataKey = "value",
   nameKey = "name",
   colors = DEFAULT_COLORS,
-  // Increase default height to better accommodate centered labels
-  height = 300,
-  // Increase innerRadius to create donut center space for the value label
-  innerRadius = 72,
+  height = 320,
+  innerRadius: innerRadiusProp,
 }) {
-  // Ensure provider name fallback (AWS/Azure/GCP)
+  // Normalize and compute total for center label
   const normalizedData = Array.isArray(data)
     ? data.map((d, i) => {
         const idxMap = { 0: "AWS", 1: "Azure", 2: "GCP" };
-        const providerName =
-          d?.[nameKey] ?? d?.name ?? d?.label ?? (i in idxMap ? idxMap[i] : `Item ${i + 1}`);
+        const providerName = d?.[nameKey] ?? d?.name ?? d?.label ?? (i in idxMap ? idxMap[i] : `Item ${i + 1}`);
         return { ...d, [nameKey]: providerName, name: providerName };
       })
     : [];
 
-  const formatNumber = (n) => {
-    try {
-      return Number(n).toLocaleString();
-    } catch {
-      return String(n);
-    }
+  const totalValue = useMemo(
+    () => normalizedData.reduce((s, d) => s + (typeof d[dataKey] === "number" ? d[dataKey] : 0), 0),
+    [normalizedData, dataKey]
+  );
+
+  const formatCurrency = (n) => {
+    try { return `$${Number(n).toLocaleString()}`; } catch { return `$${n}`; }
   };
 
-  // PUBLIC_INTERFACE
-  // Centered label renderer that places the total/value text inside the donut at (cx, cy).
-  // This ensures values like "$12,450" never overflow the card.
-  const renderCenterLabel = ({ cx, cy, value }) => {
-    const valueFormatted = formatNumber(value);
-    const fontSize = 13; // reduced for safety on smaller cards
+  // Responsive inner/outer radius
+  const computeRadii = (boxWidth) => {
+    const innerRadius = Math.max(innerRadiusProp ?? Math.round(boxWidth * 0.28), 68);
+    const outerRadius = Math.max(innerRadius + Math.round(boxWidth * 0.14), innerRadius + 36);
+    return { innerRadius, outerRadius };
+  };
+
+  // Center label renderer with SVG textLength/lengthAdjust for fit
+  const renderCenterLabel = (props) => {
+    const { cx, cy, viewBox } = props;
+    const width = Math.max(200, viewBox?.width || height);
+    const { innerRadius } = computeRadii(width);
+    const maxTextWidth = Math.floor(innerRadius * 1.7);
+    const text = formatCurrency(totalValue);
+    const baseSize = Math.max(12, Math.min(24, Math.round(innerRadius * 0.3)));
+
     return (
       <g pointerEvents="none">
         <text
@@ -360,35 +369,45 @@ export function PieBreakdownChart({
           textAnchor="middle"
           dominantBaseline="central"
           fill="var(--color-text, #111827)"
-          fontSize={fontSize}
-          fontWeight={700}
+          fontWeight={800}
+          style={{ fontVariantNumeric: "tabular-nums" }}
+          textLength={maxTextWidth}
+          lengthAdjust="spacingAndGlyphs"
+          fontSize={baseSize}
         >
-          ${valueFormatted}
+          {text}
         </text>
       </g>
     );
   };
 
-  // Add outer margins so labels are not clipped; increase on small screens
-  const chartMargin = { top: 20, right: 36, bottom: 20, left: 36 };
+  // Legend below chart to avoid side clipping
+  const LegendBelow = () => (
+    <div role="list" aria-label="Chart legend" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 8, marginTop: 10 }}>
+      {normalizedData.map((d, i) => (
+        <div key={`${d[nameKey]}-${i}`} role="listitem" style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-text)", fontSize: 12 }}>
+          <span aria-hidden style={{ width: 10, height: 10, borderRadius: "50%", background: colors[i % colors.length] }} />
+          <span style={{ color: "var(--color-muted)" }}>{d[nameKey]}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div
       className="card surface"
       style={{
-        padding: 16,
-        // Ensure enough vertical space for labels and prevent clipping
+        padding: 14,
         minHeight: Math.max(280, height),
-        // Important: contain visuals while keeping a clean look
-        overflow: "hidden",
+        // allow internal chart to manage clipping and keep labels visible
+        overflow: "visible",
         position: "relative",
-        // Thicker border and slightly larger radius for prominence
         border: "2px solid var(--color-border, #E5E7EB)",
         borderRadius: 12,
       }}
     >
       <ResponsiveContainer width="100%" height={height}>
-        <RPieChart margin={chartMargin}>
+        <RPieChart margin={{ top: 8, right: 12, bottom: 8, left: 12 }}>
           <Tooltip />
           <Pie
             data={normalizedData}
@@ -396,11 +415,9 @@ export function PieBreakdownChart({
             nameKey={nameKey}
             cx="50%"
             cy="50%"
-            innerRadius={innerRadius}
-            // Slightly reduce outer radius growth to keep more inner space
-            outerRadius={Math.max(innerRadius + 36, 92)}
-            // Force inner centered label and no label lines
-            labelLine={false}
+            innerRadius={computeRadii(height).innerRadius}
+            outerRadius={computeRadii(height).outerRadius}
+            labelLine={true}
             label={renderCenterLabel}
             isAnimationActive={false}
           >
@@ -410,20 +427,7 @@ export function PieBreakdownChart({
           </Pie>
         </RPieChart>
       </ResponsiveContainer>
-      <style>{`
-        /* Ensure any text inside the chart wraps/clamps visually and stays in bounds */
-        .card.surface svg text {
-          font-size: 12px;
-        }
-        @media (max-width: 640px) {
-          .card.surface:has(svg) { padding: 12px !important; min-height: 260px; }
-          .card.surface svg text { font-size: 11px !important; }
-        }
-        @media (max-width: 520px) {
-          .card.surface:has(svg) { padding: 10px !important; min-height: 240px; }
-          .card.surface svg text { font-size: 10px !important; }
-        }
-      `}</style>
+      <LegendBelow />
     </div>
   );
 }

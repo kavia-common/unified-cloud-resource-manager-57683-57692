@@ -26,7 +26,7 @@ export default function SimplePieChart({
   legendPosition = "right",
   ariaLabel = "Pie chart",
   colors = ["#000000", "#1a237e", "var(--series-3)", "#9CA3AF", "#F59E0B", "#10B981"],
-  chartOffsetX = -16,
+  chartOffsetX = -20,
   showLabels = true,
   labelType = "value",
   labelColor = "auto",

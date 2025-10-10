@@ -410,8 +410,8 @@ export function PieBreakdownChart({
         {/* Use a render-prop pattern to access measured width for precise cx shift */}
         {({ width }) => {
           const boxW = Math.max(0, width || height || 320);
-          // Shift center ~16px left (additional 6px from prior), clamp to non-negative
-          const cxValue = Math.max(0, boxW / 2 - 16);
+          // Shift center ~20px left (additional 4px from prior), clamp to non-negative
+          const cxValue = Math.max(0, boxW / 2 - 20);
           const { innerRadius, outerRadius } = computeRadii(boxW);
 
           return (

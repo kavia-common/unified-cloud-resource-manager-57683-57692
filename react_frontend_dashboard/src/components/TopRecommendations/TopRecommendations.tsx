@@ -475,41 +475,13 @@ export function TopRecommendations({ onViewDetails }: TopRecommendationsProps) {
   return (
     <section
       className="toprecs-dark"
-      aria-labelledby="top-recommendations-header"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
+        gap: 0,
         background: 'transparent',
       }}
     >
-      <div
-        id="top-recommendations-header"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: TOKENS.surface,
-          border: `1px solid ${TOKENS.border}`,
-          borderRadius: 8,
-          padding: 12,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 18,
-            color: TOKENS.text,
-            fontWeight: 700,
-          }}
-        >
-          Top Recommendations
-        </h2>
-        <span style={{ color: TOKENS.textSecondary, fontSize: 12 }}>
-          Top 3 high-priority with confidence ≥ 0.5
-        </span>
-      </div>
       {content}
     </section>
   );

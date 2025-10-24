@@ -53,12 +53,22 @@ if (process.env.NODE_ENV === 'development') {
 
 const root = ReactDOM.createRoot(rootEl);
 
-// Ensure dark theme class is present so tokens from styles/theme.css resolve to dark by default
+/* Default to light theme. Ensure no dark class is applied at startup.
+   Preserve a window-level toggle function for optional future use. */
 if (typeof document !== 'undefined') {
   const html = document.documentElement;
-  if (!html.classList.contains('theme-dark')) {
-    html.classList.add('theme-dark');
-  }
+  html.classList.remove('theme-dark');
+  html.classList.add('theme-light');
+  // Expose a safe toggle to switch between light/dark without defaulting to dark
+  window.__toggleTheme = function () {
+    if (html.classList.contains('theme-light')) {
+      html.classList.remove('theme-light');
+      html.classList.add('theme-dark');
+    } else {
+      html.classList.remove('theme-dark');
+      html.classList.add('theme-light');
+    }
+  };
 }
 
 // Initialize Supabase client early (safe, no-throw); can be used by providers if needed

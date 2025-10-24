@@ -1,26 +1,26 @@
-:root {
-  /* Light theme tokens (kept for future toggle) */
-  --bg: #ffffff;
-  --bg-elevated: #f9fafb;
-  --surface: #ffffff;
-  --surface-2: #f3f4f6;
+/* Ensure default light theme tokens reflect Pure White scheme and are also applied with .theme-light */
+:root, html.theme-light {
+  --bg: #FFFFFF;
+  --bg-elevated: #F9FAFB;
+  --surface: #FFFFFF;
+  --surface-2: #F3F4F6;
   --overlay: rgba(17,24,39,0.45);
 
   --text: #111827;
-  --text-muted: #6b7280;
-  --text-subtle: #9ca3af;
+  --text-muted: #6B7280;
+  --text-subtle: #9CA3AF;
 
-  --primary: #60a5fa; /* light accent */
+  --primary: #374151; /* brand primary for controls */
   --secondary: #9CA3AF;
   --success: #10B981;
   --error: #EF4444;
 
-  --border: #e5e7eb;
-  --border-subtle: #eceff3;
+  --border: #E5E7EB;
+  --border-subtle: #ECEFF3;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 6px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 14px 32px rgba(0,0,0,0.14);
+  --shadow-sm: 0 1px 2px rgba(17,24,39,0.04);
+  --shadow-md: 0 6px 12px rgba(17,24,39,0.08);
+  --shadow-lg: 0 14px 32px rgba(17,24,39,0.12);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -29,57 +29,56 @@
   --nav-width: 264px;
 
   /* Default (light) button tokens */
-  --btn-bg: #111827;
-  --btn-bg-hover: #1f2937;
-  --btn-text: #ffffff;
-  --btn-outline: #d1d5db;
+  --btn-bg: #374151;
+  --btn-bg-hover: #1F2937;
+  --btn-text: #FFFFFF;
+  --btn-outline: #D1D5DB;
 
-  --input-bg: #ffffff;
-  --input-border: #e5e7eb;
+  --input-bg: #FFFFFF;
+  --input-border: #E5E7EB;
   --input-text: #111827;
-  --input-placeholder: #9ca3af;
+  --input-placeholder: #9CA3AF;
   --input-focus-ring: rgba(59,130,246,0.25);
 
-  --table-header-bg: #f9fafb;
-  --table-row-bg: #ffffff;
-  --table-row-alt-bg: #f8fafc;
-  --table-border: #e5e7eb;
+  --table-header-bg: #F9FAFB;
+  --table-row-bg: #FFFFFF;
+  --table-row-alt-bg: #F8FAFC;
+  --table-border: #E5E7EB;
 
-  --chip-bg: #f3f4f6;
-  --chip-text: #4b5563;
+  --chip-bg: #F3F4F6;
+  --chip-text: #4B5563;
 
-  --link: #2563eb;
-  --link-hover: #1d4ed8;
+  --link: #2563EB;
+  --link-hover: #1D4ED8;
 
-  --axis-text: #6b7280;
-  --gridline: #e5e7eb;
-  --legend-text: #6b7280;
-  /* Chart label default text on surfaces; used when auto color not applied */
+  --axis-text: #6B7280;
+  --gridline: #E5E7EB;
+  --legend-text: #6B7280;
   --chart-label-text: var(--text);
 
   --series-1: #3B82F6;
   --series-2: #F59E0B;
   --series-3: #10B981;
 
-  --scrollbar-track: #f3f4f6;
-  --scrollbar-thumb: #d1d5db;
-  --scrollbar-thumb-hover: #9ca3af;
+  --scrollbar-track: #F3F4F6;
+  --scrollbar-thumb: #D1D5DB;
+  --scrollbar-thumb-hover: #9CA3AF;
 
   --card-accent-gradient: linear-gradient(135deg, #2563EB 0%, #4F46E5 48%, #7C3AED 100%);
 
-  /* Dark theme unified variables (aliases for components expecting --color-*) */
+  /* Map to unified component variables */
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-text: var(--text);
   --color-muted: var(--text-muted);
-  --color-accent: #3b82f6;
+  --color-accent: #3B82F6;
   --color-border: var(--border);
   --color-overlay: var(--overlay);
-  --color-on-accent: #ffffff;
+  --color-on-accent: #FFFFFF;
 
   /* Button system variables for variants */
-  --btn-primary-bg: var(--color-accent);
+  --btn-primary-bg: var(--color-primary, var(--btn-bg));
   --btn-primary-text: var(--color-on-accent);
   --btn-primary-bg-hover: #316dd0;
   --btn-primary-bg-active: #2a5fb6;
@@ -87,12 +86,12 @@
   --btn-secondary-bg: var(--color-surface-2);
   --btn-secondary-text: var(--color-text);
   --btn-secondary-border: var(--color-border);
-  --btn-secondary-bg-hover: #e7eaf0;
-  --btn-secondary-bg-active: #dde2ea;
+  --btn-secondary-bg-hover: #E7EAF0;
+  --btn-secondary-bg-active: #DDE2EA;
 
   --btn-ghost-text: var(--color-text);
   --btn-ghost-bg-hover: var(--color-surface-2);
-  --btn-ghost-bg-active: #e7eaf0;
+  --btn-ghost-bg-active: #E7EAF0;
 
   --focus-ring: rgba(59, 130, 246, 0.6);
 
@@ -107,20 +106,18 @@
   --z-dropdown: 800;
   --z-nav: 200;
 
-  /* Sidebar background token */
+  /* Sidebar background tokens */
   --sidebar-bg: var(--color-surface);
-  /* Dedicated Sidebar surface variables to control backgrounds and states consistently */
   --sidebar-surface: var(--color-surface);
   --sidebar-surface-2: var(--color-surface-2);
   --sidebar-border: var(--color-border);
 
-  /* Sidebar item state tokens - default (light) */
   --sidebar-hover: var(--sidebar-surface-2);
   --sidebar-active: rgba(59, 130, 246, 0.12);
   --sidebar-active-border: var(--color-accent);
 }
 
-/* Dark theme defaults: app loads with .theme-dark on html by default */
+/* Dark theme tokens (available for optional toggle) */
 html.theme-dark {
   --bg: #0b0f1a;
   --bg-elevated: #0f1729;

@@ -1,15 +1,16 @@
 :root{
+  /* Pure White minimalist light theme tokens */
   --color-text:#111827;
   --color-bg:#FFFFFF;
   --color-surface:#F9FAFB;
-  --color-accent:#3b82f6;
+  --color-accent:#3B82F6;
   --color-muted:#6B7280;
   --color-border:#E5E7EB;
 
   /* Provide default sidebar variables that themes can override */
   --sidebar-bg: var(--color-surface);
   --sidebar-surface: var(--color-surface);
-  --sidebar-surface-2: var(--color-surface-2, #eef2f7);
+  --sidebar-surface-2: var(--color-surface-2, #EEF2F7);
   --sidebar-border: var(--color-border);
 
   /* Default state colors (light-safe) */

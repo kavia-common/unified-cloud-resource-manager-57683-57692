@@ -10,6 +10,32 @@
   overflow: hidden;
 }
 
+/* Add vertical column dividers within the Inventory table scope */
+.inventoryTable thead th {
+  /* existing props retained below */
+  border-right: 1px solid var(--table-header-divider, #6B7280); /* gray-500 for header verticals */
+}
+.inventoryTable thead th:last-child {
+  /* avoid double border on the edge; wrapper already provides the outer border */
+  border-right: none;
+}
+
+.inventoryTable tbody td {
+  /* existing props retained below */
+  border-right: 1px solid var(--table-body-vertical, #4B5563); /* gray-600 for body verticals */
+}
+.inventoryTable tbody td:last-child {
+  border-right: none; /* prevent double border on rightmost cell */
+}
+
+/* Keep hover/focus readable with vertical lines present */
+.inventoryTable tbody tr:hover td {
+  /* keep vertical borders visible on hover by not altering border color */
+  background: color-mix(in srgb, var(--table-row-alt-bg, #F8FAFC) 70%, #ffffff);
+}
+
+/* Variables to control header/body vertical divider colors are consolidated below with other table variables */
+
 /* Table element baseline */
 .inventoryTable table {
   width: 100%;
@@ -25,8 +51,9 @@
   font-size: 13px;
   color: var(--text, #111827);
   background: var(--table-header-bg, #F9FAFB);
-  /* Keep header divider consistent via variable, which now resolves stronger */
+  /* Bottom divider for header row */
   border-bottom: 1px solid var(--table-border-strong, #4B5563);
+  /* Right-side divider added above in feature scope block */
   padding: 10px 12px;
   position: relative;
 }
@@ -81,6 +108,10 @@
   --table-border-strong: #4B5563; /* gray-600 */
   --table-body-divider: #4B5563;  /* explicit tbody separator (same as strong) */
   --table-border-dark: #4B5563;   /* gray-600 as a sensible dark-theme strong border */
+
+  /* Consolidated header/body vertical divider variables */
+  --table-header-divider: #6B7280; /* gray-500 for header */
+  --table-body-vertical: #4B5563;  /* gray-600 for body */
 }
 
 /* Ensure dark theme continues to scope correctly for borders */

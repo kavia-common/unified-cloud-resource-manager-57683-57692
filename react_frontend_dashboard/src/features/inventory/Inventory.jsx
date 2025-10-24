@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import Tabs from "../../components/ui/Tabs";
+import "./inventory.css";
 
 /**
  * PUBLIC_INTERFACE
@@ -35,7 +36,12 @@ export default function Inventory() {
  * Minimalist Table scaffolding
  */
 function TableWrapper({ children }) {
-  return <div className="table-wrapper">{children}</div>;
+  // Wrap table with a scoped container to apply inventory-specific higher-contrast borders
+  return (
+    <div className="inventoryTable">
+      <div className="table-wrapper">{children}</div>
+    </div>
+  );
 }
 
 function StatusBadge({ status }) {

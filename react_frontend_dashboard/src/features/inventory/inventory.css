@@ -1,0 +1,79 @@
+.inventoryTable {
+  /* Container for inventory tables to scope styles */
+}
+
+.inventoryTable .table-wrapper {
+  border: 1px solid var(--table-border-strong, #D1D5DB); /* gray-300 default */
+  border-radius: 10px;
+  background: var(--table-row-bg, #FFFFFF);
+  overflow: hidden;
+}
+
+/* Table element baseline */
+.inventoryTable table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--table-row-bg, #FFFFFF);
+}
+
+/* Header cells */
+.inventoryTable thead th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text, #111827);
+  background: var(--table-header-bg, #F9FAFB);
+  border-bottom: 1px solid var(--table-border-strong, #D1D5DB); /* stronger contrast */
+  padding: 10px 12px;
+  position: relative;
+}
+
+/* Body rows and cells */
+.inventoryTable tbody tr {
+  background: var(--table-row-bg, #FFFFFF);
+}
+
+.inventoryTable tbody tr:nth-child(even) {
+  background: var(--table-row-alt-bg, #F8FAFC);
+}
+
+.inventoryTable tbody td {
+  padding: 10px 12px;
+  color: var(--text, #111827);
+  border-bottom: 1px solid var(--table-border-strong, #D1D5DB); /* stronger row dividers */
+}
+
+/* Empty state cell */
+.inventoryTable .table__cell--empty {
+  text-align: center;
+  color: var(--text-muted, #6B7280);
+  padding: 16px 12px;
+}
+
+/* Row hover/active focus states - accessible and consistent */
+.inventoryTable tbody tr:hover {
+  background: color-mix(in srgb, var(--table-row-alt-bg, #F8FAFC) 70%, #ffffff);
+}
+
+.inventoryTable tbody tr:focus-within {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: -2px; /* keep outline within the wrapper radius */
+}
+
+/* Cell focus styles for interactive controls inside cells */
+.inventoryTable tbody td :focus-visible {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: 2px;
+}
+
+/* Support a slightly darker divider option if desired via CSS variable */
+:root, html.theme-light {
+  --table-border-strong: #D1D5DB; /* gray-300 */
+}
+
+html.theme-dark .inventoryTable .table-wrapper,
+html.theme-dark .inventoryTable thead th,
+html.theme-dark .inventoryTable tbody td {
+  border-color: var(--table-border-dark, #1A2436);
+}

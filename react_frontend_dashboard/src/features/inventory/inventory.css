@@ -4,7 +4,7 @@
 
 .inventoryTable .table-wrapper {
   /* Darker outer border for improved contrast within Inventory scope */
-  border: 1px solid var(--table-border-strong, #6B7280); /* gray-500 default */
+  border: 1px solid var(--table-border-strong, #4B5563); /* gray-600 for stronger contrast */
   border-radius: 10px;
   background: var(--table-row-bg, #FFFFFF);
   overflow: hidden;
@@ -25,8 +25,8 @@
   font-size: 13px;
   color: var(--text, #111827);
   background: var(--table-header-bg, #F9FAFB);
-  /* Use darker divider for header */
-  border-bottom: 1px solid var(--table-border-strong, #6B7280);
+  /* Keep header divider consistent via variable, which now resolves stronger */
+  border-bottom: 1px solid var(--table-border-strong, #4B5563);
   padding: 10px 12px;
   position: relative;
 }
@@ -43,8 +43,13 @@
 .inventoryTable tbody td {
   padding: 10px 12px;
   color: var(--text, #111827);
-  /* Darker row dividers for better contrast */
-  border-bottom: 1px solid var(--table-border-strong, #6B7280);
+  /* Stronger row dividers for better contrast (gray-600 fallback) */
+  border-bottom: 1px solid var(--table-body-divider, #4B5563);
+}
+
+/* Ensure each row has a clear separator in case cells are auto-layouted */
+.inventoryTable tbody > tr {
+  border-bottom: 1px solid var(--table-body-divider, #4B5563);
 }
 
 /* Empty state cell */
@@ -72,13 +77,16 @@
 
 /* Use darker divider default within Inventory; still overridable via CSS variable */
 :root, html.theme-light {
-  --table-border-strong: #6B7280; /* gray-500 */
+  /* Use stronger default for inventory table borders */
+  --table-border-strong: #4B5563; /* gray-600 */
+  --table-body-divider: #4B5563;  /* explicit tbody separator (same as strong) */
   --table-border-dark: #4B5563;   /* gray-600 as a sensible dark-theme strong border */
 }
 
 /* Ensure dark theme continues to scope correctly for borders */
 html.theme-dark .inventoryTable .table-wrapper,
 html.theme-dark .inventoryTable thead th,
-html.theme-dark .inventoryTable tbody td {
+html.theme-dark .inventoryTable tbody td,
+html.theme-dark .inventoryTable tbody > tr {
   border-color: var(--table-border-dark, #4B5563);
 }

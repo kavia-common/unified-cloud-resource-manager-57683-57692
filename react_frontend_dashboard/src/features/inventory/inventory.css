@@ -3,7 +3,8 @@
 }
 
 .inventoryTable .table-wrapper {
-  border: 1px solid var(--table-border-strong, #D1D5DB); /* gray-300 default */
+  /* Darker outer border for improved contrast within Inventory scope */
+  border: 1px solid var(--table-border-strong, #6B7280); /* gray-500 default */
   border-radius: 10px;
   background: var(--table-row-bg, #FFFFFF);
   overflow: hidden;
@@ -24,7 +25,8 @@
   font-size: 13px;
   color: var(--text, #111827);
   background: var(--table-header-bg, #F9FAFB);
-  border-bottom: 1px solid var(--table-border-strong, #D1D5DB); /* stronger contrast */
+  /* Use darker divider for header */
+  border-bottom: 1px solid var(--table-border-strong, #6B7280);
   padding: 10px 12px;
   position: relative;
 }
@@ -41,7 +43,8 @@
 .inventoryTable tbody td {
   padding: 10px 12px;
   color: var(--text, #111827);
-  border-bottom: 1px solid var(--table-border-strong, #D1D5DB); /* stronger row dividers */
+  /* Darker row dividers for better contrast */
+  border-bottom: 1px solid var(--table-border-strong, #6B7280);
 }
 
 /* Empty state cell */
@@ -67,13 +70,15 @@
   outline-offset: 2px;
 }
 
-/* Support a slightly darker divider option if desired via CSS variable */
+/* Use darker divider default within Inventory; still overridable via CSS variable */
 :root, html.theme-light {
-  --table-border-strong: #D1D5DB; /* gray-300 */
+  --table-border-strong: #6B7280; /* gray-500 */
+  --table-border-dark: #4B5563;   /* gray-600 as a sensible dark-theme strong border */
 }
 
+/* Ensure dark theme continues to scope correctly for borders */
 html.theme-dark .inventoryTable .table-wrapper,
 html.theme-dark .inventoryTable thead th,
 html.theme-dark .inventoryTable tbody td {
-  border-color: var(--table-border-dark, #1A2436);
+  border-color: var(--table-border-dark, #4B5563);
 }

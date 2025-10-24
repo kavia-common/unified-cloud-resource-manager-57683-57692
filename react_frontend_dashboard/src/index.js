@@ -65,7 +65,6 @@ if (typeof document !== 'undefined') {
 getSupabaseClient();
 
 // Basic boot fallback UI while React mounts, then replaced on first paint.
-// This is defensive and ensures something visible appears immediately.
 rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--color-text);background:transparent">App booting…</div>';
 
 root.render(

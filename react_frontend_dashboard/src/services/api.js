@@ -3,7 +3,6 @@
  * PUBLIC_INTERFACE exports are documented for use across the app.
  */
 import { getSupabaseClient } from '../lib/supabaseClient';
-const supabase = getSupabaseClient();
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 // Use absolute URL for Edge Functions to avoid relative-path failures in preview/build setups.
@@ -14,8 +13,8 @@ const EDGE_BASE = (() => {
     const err = new Error(
       'Supabase URL is not configured. Set REACT_APP_SUPABASE_URL in your .env to enable Edge Function calls.'
     );
+    // Attach a code but do not throw here; callEdgeFunction will handle with a clear message.
     err.code = 'CONFIG_MISSING';
-    // We won't throw here immediately to avoid breaking import time; callEdgeFunction will check and throw with context.
     return null;
   }
   return `${SUPABASE_URL}/functions/v1`;
@@ -32,8 +31,16 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
     throw err;
   }
 
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    const err = new Error(
+      `Supabase client is unavailable. Cannot call edge function "${name}". Configure environment variables and reload.`
+    );
+    err.code = 'CONFIG_MISSING';
+    throw err;
+  }
+
   // Attach Authorization header with the current session access token.
-  // Supabase Edge Functions require a valid JWT for user-scoped operations.
   const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData?.session?.access_token || null;
 
@@ -65,7 +72,6 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
   }
 
   // Some CORS failures can yield opaque responses; treat them as network/CORS issues with guidance.
-  // Note: In standard mode, fetch with 'cors' returns res.type === 'cors'; opaque means blocked by CORS.
   if (res && res.type === 'opaque') {
     const err = new Error('CORS/opaque response when calling Edge Function. Check Supabase CORS settings and the app origin.');
     err.code = 'NETWORK_ERROR';
@@ -112,6 +118,8 @@ async function callEdgeFunction(name, method = 'POST', body = null, signal) {
 // PUBLIC_INTERFACE
 export async function loginWithEmail(email, password) {
   /** Log in a user via email/password using Supabase Auth. Returns { user, session }. */
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error('Auth not initialized');
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -126,6 +134,8 @@ export async function signUpWithEmail(email, password, siteUrl) {
    * Sign up a user via Supabase Auth with email/password.
    * emailRedirectTo must be set from SITE_URL env configured externally.
    */
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error('Auth not initialized');
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -140,6 +150,8 @@ export async function signUpWithEmail(email, password, siteUrl) {
 // PUBLIC_INTERFACE
 export async function logout() {
   /** Logs out the current user session. */
+  const supabase = getSupabaseClient();
+  if (!supabase) return true;
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
   return true;
@@ -148,6 +160,8 @@ export async function logout() {
 // PUBLIC_INTERFACE
 export async function getCurrentUser() {
   /** Returns the current authenticated user (or null). */
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -192,7 +206,6 @@ export async function fetchCosts({ range = '30d', groupBy = 'service' }, signal)
   /** Returns cost data aggregation for charts/tables. */
   return callEdgeFunction('mock-azure', 'POST', { action: 'costs', range, groupBy }, signal);
 }
-
 
 // PUBLIC_INTERFACE
 export async function fetchRecommendations({ scope = 'all' }, signal) {
@@ -241,6 +254,8 @@ export async function fetchActivity({ page = 1, pageSize = 25 }, signal) {
 // PUBLIC_INTERFACE
 export async function isAuthenticated() {
   /** Returns true if there is an active session, else false (auth-less mode). */
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
   const { data } = await supabase.auth.getSession();
   return Boolean(data?.session);
 }
@@ -255,6 +270,8 @@ export async function getLinkedAccounts(signal) {
    * In auth-less mode (no session), this resolves to [] instead of throwing, so
    * callers can render a neutral empty state without error noise.
    */
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
   const { data: sessionData } = await supabase.auth.getSession();
   if (!sessionData?.session) {
     // Auth-less workflow: no session; skip querying and return empty array.

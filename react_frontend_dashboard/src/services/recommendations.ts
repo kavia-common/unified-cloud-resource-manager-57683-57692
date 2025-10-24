@@ -42,12 +42,15 @@ const FALLBACK_SOURCES = ['ai_recommendations', 'recommendations_view'];
  *  - Only latest TopRecommendations caller should set state; component enforces request-id guard.
  */
 export async function getRecommendations(): Promise<Recommendation[]> {
-  // Unit-safe logging; avoid noisy logs during tests
   if (process.env.NODE_ENV !== 'test') {
     // eslint-disable-next-line no-console
     console.info('[TopRecs] getRecommendations() invoked');
   }
   const supabase = getSupabaseClient();
+  if (!supabase) {
+    // No supabase config; return empty to allow UI to render without errors.
+    return [];
+  }
 
   // Helper to run a query and map results from an arbitrary table/view
   async function querySource(table: string): Promise<Recommendation[]> {
@@ -239,22 +242,6 @@ function daysSince(dateISO?: string | null): number {
  * PUBLIC_INTERFACE
  * selectTopHighPriorityRecommendations
  * Applies relaxed filtering and priority scoring to select the top N (default 3) high-priority items.
- *
- * High priority if:
- *  - severity in ['Critical','High'] OR
- *  - priority in ['P0','P1'] OR
- *  - category_priority >= 80 (if field exists)
- *
- * Confidence threshold: >= 0.5
- *
- * Scoring:
- *   priorityScore = 0.45*severityWeight + 0.35*riskScoreNorm + 0.2*recencyDecay
- *   severityWeight: Critical=1.0, High=0.85, else 0.6
- *   riskScoreNorm = (risk_score || risk || 0)/100
- *   recencyDecay = exp(-daysSince(updated_at||detected_at)/21)
- *
- * Sort desc by priorityScore,
- * tie-breakers: environment==='prod' > higher risk > newer updated_at.
  */
 export function selectTopHighPriorityRecommendations(
   items: Recommendation[],

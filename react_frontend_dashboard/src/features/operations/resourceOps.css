@@ -1,0 +1,70 @@
+.resourceOpsTable .table-wrapper {
+  /* Outer border similar to Inventory, strong contrast */
+  border: 1px solid #6B7280; /* gray-500 for outer/header as requested */
+  border-radius: 10px;
+  background: var(--table-row-bg, #FFFFFF);
+  overflow: hidden;
+}
+
+/* Table baseline */
+.resourceOpsTable table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--table-row-bg, #FFFFFF);
+}
+
+/* Header cells: darker bottom divider and vertical dividers */
+.resourceOpsTable thead th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text, #111827);
+  background: var(--table-header-bg, #F9FAFB);
+  border-bottom: 1px solid #6B7280; /* outer/header divider color */
+  border-right: 1px solid #6B7280;  /* vertical header dividers */
+  padding: 10px 12px;
+}
+.resourceOpsTable thead th:last-child {
+  border-right: none;
+}
+
+/* Body cells: row dividers and vertical dividers */
+.resourceOpsTable tbody tr {
+  background: var(--table-row-bg, #FFFFFF);
+}
+.resourceOpsTable tbody tr:nth-child(even) {
+  background: var(--table-row-alt-bg, #F8FAFC);
+}
+.resourceOpsTable tbody td {
+  padding: 10px 12px;
+  color: var(--text, #111827);
+  border-bottom: 1px solid #4B5563; /* gray-600 for body row dividers */
+  border-right: 1px solid #4B5563;  /* gray-600 for body verticals */
+}
+.resourceOpsTable tbody td:last-child {
+  border-right: none;
+}
+
+/* Empty state cell */
+.resourceOpsTable .table__cell--empty {
+  text-align: center;
+  color: var(--text-muted, #6B7280);
+  padding: 16px 12px;
+}
+
+/* Hover/focus states consistent with Inventory; keep dividers visible */
+.resourceOpsTable tbody tr:hover {
+  background: color-mix(in srgb, var(--table-row-alt-bg, #F8FAFC) 70%, #ffffff);
+}
+.resourceOpsTable tbody tr:hover td {
+  background: inherit; /* keep same background to not obscure borders */
+}
+.resourceOpsTable tbody tr:focus-within {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: -2px;
+}
+.resourceOpsTable tbody td :focus-visible {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: 2px;
+}

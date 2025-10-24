@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import Modal from "../../components/ui/Modal";
 import Tabs from "../../components/ui/Tabs";
+import "./resourceOps.css";
 
 /**
  * PUBLIC_INTERFACE
@@ -124,8 +125,9 @@ function ResourceTable({
   onResourceOperation 
 }) {
   return (
-    <div className="table-wrapper">
-      <table role="table" aria-label="Resource operations table">
+    <div className="resourceOpsTable">
+      <div className="table-wrapper">
+        <table role="table" aria-label="Resource operations table">
         <thead>
           <tr>
             <th>Resource Name</th>
@@ -198,7 +200,8 @@ function ResourceTable({
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }

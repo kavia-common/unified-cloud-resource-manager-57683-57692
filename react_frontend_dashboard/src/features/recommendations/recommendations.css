@@ -1,0 +1,74 @@
+.recommendationsTable .table-wrapper {
+  border: 1px solid #6B7280; /* gray-500 for outer/header */
+  border-radius: 10px;
+  background: var(--table-row-bg, #FFFFFF);
+  overflow: hidden;
+}
+
+.recommendationsTable table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--table-row-bg, #FFFFFF);
+}
+
+/* Header cells with stronger dividers like Inventory */
+.recommendationsTable thead th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text, #111827);
+  background: var(--table-header-bg, #F9FAFB);
+  border-bottom: 1px solid #6B7280; /* header bottom divider */
+  border-right: 1px solid #6B7280;  /* header verticals */
+  padding: 10px 12px;
+}
+.recommendationsTable thead th:last-child {
+  border-right: none;
+}
+
+/* Body rows/cells with clear vertical and horizontal separators */
+.recommendationsTable tbody tr {
+  background: var(--table-row-bg, #FFFFFF);
+}
+.recommendationsTable tbody tr:nth-child(even) {
+  background: var(--table-row-alt-bg, #F8FAFC);
+}
+.recommendationsTable tbody td {
+  padding: 10px 12px;
+  color: var(--text, #111827);
+  border-bottom: 1px solid #4B5563; /* body row divider gray-600 */
+  border-right: 1px solid #4B5563;  /* body verticals gray-600 */
+}
+.recommendationsTable tbody td:last-child {
+  border-right: none;
+}
+
+.recommendationsTable .table__cell--empty {
+  text-align: center;
+  color: var(--text-muted, #6B7280);
+  padding: 16px 12px;
+}
+
+/* Keep hover/focus behavior consistent with Inventory */
+.recommendationsTable tbody tr:hover {
+  background: color-mix(in srgb, var(--table-row-alt-bg, #F8FAFC) 70%, #ffffff);
+}
+.recommendationsTable tbody tr:hover td {
+  background: inherit;
+}
+.recommendationsTable tbody tr:focus-within {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: -2px;
+}
+.recommendationsTable tbody td :focus-visible {
+  outline: 2px solid var(--color-accent, #3B82F6);
+  outline-offset: 2px;
+}
+
+/* Minor alignment for actions group within recommendations table cells */
+.recommendationsTable .table__actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}

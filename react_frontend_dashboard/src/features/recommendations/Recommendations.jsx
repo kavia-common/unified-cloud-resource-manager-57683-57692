@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
+import "./recommendations.css";
 
 /**
  * PUBLIC_INTERFACE
@@ -407,8 +408,9 @@ export default function Recommendations() {
         </div>
 
         {/* Unified actionable list rendered as minimalist table */}
-        <div className="table-wrapper">
-          <table role="table" aria-label="Recommendations">
+        <div className="recommendationsTable">
+          <div className="table-wrapper">
+            <table role="table" aria-label="Recommendations">
             <thead>
               <tr>
                 {columns.map((c) => (
@@ -435,7 +437,8 @@ export default function Recommendations() {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         <div className="text-xs" style={{ color: "var(--muted)" }}>
